@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -381,7 +382,6 @@ namespace Statiq.Core
                 Logger.LogInformation("========== Execution ==========");
                 Logger.LogInformation($"Executing {ExecutingPipelines.Count} pipelines ({string.Join(", ", ExecutingPipelines.Keys.OrderBy(x => x))})");
                 Logger.LogDebug($"Execution ID {ExecutionId}");
-                System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
                 // Do a check for the same input/output path
                 if (FileSystem.InputPaths.Any(x => x.Equals(FileSystem.OutputPath)))
@@ -389,7 +389,12 @@ namespace Statiq.Core
                     Logger.LogWarning("The output path is also one of the input paths which can cause unexpected behavior and is usually not advised");
                 }
 
+                // Get timings
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                Stack<(string, Stopwatch)> otherStopwatches = new Stack<(string, Stopwatch)>();
+
                 // Clean paths and reset written files collection (do this before events since the events might kick off processes that write to the output path)
+                otherStopwatches.Push(("Initial Clean", Stopwatch.StartNew()));
                 CleanDirectory(FileSystem.GetTempDirectory(), "temp");
                 CleanMode cleanMode = Settings.Get(Keys.CleanMode, CleanMode.Self);
                 if (cleanMode == CleanMode.Full || firstExecution)
@@ -401,10 +406,16 @@ namespace Statiq.Core
                     CleanWrittenFiles();
                 }
                 _fileSystem.WrittenFiles.Clear();
+                otherStopwatches.Peek().Item2.Stop();
 
                 // Raise before event and analyzer before method
+                otherStopwatches.Push(("Before Engine Execution Events", Stopwatch.StartNew()));
                 await Events.RaiseAsync(new BeforeEngineExecution(this, ExecutionId));
+                otherStopwatches.Peek().Item2.Stop();
+
+                otherStopwatches.Push(("Analyzer Before Engine Execution Events", Stopwatch.StartNew()));
                 await AnalyzerCollection.ParallelForEachAsync(async x => await x.Value.BeforeEngineExecutionAsync(this, ExecutionId));
+                otherStopwatches.Peek().Item2.Stop();
 
                 // Analyzer results need to be recorded separately so that they can still be reported if the phase throws
                 ConcurrentDictionary<PipelinePhase, ConcurrentBag<AnalyzerResult>> analyzerResults =
@@ -415,16 +426,24 @@ namespace Statiq.Core
                 try
                 {
                     // Get and execute all phases
+                    otherStopwatches.Push(("Engine Execution", Stopwatch.StartNew()));
                     phaseTasks = GetPhaseTasks(phaseResults, analyzerResults);
                     await Task.WhenAll(phaseTasks);
+                    otherStopwatches.Peek().Item2.Stop();
 
                     // Raise after event
+                    otherStopwatches.Push(("After Engine Execution Events", Stopwatch.StartNew()));
                     await Events.RaiseAsync(new AfterEngineExecution(this, ExecutionId, Outputs, stopwatch.ElapsedMilliseconds));
+                    otherStopwatches.Peek().Item2.Stop();
                 }
                 finally
                 {
                     // Log final information even if there was an exception
                     stopwatch.Stop();
+                    foreach ((string, Stopwatch) otherStopwatch in otherStopwatches)
+                    {
+                        otherStopwatch.Item2.Stop();
+                    }
 
                     // Log execution summary table
                     if (phaseResults.Count > 0)
@@ -442,7 +461,11 @@ namespace Statiq.Core
 
                     // Clean up
                     Logger.LogInformation("========== Completed ==========");
-                    Logger.LogInformation($"Finished execution in {stopwatch.ElapsedMilliseconds} ms");
+                    Logger.LogInformation($"Finished in {stopwatch.ElapsedMilliseconds} ms:");
+                    foreach ((string, Stopwatch) otherStopwatch in otherStopwatches.Reverse())
+                    {
+                        Logger.LogInformation($"- {otherStopwatch.Item1} in {otherStopwatch.Item2.ElapsedMilliseconds} ms");
+                    }
                 }
 
                 // Throw if there was a log failure
@@ -512,7 +535,7 @@ namespace Statiq.Core
                     new[]
                     {
                         "Pipeline",
-                        $"Timeline ({duration} total ms)"
+                        $"Timeline ({duration} total ms not including overhead)"
                     },
                     x => x.Key,
                     x => GetPhaseResultsTimeline(x.Value)));
