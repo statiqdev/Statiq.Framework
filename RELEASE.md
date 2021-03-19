@@ -4,6 +4,8 @@
 - Improved logging messages related to timing.
 - Added `IFile` extensions to serialize and deserialize JSON.
 - Added `IFile` extensions to serialize and deserialize YAML.
+- Added `NormalizedPath.ThrowIfRealtive()` and `NormalizedPath.ThrowIfAbsolute()` helper methods.
+- Added a `IDirectory.MoveTo()` method.
 
 # 1.0.0-beta.38
 

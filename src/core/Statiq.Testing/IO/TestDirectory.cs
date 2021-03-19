@@ -42,6 +42,8 @@ namespace Statiq.Testing
 
         public void Delete(bool recursive) => _fileProvider.Directories.Remove(Path);
 
+        public void MoveTo(NormalizedPath destinationPath) => throw new NotImplementedException();
+
         public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             if (searchOption == SearchOption.TopDirectoryOnly)

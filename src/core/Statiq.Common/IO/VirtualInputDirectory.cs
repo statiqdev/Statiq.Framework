@@ -35,17 +35,15 @@ namespace Statiq.Common
             }
         }
 
-        /// <inheritdoc/>
         public DateTime LastWriteTime => throw new NotSupportedException();
 
-        /// <inheritdoc/>
         public DateTime CreationTime => throw new NotSupportedException();
 
-        /// <inheritdoc/>
         public void Create() => throw new NotSupportedException("Can not create a virtual input directory");
 
-        /// <inheritdoc/>
         public void Delete(bool recursive) => throw new NotSupportedException("Can not delete a virtual input directory");
+
+        public void MoveTo(NormalizedPath destinationPath) => throw new NotSupportedException("Can not move a virtual input directory");
 
         /// <inheritdoc/>
         public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly)

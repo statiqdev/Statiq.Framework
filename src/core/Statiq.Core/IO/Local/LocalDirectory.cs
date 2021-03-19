@@ -15,13 +15,8 @@ namespace Statiq.Core
         public LocalDirectory(LocalFileProvider fileProvider, in NormalizedPath path)
         {
             _fileProvider = fileProvider.ThrowIfNull(nameof(fileProvider));
-
             path.ThrowIfNull(nameof(path));
-
-            if (path.IsRelative)
-            {
-                throw new ArgumentException("Path must be absolute", nameof(path));
-            }
+            path.ThrowIfRelative(nameof(path));
 
             Path = path;
             _directory = new System.IO.DirectoryInfo(Path.FullPath);
@@ -50,6 +45,13 @@ namespace Statiq.Core
 
         public void Delete(bool recursive) => LocalFileProvider.RetryPolicy.Execute(() => _directory.Delete(recursive));
 
+        public void MoveTo(NormalizedPath path)
+        {
+            path.ThrowIfNull(nameof(path));
+            path.ThrowIfRelative(nameof(path));
+            LocalFileProvider.RetryPolicy.Execute(() => _directory.MoveTo(path.FullPath));
+        }
+
         public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
             LocalFileProvider.RetryPolicy.Execute(() => _directory
                 .GetDirectories("*", searchOption)
@@ -65,11 +67,7 @@ namespace Statiq.Core
         public IDirectory GetDirectory(NormalizedPath path)
         {
             path.ThrowIfNull(nameof(path));
-
-            if (!path.IsRelative)
-            {
-                throw new ArgumentException("Path must be relative", nameof(path));
-            }
+            path.ThrowIfAbsolute(nameof(path));
 
             return _fileProvider.FileSystem.GetDirectory(Path.Combine(path));
         }
@@ -77,11 +75,7 @@ namespace Statiq.Core
         public IFile GetFile(NormalizedPath path)
         {
             path.ThrowIfNull(nameof(path));
-
-            if (!path.IsRelative)
-            {
-                throw new ArgumentException("Path must be relative", nameof(path));
-            }
+            path.ThrowIfAbsolute(nameof(path));
 
             return _fileProvider.FileSystem.GetFile(Path.Combine(path));
         }

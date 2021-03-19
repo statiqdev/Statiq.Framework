@@ -19,11 +19,7 @@ namespace Statiq.Core
             _fileProvider = fileProvider.ThrowIfNull(nameof(fileProvider));
 
             path.ThrowIfNull(nameof(path));
-
-            if (path.IsRelative)
-            {
-                throw new ArgumentException("Path must be absolute", nameof(path));
-            }
+            path.ThrowIfRelative(nameof(path));
 
             Path = path;
             _file = new System.IO.FileInfo(Path.FullPath);

@@ -132,7 +132,7 @@ namespace Statiq.Common
             {
                 if (pathKind == PathKind.Absolute)
                 {
-                    throw new ArgumentException("An empty path cannot be absolute");
+                    throw new ArgumentException("An empty path cannot be absolute", nameof(pathKind));
                 }
                 return EmptyData;
             }
@@ -140,7 +140,7 @@ namespace Statiq.Common
             {
                 if (pathKind == PathKind.Relative)
                 {
-                    throw new ArgumentException("An absolute root path cannot be relative");
+                    throw new ArgumentException("An absolute root path cannot be relative", nameof(pathKind));
                 }
                 return SlashData;
             }
@@ -148,7 +148,7 @@ namespace Statiq.Common
             {
                 if (pathKind == PathKind.Absolute)
                 {
-                    throw new ArgumentException("A dotted relative path cannot be absolute");
+                    throw new ArgumentException("A dotted relative path cannot be absolute", nameof(pathKind));
                 }
                 return DotData;
             }
@@ -156,7 +156,7 @@ namespace Statiq.Common
             {
                 if (pathKind == PathKind.Absolute)
                 {
-                    throw new ArgumentException("A dotted relative path cannot be absolute");
+                    throw new ArgumentException("A dotted relative path cannot be absolute", nameof(pathKind));
                 }
                 return DotDotData;
             }
@@ -602,6 +602,18 @@ namespace Statiq.Common
 
         private NormalizedPath ThrowIfNull() =>
             IsNull ? throw new NullReferenceException() : this;
+
+        public NormalizedPath ThrowIfAbsolute(string paramName) =>
+            ThrowIfAbsolute("Path must be relative", paramName);
+
+        public NormalizedPath ThrowIfRelative(string paramName) =>
+            ThrowIfRelative("Path must be absolute", paramName);
+
+        public NormalizedPath ThrowIfAbsolute(string message, string paramName) =>
+            IsAbsolute ? throw new ArgumentException(message, paramName) : this;
+
+        public NormalizedPath ThrowIfRelative(string message, string paramName) =>
+            IsRelative ? throw new ArgumentException(message, paramName) : this;
 
         /// <summary>
         /// Gets the root of this path,

@@ -39,6 +39,12 @@ namespace Statiq.Common
         void Delete(bool recursive);
 
         /// <summary>
+        /// Moves the directory and it's contents to a new path.
+        /// </summary>
+        /// <param name="destinationPath">The path to move the directory to.</param>
+        void MoveTo(NormalizedPath destinationPath);
+
+        /// <summary>
         /// Gets directories matching the specified filter and scope.
         /// </summary>
         /// <param name="searchOption">
