@@ -6,6 +6,7 @@
 - Added `IFile` extensions to serialize and deserialize YAML.
 - Added `NormalizedPath.ThrowIfRealtive()` and `NormalizedPath.ThrowIfAbsolute()` helper methods.
 - Added a `IDirectory.MoveTo()` method.
+- Fixed a bug that caused an input phase overload of an `ExecutionPipeline` not to execute.
 
 # 1.0.0-beta.38
 

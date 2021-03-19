@@ -17,7 +17,7 @@ namespace Statiq.Core
             DependencyOf = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             if (GetType()
-                .GetMethod(nameof(ExecuteInputAsync), BindingFlags.Instance | BindingFlags.NonPublic)
+                .GetMethod(nameof(ExecuteInputPhaseAsync), BindingFlags.Instance | BindingFlags.NonPublic)
                 .DeclaringType != typeof(ExecutionPipeline))
             {
                 ((IPipeline)this).InputModules.Add(this);
