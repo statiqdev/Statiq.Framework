@@ -3,6 +3,7 @@
 - Added caching for `IEnumerable<TDocument>.GetDestinationTree()` and `IEnumerable<TDocument>.GetSourceTree()` which results in a significant performance improvement in some cases for large sites.
 - Improved logging messages related to timing.
 - Added `IFile` extensions to serialize and deserialize JSON.
+- Added `IFile` extensions to serialize and deserialize YAML.
 
 # 1.0.0-beta.38
 
