@@ -45,6 +45,8 @@ namespace Statiq.Common
 
         public void MoveTo(NormalizedPath destinationPath) => throw new NotSupportedException("Can not move a virtual input directory");
 
+        public void MoveTo(IDirectory destinationDirectory) => throw new NotSupportedException("Can not move a virtual input directory");
+
         /// <inheritdoc/>
         public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {

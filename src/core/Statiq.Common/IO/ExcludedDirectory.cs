@@ -46,6 +46,9 @@ namespace Statiq.Common
         public void MoveTo(NormalizedPath destinationPath) =>
             throw new NotSupportedException("Not supported for an excluded path");
 
+        public void MoveTo(IDirectory destinationDirectory) =>
+            throw new NotSupportedException("Not supported for an excluded path");
+
         public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
             throw new NotSupportedException("Not supported for an excluded path");
 

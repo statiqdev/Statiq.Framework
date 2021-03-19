@@ -45,11 +45,17 @@ namespace Statiq.Core
 
         public void Delete(bool recursive) => LocalFileProvider.RetryPolicy.Execute(() => _directory.Delete(recursive));
 
-        public void MoveTo(NormalizedPath path)
+        public void MoveTo(NormalizedPath destinationPath)
         {
-            path.ThrowIfNull(nameof(path));
-            path.ThrowIfRelative(nameof(path));
-            LocalFileProvider.RetryPolicy.Execute(() => _directory.MoveTo(path.FullPath));
+            destinationPath.ThrowIfNull(nameof(destinationPath));
+            destinationPath.ThrowIfRelative(nameof(destinationPath));
+            LocalFileProvider.RetryPolicy.Execute(() => _directory.MoveTo(destinationPath.FullPath));
+        }
+
+        public void MoveTo(IDirectory destinationDirectory)
+        {
+            destinationDirectory.ThrowIfNull(nameof(destinationDirectory));
+            MoveTo(destinationDirectory.Path);
         }
 
         public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>

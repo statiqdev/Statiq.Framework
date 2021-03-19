@@ -102,6 +102,8 @@ namespace Statiq.Common
 
         public void MoveTo(NormalizedPath destinationPath) => throw new NotSupportedException();
 
+        public void MoveTo(IDirectory destinationDirectory) => throw new NotSupportedException();
+
         public override string ToString() => Path.ToString();
 
         public string ToDisplayString() => Path.ToDisplayString();

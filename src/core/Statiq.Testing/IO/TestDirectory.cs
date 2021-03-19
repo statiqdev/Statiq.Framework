@@ -44,6 +44,8 @@ namespace Statiq.Testing
 
         public void MoveTo(NormalizedPath destinationPath) => throw new NotImplementedException();
 
+        public void MoveTo(IDirectory destinationDirectory) => throw new NotImplementedException();
+
         public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             if (searchOption == SearchOption.TopDirectoryOnly)
