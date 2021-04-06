@@ -51,9 +51,9 @@ namespace Statiq.Markdown
                         return link;
                     }
 
-                    if (!RelativeUrl.IsRelative(link) && LinkGenerator.TryGetAbsoluteHttpUri(link, out string absoluteUri))
+                    if (!RelativeUrl.IsRelative(link))
                     {
-                        return absoluteUri;
+                        return LinkGenerator.TryGetAbsoluteHttpUri(link, out string absoluteUri) ? absoluteUri : link;
                     }
 
                     // TODO: Remove when RenderMarkdown.PrependLinkRoot goes away.
