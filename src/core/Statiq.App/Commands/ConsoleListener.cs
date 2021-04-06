@@ -44,6 +44,12 @@ namespace Statiq.App
         {
             while (true)
             {
+                if (!Console.KeyAvailable)
+                {
+                    await Task.Delay(50);
+                    continue;
+                }
+
                 // Console.CancelKeyPress bubbles up to calling batch files so check manually instead
                 // The (ConsoleKey)3 check is to support a bug in VS Code: https://github.com/Microsoft/vscode/issues/9347 (possibly others?)
                 // Intercept the key press if we're not reading lines (otherwise it'll be output to screen)
