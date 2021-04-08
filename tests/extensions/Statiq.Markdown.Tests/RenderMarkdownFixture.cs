@@ -319,6 +319,57 @@ the family Rosaceae.</dd>
                 // Then
                 result.Content.ShouldBe(expected, StringCompareShould.IgnoreLineEndings);
             }
+
+            [Test]
+            public async Task RendersHttpLinks()
+            {
+                // Given
+                const string input = @"Visit my [web](http://www.statiq.dev) site.";
+                const string output = @"<p>Visit my <a href=""http://www.statiq.dev/"">web</a> site.</p>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task RendersHttpsLinks()
+            {
+                // Given
+                const string input = @"Visit my [web](https://www.statiq.dev) site.";
+                const string output = @"<p>Visit my <a href=""https://www.statiq.dev/"">web</a> site.</p>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task RendersNonHttpLinks()
+            {
+                // Given
+                const string input = @"Email me at [my](foo:bar) address.";
+                const string output = @"<p>Email me at <a href=""foo:bar"">my</a> address.</p>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
         }
     }
 }

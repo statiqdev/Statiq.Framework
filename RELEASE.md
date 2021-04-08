@@ -1,5 +1,8 @@
 # 1.0.0-beta.39
 
+- Fixed a bug with link generation for non http/https links in Markdown (#179, #184, thanks @JoshClose).
+- Fixed a bug with the `ConsoleListener` on MacOS that prevented signaling from the main thread (used for the `preview` command in Statiq Web) (#182, #183, thanks @devlead).
+- Fixed a bug with the CLI `--help` output that caused the app to crash (#180, #181, thanks @matkoch).
 - Added caching for `IEnumerable<TDocument>.GetDestinationTree()` and `IEnumerable<TDocument>.GetSourceTree()` which results in a significant performance improvement in some cases for large sites.
 - Improved logging messages related to timing.
 - Added `IFile` extensions to serialize and deserialize JSON.
