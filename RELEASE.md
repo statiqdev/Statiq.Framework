@@ -1,5 +1,7 @@
 # 1.0.0-beta.40
 
+- Several optimizations to file IO and the `WriteFiles` and `CopyFiles` modules.
+
 # 1.0.0-beta.39
 
 - Fixed a bug with link generation for non http/https links in Markdown (#179, #184, thanks @JoshClose).

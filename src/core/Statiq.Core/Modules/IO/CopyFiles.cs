@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
@@ -96,41 +97,58 @@ namespace Statiq.Core
         {
             if (value is object)
             {
+                // Use a semaphore to limit the write operations so we don't try to do a bunch of writes at once
+                SemaphoreSlim semaphore = new SemaphoreSlim(10, 10);
+
+                // Create copy tasks
                 IEnumerable<IFile> inputFiles = context.FileSystem.GetInputFiles(value);
-                inputFiles = await inputFiles.ParallelWhereAsync(async x => _predicate is null || await _predicate(x));
-                return await inputFiles
-                    .ToAsyncEnumerable()
-                    .SelectAwait(async file =>
+                List<Task<IDocument>> copyTasks = new List<Task<IDocument>>();
+                foreach (IFile inputFile in inputFiles)
+                {
+                    if (_predicate is null || await _predicate(inputFile))
                     {
-                        try
-                        {
-                            // Get the default destination file
-                            NormalizedPath relativePath = file.Path.GetRelativeInputPath();
-                            IFile destination = context.FileSystem.GetOutputFile(relativePath);
+                        copyTasks.Add(CopyFileAsync(input, inputFile, context, semaphore));
+                    }
+                }
 
-                            // Calculate an alternate destination if needed
-                            if (_destinationPath is object)
-                            {
-                                destination = context.FileSystem.GetOutputFile(await _destinationPath(file, destination));
-                            }
-
-                            // Copy to the destination
-                            await file.CopyToAsync(destination, cancellationToken: context.CancellationToken);
-                            context.LogDebug("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
-
-                            // Return the document
-                            return context.CloneOrCreateDocument(input, file.Path, relativePath, file?.GetContentProvider());
-                        }
-                        catch (Exception ex)
-                        {
-                            context.LogError($"Error while copying file {file.Path.FullPath}: {ex.Message}");
-                            throw;
-                        }
-                    })
-                    .Where(x => x is object)
-                    .ToListAsync(context.CancellationToken);
+                // Run all the tasks
+                IDocument[] outputs = await Task.WhenAll(copyTasks);
+                return outputs.Where(x => x is object);
             }
             return null;
+        }
+
+        private async Task<IDocument> CopyFileAsync(IDocument input, IFile file, IExecutionContext context, SemaphoreSlim semaphore)
+        {
+            await semaphore.WaitAsync();
+            try
+            {
+                // Get the default destination file
+                NormalizedPath relativePath = file.Path.GetRelativeInputPath();
+                IFile destination = context.FileSystem.GetOutputFile(relativePath);
+
+                // Calculate an alternate destination if needed
+                if (_destinationPath is object)
+                {
+                    destination = context.FileSystem.GetOutputFile(await _destinationPath(file, destination));
+                }
+
+                // Copy to the destination
+                await file.CopyToAsync(destination, cancellationToken: context.CancellationToken);
+                context.LogDebug("Copied file {0} to {1}", file.Path.FullPath, destination.Path.FullPath);
+
+                // Return the document
+                return context.CloneOrCreateDocument(input, file.Path, relativePath, file?.GetContentProvider());
+            }
+            catch (Exception ex)
+            {
+                context.LogError($"Error while copying file {file.Path.FullPath}: {ex.Message}");
+                throw;
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
     }
 }

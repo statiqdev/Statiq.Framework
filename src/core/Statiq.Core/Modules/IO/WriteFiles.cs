@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
@@ -69,6 +70,9 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            // Use a semaphore to limit the write operations so we don't try to do a bunch of writes at once
+            SemaphoreSlim semaphore = new SemaphoreSlim(10, 10);
+
             // Get the output file path for each file in sequence and set up action chains
             // Value = input source string(s) (for reporting a warning if not appending), write action
             Dictionary<NormalizedPath, Tuple<List<string>, Func<Task>>> writesBySource = new Dictionary<NormalizedPath, Tuple<List<string>, Func<Task>>>();
@@ -106,16 +110,35 @@ namespace Statiq.Core
                             value.Item1,
                             async () =>
                             {
-                                // Complete the previous write, then do the next one
-                                await previousWrite();
-                                await WriteAsync(input, context, input.Destination);
+                                await semaphore.WaitAsync();
+                                try
+                                {
+                                    // Complete the previous write, then do the next one
+                                    await previousWrite();
+                                    await WriteAsync(input, context, input.Destination);
+                                }
+                                finally
+                                {
+                                    semaphore.Release();
+                                }
                             });
                     }
                     else
                     {
                         value = new Tuple<List<string>, Func<Task>>(
                             new List<string> { input.Source.ToSafeDisplayString() },
-                            async () => await WriteAsync(input, context, input.Destination));
+                            async () =>
+                            {
+                                await semaphore.WaitAsync();
+                                try
+                                {
+                                    await WriteAsync(input, context, input.Destination);
+                                }
+                                finally
+                                {
+                                    semaphore.Release();
+                                }
+                            });
                     }
                     writesBySource[input.Destination] = value;
                 }

@@ -9,7 +9,7 @@ namespace Statiq.Core
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class LocalFile : IFile
     {
-        private const int BufferSize = 8192;
+        private const int BufferSize = 16384;
 
         private readonly LocalFileProvider _fileProvider;
         private readonly System.IO.FileInfo _file;
@@ -96,7 +96,9 @@ namespace Statiq.Core
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents, cancellationToken));
         }
 
-        public Stream OpenRead() => LocalFileProvider.RetryPolicy.Execute(() => new FileStream(_file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, true));
+        // Most file operations are going to be asynchronous and sequential so assume those options
+        public Stream OpenRead() => LocalFileProvider.RetryPolicy.Execute(() =>
+            new FileStream(_file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan));
 
         public Stream OpenWrite(bool createDirectory = true)
         {
@@ -107,7 +109,9 @@ namespace Statiq.Core
                 CreateDirectory();
             }
 
-            return LocalFileProvider.RetryPolicy.Execute(() => new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, BufferSize, true));
+            // Most file operations are going to be asynchronous and sequential so assume those options
+            return LocalFileProvider.RetryPolicy.Execute(() =>
+                new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan));
         }
 
         public Stream OpenAppend(bool createDirectory = true)
@@ -119,7 +123,8 @@ namespace Statiq.Core
                 CreateDirectory();
             }
 
-            return LocalFileProvider.RetryPolicy.Execute(() => new FileStream(_file.FullName, FileMode.Append, FileAccess.Write, FileShare.None, BufferSize, true));
+            return LocalFileProvider.RetryPolicy.Execute(() =>
+                new FileStream(_file.FullName, FileMode.Append, FileAccess.Write, FileShare.None, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan));
         }
 
         public Stream Open(bool createDirectory = true)
@@ -132,7 +137,9 @@ namespace Statiq.Core
                 CreateDirectory();
             }
 
-            return LocalFileProvider.RetryPolicy.Execute(() => new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, true));
+            // Most file operations are going to be asynchronous and sequential so assume those options
+            return LocalFileProvider.RetryPolicy.Execute(() =>
+                new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan));
         }
 
         public TextReader OpenText() => LocalFileProvider.RetryPolicy.Execute(() => File.OpenText(_file.FullName));
