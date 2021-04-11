@@ -71,14 +71,14 @@ namespace Statiq.Core
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             // Use a semaphore to limit the write operations so we don't try to do a bunch of writes at once
-            SemaphoreSlim semaphore = new SemaphoreSlim(10, 10);
+            SemaphoreSlim semaphore = new SemaphoreSlim(20, 20);
 
             // Get the output file path for each file in sequence and set up action chains
             // Value = input source string(s) (for reporting a warning if not appending), write action
             Dictionary<NormalizedPath, Tuple<List<string>, Func<Task>>> writesBySource = new Dictionary<NormalizedPath, Tuple<List<string>, Func<Task>>>();
             foreach (IDocument input in context.Inputs)
             {
-                await WriteFileAsync(input);
+                await AddWriteFileTaskAsync(input, context, writesBySource, semaphore);
             }
 
             // Display a warning for any duplicated outputs if not appending
@@ -91,57 +91,61 @@ namespace Statiq.Core
                 }
             }
 
-            // Run the write actions in parallel
+            // Run the write actions
             await Task.WhenAll(writesBySource.Values.Select(x => x.Item2()));
 
             // Return the input documents
             return context.Inputs;
+        }
 
-            async Task WriteFileAsync(IDocument input)
+        private async Task AddWriteFileTaskAsync(
+            IDocument input,
+            IExecutionContext context,
+            Dictionary<NormalizedPath, Tuple<List<string>, Func<Task>>> writesBySource,
+            SemaphoreSlim semaphore)
+        {
+            if (await ShouldProcessAsync(input, context) && !input.Destination.IsNull)
             {
-                if (await ShouldProcessAsync(input, context) && !input.Destination.IsNull)
+                if (writesBySource.TryGetValue(input.Destination, out Tuple<List<string>, Func<Task>> value))
                 {
-                    if (writesBySource.TryGetValue(input.Destination, out Tuple<List<string>, Func<Task>> value))
-                    {
-                        // This output source was already seen so nest the previous write action in a new one
-                        value.Item1.Add(input.Source.ToSafeDisplayString());
-                        Func<Task> previousWrite = value.Item2;
-                        value = new Tuple<List<string>, Func<Task>>(
-                            value.Item1,
-                            async () =>
+                    // This output source was already seen so nest the previous write action in a new one
+                    value.Item1.Add(input.Source.ToSafeDisplayString());
+                    Func<Task> previousWrite = value.Item2;
+                    value = new Tuple<List<string>, Func<Task>>(
+                        value.Item1,
+                        async () =>
+                        {
+                            await semaphore.WaitAsync();
+                            try
                             {
-                                await semaphore.WaitAsync();
-                                try
-                                {
-                                    // Complete the previous write, then do the next one
-                                    await previousWrite();
-                                    await WriteAsync(input, context, input.Destination);
-                                }
-                                finally
-                                {
-                                    semaphore.Release();
-                                }
-                            });
-                    }
-                    else
-                    {
-                        value = new Tuple<List<string>, Func<Task>>(
-                            new List<string> { input.Source.ToSafeDisplayString() },
-                            async () =>
+                                // Complete the previous write, then do the next one
+                                await previousWrite();
+                                await WriteAsync(input, context, input.Destination);
+                            }
+                            finally
                             {
-                                await semaphore.WaitAsync();
-                                try
-                                {
-                                    await WriteAsync(input, context, input.Destination);
-                                }
-                                finally
-                                {
-                                    semaphore.Release();
-                                }
-                            });
-                    }
-                    writesBySource[input.Destination] = value;
+                                semaphore.Release();
+                            }
+                        });
                 }
+                else
+                {
+                    value = new Tuple<List<string>, Func<Task>>(
+                        new List<string> { input.Source.ToSafeDisplayString() },
+                        async () =>
+                        {
+                            await semaphore.WaitAsync();
+                            try
+                            {
+                                await WriteAsync(input, context, input.Destination);
+                            }
+                            finally
+                            {
+                                semaphore.Release();
+                            }
+                        });
+                }
+                writesBySource[input.Destination] = value;
             }
         }
 

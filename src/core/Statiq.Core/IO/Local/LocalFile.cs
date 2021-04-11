@@ -9,7 +9,7 @@ namespace Statiq.Core
     // Initially based on code from Cake (http://cakebuild.net/)
     internal class LocalFile : IFile
     {
-        private const int BufferSize = 16384;
+        private const int BufferSize = 8192;
 
         private readonly LocalFileProvider _fileProvider;
         private readonly System.IO.FileInfo _file;

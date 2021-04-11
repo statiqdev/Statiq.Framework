@@ -98,7 +98,7 @@ namespace Statiq.Core
             if (value is object)
             {
                 // Use a semaphore to limit the write operations so we don't try to do a bunch of writes at once
-                SemaphoreSlim semaphore = new SemaphoreSlim(10, 10);
+                SemaphoreSlim semaphore = new SemaphoreSlim(20, 20);
 
                 // Create copy tasks
                 IEnumerable<IFile> inputFiles = context.FileSystem.GetInputFiles(value);
