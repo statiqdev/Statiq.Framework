@@ -1068,12 +1068,16 @@ namespace Statiq.Core
             {
                 Logger.LogDebug($"Cleaning files written to output directory {directory.Path.FullPath} during previous execution...");
                 int count = 0;
-                foreach (IFile file in _fileSystem.WrittenFiles)
+                foreach (NormalizedPath path in _fileSystem.WrittenFiles.Keys)
                 {
-                    if (directory.Path.ContainsDescendant(file.Path) && file.Exists)
+                    if (directory.Path.ContainsDescendant(path))
                     {
-                        file.Delete();
-                        count++;
+                        IFile file = _fileSystem.GetFile(path);
+                        if (file.Exists)
+                        {
+                            file.Delete();
+                            count++;
+                        }
                     }
                 }
                 Logger.LogInformation($"Cleaned {count} files written to output directory {directory.Path.FullPath} during previous execution");

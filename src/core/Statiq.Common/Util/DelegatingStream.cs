@@ -22,6 +22,8 @@ namespace Statiq.Common
         public override async Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken) =>
             await Stream.CopyToAsync(destination, bufferSize, cancellationToken);
 
+        public override void CopyTo(Stream destination, int bufferSize) => Stream.CopyTo(destination, bufferSize);
+
         public override void Flush() => Stream.Flush();
 
         public override async Task FlushAsync(CancellationToken cancellationToken) =>

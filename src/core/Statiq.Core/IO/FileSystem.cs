@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using ConcurrentCollections;
 using Statiq.Common;
@@ -78,8 +76,9 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Keeps track of the files opened for writing for a given execution (reset by the engine before execution).
+        /// Keeps track of the files opened for writing and their post-write state
+        /// hash for a given execution (reset by the engine before execution).
         /// </summary>
-        public ConcurrentHashSet<IFile> WrittenFiles { get; } = new ConcurrentHashSet<IFile>();
+        public ConcurrentDictionary<NormalizedPath, int> WrittenFiles { get; } = new ConcurrentDictionary<NormalizedPath, int>();
     }
 }

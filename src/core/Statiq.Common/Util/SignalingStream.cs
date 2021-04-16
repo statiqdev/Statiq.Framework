@@ -22,5 +22,11 @@ namespace Statiq.Common
         {
             _waitHandle.Set();
         }
+
+        public override ValueTask DisposeAsync()
+        {
+            _waitHandle.Set();
+            return default;
+        }
     }
 }

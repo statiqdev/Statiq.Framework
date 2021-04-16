@@ -99,64 +99,66 @@ namespace Statiq.Core
         /// <inheritdoc/>
         public async Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default)
         {
-            _fileProvider.WrittenFiles.Add(this);
-
             if (createDirectory)
             {
                 CreateDirectory();
             }
-
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents, cancellationToken));
+            _fileProvider.WrittenFiles[Path] = GetCacheHashCode();
         }
 
         /// <inheritdoc/>
-        // Most file operations are going to be asynchronous and sequential so assume those options
+        // Assumes most file operations are going to be asynchronous and sequential
         public Stream OpenRead() => LocalFileProvider.RetryPolicy.Execute(() =>
             new FileStream(_file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan));
 
         /// <inheritdoc/>
         public Stream OpenWrite(bool createDirectory = true)
         {
-            _fileProvider.WrittenFiles.Add(this);
-
             if (createDirectory)
             {
                 CreateDirectory();
             }
 
-            // Most file operations are going to be asynchronous and sequential so assume those options
+            // Assumes most file operations are going to be asynchronous and sequential
             return LocalFileProvider.RetryPolicy.Execute(() =>
-                new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan));
+                new WrittenFileStream(
+                    new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan),
+                    _fileProvider,
+                    this));
         }
 
         /// <inheritdoc/>
         public Stream OpenAppend(bool createDirectory = true)
         {
-            _fileProvider.WrittenFiles.Add(this);
-
             if (createDirectory)
             {
                 CreateDirectory();
             }
 
+            // Assumes most file operations are going to be asynchronous and sequential
             return LocalFileProvider.RetryPolicy.Execute(() =>
-                new FileStream(_file.FullName, FileMode.Append, FileAccess.Write, FileShare.None, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan));
+                new WrittenFileStream(
+                    new FileStream(_file.FullName, FileMode.Append, FileAccess.Write, FileShare.None, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan),
+                    _fileProvider,
+                    this));
         }
 
         /// <inheritdoc/>
         public Stream Open(bool createDirectory = true)
         {
-            // We don't actually know if this is going to be used for writing, so include it just in case
-            _fileProvider.WrittenFiles.Add(this);
-
             if (createDirectory)
             {
                 CreateDirectory();
             }
 
-            // Most file operations are going to be asynchronous and sequential so assume those options
+            // Assumes most file operations are going to be asynchronous and sequential
+            // We don't actually know if this is going to be used for writing, so use the WrittenFileStream just in case
             return LocalFileProvider.RetryPolicy.Execute(() =>
-                new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan));
+                new WrittenFileStream(
+                    new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan),
+                    _fileProvider,
+                    this));
         }
 
         /// <inheritdoc/>
@@ -177,7 +179,9 @@ namespace Statiq.Core
         public string ToDisplayString() => Path.ToDisplayString();
 
         /// <inheritdoc/>
-        public Task<int> GetCacheHashCodeAsync()
+        public Task<int> GetCacheHashCodeAsync() => Task.FromResult(GetCacheHashCode());
+
+        internal int GetCacheHashCode()
         {
             HashCode hashCode = default;
             hashCode.Add(_file.FullName);
@@ -191,7 +195,7 @@ namespace Statiq.Core
             {
                 hashCode.Add(-1);
             }
-            return Task.FromResult(hashCode.ToHashCode());
+            return hashCode.ToHashCode();
         }
     }
 }
