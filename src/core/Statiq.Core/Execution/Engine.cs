@@ -114,8 +114,9 @@ namespace Statiq.Core
             _serviceScope = GetServiceScope(serviceCollection, settings);
             Logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(this, Settings);
+            FileCleaner = new FileCleaner(Settings.Get(Keys.CleanMode, CleanMode.Changed), FileSystem, Logger);
             _diagnosticsTraceListener = new DiagnosticsTraceListener(Logger);
-            System.Diagnostics.Trace.Listeners.Add(_diagnosticsTraceListener);
+            Trace.Listeners.Add(_diagnosticsTraceListener);
 
             // Add the service-based pipelines as late as possible so other services have been configured
             AddServicePipelines();
@@ -267,6 +268,12 @@ namespace Statiq.Core
         /// <inheritdoc />
         public bool SerialExecution { get; set; }
 
+        /// <summary>
+        /// Cleans files and folders from the file system, usually before or after an execution
+        /// using the <see cref="CleanMode"/> setting.
+        /// </summary>
+        public FileCleaner FileCleaner { get; }
+
         internal DocumentFactory DocumentFactory { get; }
 
         internal void ResetPipelinePhases() => _phases = null;
@@ -358,11 +365,8 @@ namespace Statiq.Core
 
                 // Create the pipeline phases (this also validates the pipeline graph)
                 // Other one-time setup code can go here as well
-                bool firstExecution = false;
                 if (_phases is null)
                 {
-                    firstExecution = true;
-
                     // Create all the phases
                     _phases = GetPipelinePhases(_pipelines, Logger);
 
@@ -394,18 +398,8 @@ namespace Statiq.Core
                 Stack<(string, Stopwatch)> otherStopwatches = new Stack<(string, Stopwatch)>();
 
                 // Clean paths and reset written files collection (do this before events since the events might kick off processes that write to the output path)
-                otherStopwatches.Push(("Initial Clean", Stopwatch.StartNew()));
-                CleanDirectory(FileSystem.GetTempDirectory(), "temp");
-                CleanMode cleanMode = Settings.Get(Keys.CleanMode, CleanMode.Self);
-                if (cleanMode == CleanMode.Full || firstExecution)
-                {
-                    CleanDirectory(FileSystem.GetOutputDirectory(), "output");
-                }
-                else if (cleanMode == CleanMode.Self)
-                {
-                    CleanWrittenFiles();
-                }
-                _fileSystem.WrittenFiles.Clear();
+                otherStopwatches.Push(("Before Engine Execution Clean", Stopwatch.StartNew()));
+                FileCleaner.CleanBeforeExecution();
                 otherStopwatches.Peek().Item2.Stop();
 
                 // Raise before event and analyzer before method
@@ -434,6 +428,11 @@ namespace Statiq.Core
                     // Raise after event
                     otherStopwatches.Push(("After Engine Execution Events", Stopwatch.StartNew()));
                     await Events.RaiseAsync(new AfterEngineExecution(this, ExecutionId, Outputs, stopwatch.ElapsedMilliseconds));
+                    otherStopwatches.Peek().Item2.Stop();
+
+                    // Do after execution cleaning
+                    otherStopwatches.Push(("After Engine Execution Clean", Stopwatch.StartNew()));
+                    FileCleaner.CleanAfterExecution();
                     otherStopwatches.Peek().Item2.Stop();
                 }
                 finally
@@ -1057,63 +1056,6 @@ namespace Statiq.Core
             }
         }
 
-        /// <summary>
-        /// Deletes all files we wrote on the last execution.
-        /// </summary>
-        public void CleanWrittenFiles()
-        {
-            IDirectory directory = FileSystem.GetOutputDirectory();
-
-            try
-            {
-                Logger.LogDebug($"Cleaning files written to output directory {directory.Path.FullPath} during previous execution...");
-                int count = 0;
-                foreach (NormalizedPath path in _fileSystem.WrittenFiles.Keys)
-                {
-                    if (directory.Path.ContainsDescendant(path))
-                    {
-                        IFile file = _fileSystem.GetFile(path);
-                        if (file.Exists)
-                        {
-                            file.Delete();
-                            count++;
-                        }
-                    }
-                }
-                Logger.LogInformation($"Cleaned {count} files written to output directory {directory.Path.FullPath} during previous execution");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogWarning($"Error while cleaning files written to output directory {directory.Path.FullPath} during previous execution: {0} - {1}", ex.GetType(), ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// Recursively deletes a directory and then recreates it.
-        /// </summary>
-        /// <param name="directory">The directory to clean.</param>
-        /// <param name="name">A name for logging purposes.</param>
-        public void CleanDirectory(IDirectory directory, string name = null)
-        {
-            _ = directory.ThrowIfNull(nameof(directory));
-
-            name = name is null ? string.Empty : (name + " ");
-            try
-            {
-                Logger.LogDebug($"Cleaning {name}directory {directory.Path.FullPath}...");
-                if (directory.Exists)
-                {
-                    directory.Delete(true);
-                }
-                directory.Create();
-                Logger.LogInformation($"Cleaned {name}directory {directory.Path.FullPath}");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogWarning($"Error while cleaning {name}directory {directory.Path.FullPath}: {0} - {1}", ex.GetType(), ex.Message);
-            }
-        }
-
         /// <inheritdoc />
         public void Dispose()
         {
@@ -1138,8 +1080,8 @@ namespace Statiq.Core
                 }
             }
 
-            System.Diagnostics.Trace.Listeners.Remove(_diagnosticsTraceListener);
-            CleanDirectory(FileSystem.GetTempDirectory(), "temp");
+            Trace.Listeners.Remove(_diagnosticsTraceListener);
+            FileCleaner.CleanDirectory(FileSystem.GetTempDirectory(), "temp");
             _serviceScope.Dispose();
             _disposed = true;
         }

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using ConcurrentCollections;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -17,7 +15,7 @@ namespace Statiq.Core
 
         public FileSystem()
         {
-            FileProvider = new LocalFileProvider(this, WrittenFiles);
+            FileProvider = new LocalFileProvider(this);
         }
 
         public IFileProvider FileProvider
@@ -75,10 +73,6 @@ namespace Statiq.Core
             }
         }
 
-        /// <summary>
-        /// Keeps track of the files opened for writing and their post-write state
-        /// hash for a given execution (reset by the engine before execution).
-        /// </summary>
-        public ConcurrentDictionary<NormalizedPath, int> WrittenFiles { get; } = new ConcurrentDictionary<NormalizedPath, int>();
+        public IFileWriteTracker WriteTracker { get; } = new FileWriteTracker();
     }
 }

@@ -26,6 +26,6 @@
         /// attributes to avoid copying files when there's already a
         /// duplicate file in the output folder.
         /// </summary>
-        Smart
+        Changed
     }
 }

@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Concurrent;
-using ConcurrentCollections;
 using Polly;
 using Statiq.Common;
 
@@ -8,19 +6,12 @@ namespace Statiq.Core
 {
     public class LocalFileProvider : IFileProvider
     {
-        public LocalFileProvider(IReadOnlyFileSystem fileSystem, ConcurrentDictionary<NormalizedPath, int> writtenFiles = null)
+        public LocalFileProvider(IReadOnlyFileSystem fileSystem)
         {
             FileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
-            WrittenFiles = writtenFiles ?? new ConcurrentDictionary<NormalizedPath, int>();
         }
 
         public IReadOnlyFileSystem FileSystem { get; }
-
-        /// <summary>
-        /// Keeps track of the files opened for writing and their post-write state
-        /// hash for a given execution (reset by the engine before execution).
-        /// </summary>
-        public ConcurrentDictionary<NormalizedPath, int> WrittenFiles { get; }
 
         internal static Policy RetryPolicy { get; } =
             Policy

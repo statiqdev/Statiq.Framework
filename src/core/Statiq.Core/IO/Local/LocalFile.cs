@@ -103,8 +103,8 @@ namespace Statiq.Core
             {
                 CreateDirectory();
             }
+            _fileProvider.FileSystem.WriteTracker.AddWrite(Path, GetCacheHashCode());
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents, cancellationToken));
-            _fileProvider.WrittenFiles[Path] = GetCacheHashCode();
         }
 
         /// <inheritdoc/>
@@ -124,7 +124,7 @@ namespace Statiq.Core
             return LocalFileProvider.RetryPolicy.Execute(() =>
                 new WrittenFileStream(
                     new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan),
-                    _fileProvider,
+                    _fileProvider.FileSystem.WriteTracker,
                     this));
         }
 
@@ -140,7 +140,7 @@ namespace Statiq.Core
             return LocalFileProvider.RetryPolicy.Execute(() =>
                 new WrittenFileStream(
                     new FileStream(_file.FullName, FileMode.Append, FileAccess.Write, FileShare.None, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan),
-                    _fileProvider,
+                    _fileProvider.FileSystem.WriteTracker,
                     this));
         }
 
@@ -157,7 +157,7 @@ namespace Statiq.Core
             return LocalFileProvider.RetryPolicy.Execute(() =>
                 new WrittenFileStream(
                     new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan),
-                    _fileProvider,
+                    _fileProvider.FileSystem.WriteTracker,
                     this));
         }
 

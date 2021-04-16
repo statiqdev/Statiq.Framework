@@ -57,5 +57,8 @@ namespace Statiq.Testing
 
         /// <inheritdoc />
         public NormalizedPath TempPath { get; set; } = "temp";
+
+        /// <inheritdoc />
+        public IFileWriteTracker WriteTracker { get; } = new TestFileWriteTracker();
     }
 }

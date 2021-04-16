@@ -76,5 +76,11 @@ namespace Statiq.Common
         /// The temporary file path.
         /// </value>
         NormalizedPath TempPath { get; }
+
+        /// <summary>
+        /// Tracks the state of files being written to and their source content.
+        /// This helps determine when a file should be overwritten when using <see cref="CleanMode.Changed"/>.
+        /// </summary>
+        IFileWriteTracker WriteTracker { get; }
     }
 }

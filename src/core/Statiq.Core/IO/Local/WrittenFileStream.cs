@@ -12,57 +12,57 @@ namespace Statiq.Core
     /// </summary>
     internal class WrittenFileStream : DelegatingStream
     {
-        private readonly LocalFileProvider _fileProvider;
+        private readonly IFileWriteTracker _fileWriteTracker;
         private readonly LocalFile _file;
 
-        private bool _wrote;
+        private bool _wroteData;
 
-        public WrittenFileStream(FileStream fileStream, LocalFileProvider fileProvider, LocalFile file)
+        public WrittenFileStream(FileStream fileStream, IFileWriteTracker fileWriteTracker, LocalFile file)
             : base(fileStream)
         {
-            _fileProvider = fileProvider.ThrowIfNull(nameof(fileProvider));
+            _fileWriteTracker = fileWriteTracker.ThrowIfNull(nameof(fileWriteTracker));
             _file = file.ThrowIfNull(nameof(file));
         }
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
         {
-            _wrote = true;
+            _wroteData = true;
             return base.BeginWrite(buffer, offset, count, callback, state);
         }
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            _wrote = true;
+            _wroteData = true;
             return base.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            _wrote = true;
+            _wroteData = true;
             base.Write(buffer, offset, count);
         }
 
         public override void WriteByte(byte value)
         {
-            _wrote = true;
+            _wroteData = true;
             base.WriteByte(value);
         }
 
         protected override void Dispose(bool disposing)
         {
             Stream.Dispose();
-            if (_wrote)
+            if (_wroteData)
             {
-                _fileProvider.WrittenFiles[_file.Path] = _file.GetCacheHashCode();
+                _fileWriteTracker.AddWrite(_file.Path, _file.GetCacheHashCode());
             }
         }
 
         public override async ValueTask DisposeAsync()
         {
             await Stream.DisposeAsync();
-            if (_wrote)
+            if (_wroteData)
             {
-                _fileProvider.WrittenFiles[_file.Path] = _file.GetCacheHashCode();
+                _fileWriteTracker.AddWrite(_file.Path, _file.GetCacheHashCode());
             }
         }
     }

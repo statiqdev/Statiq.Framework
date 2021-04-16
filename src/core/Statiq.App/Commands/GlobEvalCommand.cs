@@ -52,6 +52,7 @@ namespace Statiq.App
             IReadOnlyList<NormalizedPath> IReadOnlyFileSystem.ExcludedPaths => throw new NotImplementedException();
             NormalizedPath IReadOnlyFileSystem.OutputPath => throw new NotImplementedException();
             NormalizedPath IReadOnlyFileSystem.TempPath => throw new NotImplementedException();
+            IFileWriteTracker IReadOnlyFileSystem.WriteTracker => throw new NotImplementedException();
         }
     }
 }
