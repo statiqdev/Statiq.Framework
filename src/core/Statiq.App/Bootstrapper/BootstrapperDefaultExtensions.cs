@@ -98,7 +98,7 @@ namespace Statiq.App
                     { Keys.LinkHideIndexPages, true },
                     { Keys.LinkHideExtensions, true },
                     { Keys.UseCache, true },
-                    { Keys.CleanMode, CleanMode.Self }
+                    { Keys.CleanMode, CleanMode.Unwritten }
                 });
 
         public static Bootstrapper AddDefaultConfigurationFiles(this Bootstrapper bootstrapper) =>

@@ -96,5 +96,8 @@ namespace Statiq.Common
 
         /// <inheritdoc/>
         public async Task<int> GetCacheHashCodeAsync() => await _file.GetCacheHashCodeAsync();
+
+        /// <inheritdoc/>
+        public void Refresh() => _file.Refresh();
     }
 }

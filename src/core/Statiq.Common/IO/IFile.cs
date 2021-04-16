@@ -123,5 +123,14 @@ namespace Statiq.Common
         /// </remarks>
         /// <returns>A hash appropriate for caching.</returns>
         Task<int> GetCacheHashCodeAsync();
+
+        /// <summary>
+        /// Refreshes any cached information about the file.
+        /// </summary>
+        /// <remarks>
+        /// For example, a file from the file system might use a <see cref="FileInfo"/> that needs to be refreshed when it changes. Note that implementations
+        /// should internally refresh their state as appropriate so external refresh calls are only needed if the underlying file changes outside the file instance.
+        /// </remarks>
+        void Refresh();
     }
 }

@@ -79,5 +79,9 @@ namespace Statiq.Common
 
         public Task<int> GetCacheHashCodeAsync() =>
             throw new NotSupportedException("Not supported for an excluded path");
+
+        public void Refresh()
+        {
+        }
     }
 }

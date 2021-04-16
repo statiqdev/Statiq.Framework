@@ -53,7 +53,8 @@ namespace Statiq.Core
             Stream.Dispose();
             if (_wroteData)
             {
-                _fileWriteTracker.AddWrite(_file.Path, _file.GetCacheHashCode());
+                _fileWriteTracker.TrackWrite(_file.Path, _file.GetCacheHashCode(), true);
+                _file.Refresh();
             }
         }
 
@@ -62,7 +63,8 @@ namespace Statiq.Core
             await Stream.DisposeAsync();
             if (_wroteData)
             {
-                _fileWriteTracker.AddWrite(_file.Path, _file.GetCacheHashCode());
+                _fileWriteTracker.TrackWrite(_file.Path, _file.GetCacheHashCode(), true);
+                _file.Refresh();
             }
         }
     }

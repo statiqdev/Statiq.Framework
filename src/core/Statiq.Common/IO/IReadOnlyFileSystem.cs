@@ -79,7 +79,7 @@ namespace Statiq.Common
 
         /// <summary>
         /// Tracks the state of files being written to and their source content.
-        /// This helps determine when a file should be overwritten when using <see cref="CleanMode.Changed"/>.
+        /// This helps determine when a file should be overwritten when using <see cref="CleanMode.Unwritten"/>.
         /// </summary>
         IFileWriteTracker WriteTracker { get; }
     }

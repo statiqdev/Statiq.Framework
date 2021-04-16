@@ -20,7 +20,6 @@ namespace Statiq.Core
 {
     public class FileCleaner
     {
-        private readonly CleanMode _cleanMode;
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _logger;
 
@@ -28,26 +27,28 @@ namespace Statiq.Core
 
         internal FileCleaner(CleanMode cleanMode, IFileSystem fileSystem, ILogger logger)
         {
-            _cleanMode = cleanMode;
+            CleanMode = cleanMode;
             _fileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
             _logger = logger.ThrowIfNull(nameof(logger));
         }
+
+        public CleanMode CleanMode { get; }
 
         /// <summary>
         /// Cleans folders before execution.
         /// </summary>
         internal void CleanBeforeExecution()
         {
+            _fileSystem.WriteTracker.Reset();
             CleanDirectory(_fileSystem.GetTempDirectory(), "temp");
-            if (_cleanMode == CleanMode.Full || _firstExecution)
+            if (CleanMode == CleanMode.Full || _firstExecution)
             {
                 CleanDirectory(_fileSystem.GetOutputDirectory(), "output");
             }
-            else if (_cleanMode == CleanMode.Self)
+            else if (CleanMode == CleanMode.Self)
             {
                 CleanSelf();
             }
-            _fileSystem.WriteTracker.Reset();
             _firstExecution = false;
         }
 
@@ -56,7 +57,10 @@ namespace Statiq.Core
         /// </summary>
         internal void CleanAfterExecution()
         {
-            // TODO: Changed clean
+            if (CleanMode == CleanMode.Unwritten)
+            {
+                CleanUnwritten();
+            }
         }
 
         /// <summary>
@@ -87,6 +91,7 @@ namespace Statiq.Core
 
         /// <summary>
         /// Deletes all files we wrote on the last execution.
+        /// Called before execution.
         /// </summary>
         private void CleanSelf()
         {
@@ -96,7 +101,7 @@ namespace Statiq.Core
             {
                 _logger.LogDebug($"Cleaning files written to output directory {directory.Path.FullPath} during previous execution...");
                 int count = 0;
-                foreach (KeyValuePair<NormalizedPath, int> write in _fileSystem.WriteTracker.CurrentWrites)
+                foreach (KeyValuePair<NormalizedPath, int> write in _fileSystem.WriteTracker.PreviousWrites)
                 {
                     if (directory.Path.ContainsDescendant(write.Key))
                     {
@@ -113,6 +118,40 @@ namespace Statiq.Core
             catch (Exception ex)
             {
                 _logger.LogWarning($"Error while cleaning files written to output directory {directory.Path.FullPath} during previous execution: {0} - {1}", ex.GetType(), ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Compares what we wrote this time to what we wrote last time and deletes the files that we didn't write this time.
+        /// Called after execution.
+        /// </summary>
+        private void CleanUnwritten()
+        {
+            IDirectory directory = _fileSystem.GetOutputDirectory();
+
+            try
+            {
+                _logger.LogDebug($"Cleaning files not written to output directory {directory.Path.FullPath} during current execution...");
+                int count = 0;
+                foreach (KeyValuePair<NormalizedPath, int> write in _fileSystem.WriteTracker.PreviousWrites)
+                {
+                    if (directory.Path.ContainsDescendant(write.Key))
+                    {
+                        IFile file = _fileSystem.GetFile(write.Key);
+
+                        // Only delete it if the file exists and was not written during the current execution
+                        if (file.Exists && !_fileSystem.WriteTracker.TryGetCurrentWrite(file.Path, out int _))
+                        {
+                            file.Delete();
+                            count++;
+                        }
+                    }
+                }
+                _logger.LogInformation($"Cleaned {count} files not written to output directory {directory.Path.FullPath} during current execution");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Error while cleaning files not written to output directory {directory.Path.FullPath} during current execution: {0} - {1}", ex.GetType(), ex.Message);
             }
         }
     }

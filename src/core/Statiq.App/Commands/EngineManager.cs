@@ -70,6 +70,7 @@ namespace Statiq.App
             }
             _logger.LogInformation($"Output path:{Environment.NewLine}       {Engine.FileSystem.OutputPath}");
             _logger.LogInformation($"Temp path:{Environment.NewLine}       {Engine.FileSystem.TempPath}");
+            _logger.LogInformation($"Clean mode : {Engine.FileCleaner.CleanMode}");
         }
 
         public Engine Engine { get; }
@@ -143,7 +144,7 @@ namespace Statiq.App
             }
 
             // Clean mode
-            engine.Settings[Keys.CleanMode] = CleanMode.Self;
+            engine.Settings[Keys.CleanMode] = commandSettings.CleanMode;
             if (commandSettings.NoClean)
             {
                 engine.Settings[Keys.CleanMode] = CleanMode.None;

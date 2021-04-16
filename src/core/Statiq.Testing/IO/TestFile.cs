@@ -183,5 +183,10 @@ namespace Statiq.Testing
             }
             return Task.FromResult(hashCode.ToHashCode());
         }
+
+        /// <inheritdoc/>
+        public void Refresh()
+        {
+        }
     }
 }

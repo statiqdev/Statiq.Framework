@@ -154,6 +154,25 @@ namespace Statiq.Core
             IFile outputFile = context.FileSystem.GetOutputFile(outputPath);
             if (outputFile is object)
             {
+                // Did we write this file last time and has no one messed with it?
+                int contentHash = await input.ContentProvider.GetCacheHashCodeAsync();
+                if (context.FileSystem.WriteTracker.TryGetPreviousWrite(outputFile.Path, out int previousWriteHash)
+                    && previousWriteHash == await outputFile.GetCacheHashCodeAsync())
+                {
+                    // We wrote this file last time, it still exists, and it hasn't changed
+                    // Now check if the content we're about to write is the same as last time
+                    if (context.FileSystem.WriteTracker.TryGetPreviousContent(outputFile.Path, out int previousContentHash)
+                        && previousContentHash == contentHash)
+                    {
+                        // We used the same content last time, so we can skip writing this file
+                        // Make sure to add the appropriate entries so it looks like we wrote it this time
+                        context.LogDebug($"Skipped writing file {outputFile.Path.FullPath} from {input.Source.ToSafeDisplayString()} because it already exists and the content is the same");
+                        context.FileSystem.WriteTracker.TrackWrite(outputFile.Path, previousWriteHash, false);
+                        context.FileSystem.WriteTracker.TrackContent(outputFile.Path, previousContentHash);
+                        return;
+                    }
+                }
+
                 // Optimization if the input document is straight from a file
                 if (input.ContentProvider is FileContent fileContent)
                 {
@@ -184,6 +203,7 @@ namespace Statiq.Core
                         }
                     }
                 }
+                context.FileSystem.WriteTracker.TrackContent(outputFile.Path, contentHash); // The file write hash will be tracked when the file write actually occurs
                 context.LogDebug($"Wrote file {outputFile.Path.FullPath} from {input.Source.ToSafeDisplayString()}");
             }
         }

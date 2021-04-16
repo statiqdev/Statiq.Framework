@@ -90,7 +90,11 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
-        public void Delete() => LocalFileProvider.RetryPolicy.Execute(() => _file.Delete());
+        public void Delete() => LocalFileProvider.RetryPolicy.Execute(() =>
+        {
+            _file.Delete();
+            Refresh();
+        });
 
         /// <inheritdoc/>
         public async Task<string> ReadAllTextAsync(CancellationToken cancellationToken = default) =>
@@ -103,7 +107,8 @@ namespace Statiq.Core
             {
                 CreateDirectory();
             }
-            _fileProvider.FileSystem.WriteTracker.AddWrite(Path, GetCacheHashCode());
+            _fileProvider.FileSystem.WriteTracker.TrackWrite(Path, GetCacheHashCode(), true);
+            Refresh();
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents, cancellationToken));
         }
 
@@ -180,6 +185,9 @@ namespace Statiq.Core
 
         /// <inheritdoc/>
         public Task<int> GetCacheHashCodeAsync() => Task.FromResult(GetCacheHashCode());
+
+        /// <inheritdoc/>
+        public void Refresh() => _file.Refresh();
 
         internal int GetCacheHashCode()
         {

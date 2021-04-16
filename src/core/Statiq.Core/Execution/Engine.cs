@@ -114,7 +114,7 @@ namespace Statiq.Core
             _serviceScope = GetServiceScope(serviceCollection, settings);
             Logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(this, Settings);
-            FileCleaner = new FileCleaner(Settings.Get(Keys.CleanMode, CleanMode.Changed), FileSystem, Logger);
+            FileCleaner = new FileCleaner(Settings.Get(Keys.CleanMode, CleanMode.Unwritten), FileSystem, Logger);
             _diagnosticsTraceListener = new DiagnosticsTraceListener(Logger);
             Trace.Listeners.Add(_diagnosticsTraceListener);
 
@@ -460,6 +460,9 @@ namespace Statiq.Core
 
                     // Clean up
                     Logger.LogInformation("========== Completed ==========");
+                    Logger.LogInformation($"{FileSystem.WriteTracker.CurrentTotalWritesCount} total files written or already existed");
+                    Logger.LogInformation($"{FileSystem.WriteTracker.CurrentActualWritesCount} actual files written");
+                    Logger.LogInformation($"{FileSystem.WriteTracker.CurrentTotalWritesCount - FileSystem.WriteTracker.CurrentActualWritesCount} files already existed");
                     Logger.LogInformation($"Finished in {stopwatch.ElapsedMilliseconds} ms:");
                     foreach ((string, Stopwatch) otherStopwatch in otherStopwatches.Reverse())
                     {
