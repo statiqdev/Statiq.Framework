@@ -25,22 +25,31 @@ namespace Statiq.Core
             _file = new System.IO.FileInfo(Path.FullPath);
         }
 
+        /// <inheritdoc/>
         public NormalizedPath Path { get; }
 
+        /// <inheritdoc/>
         NormalizedPath IFileSystemEntry.Path => Path;
 
+        /// <inheritdoc/>
         public IDirectory Directory => _fileProvider.FileSystem.GetDirectory(Path.Parent);
 
+        /// <inheritdoc/>
         public bool Exists => _file.Exists;
 
+        /// <inheritdoc/>
         public long Length => _file.Length;
 
+        /// <inheritdoc/>
         public string MediaType => Path.MediaType;
 
+        /// <inheritdoc/>
         public DateTime LastWriteTime => _file.LastWriteTime;
 
+        /// <inheritdoc/>
         public DateTime CreationTime => _file.CreationTime;
 
+        /// <inheritdoc/>
         public async Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true, CancellationToken cancellationToken = default)
         {
             destination.ThrowIfNull(nameof(destination));
@@ -64,6 +73,7 @@ namespace Statiq.Core
             }
         }
 
+        /// <inheritdoc/>
         public async Task MoveToAsync(IFile destination, CancellationToken cancellationToken = default)
         {
             destination.ThrowIfNull(nameof(destination));
@@ -79,11 +89,14 @@ namespace Statiq.Core
             Delete();
         }
 
+        /// <inheritdoc/>
         public void Delete() => LocalFileProvider.RetryPolicy.Execute(() => _file.Delete());
 
+        /// <inheritdoc/>
         public async Task<string> ReadAllTextAsync(CancellationToken cancellationToken = default) =>
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.ReadAllTextAsync(_file.FullName, cancellationToken));
 
+        /// <inheritdoc/>
         public async Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default)
         {
             _fileProvider.WrittenFiles.Add(this);
@@ -96,10 +109,12 @@ namespace Statiq.Core
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents, cancellationToken));
         }
 
+        /// <inheritdoc/>
         // Most file operations are going to be asynchronous and sequential so assume those options
         public Stream OpenRead() => LocalFileProvider.RetryPolicy.Execute(() =>
             new FileStream(_file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan));
 
+        /// <inheritdoc/>
         public Stream OpenWrite(bool createDirectory = true)
         {
             _fileProvider.WrittenFiles.Add(this);
@@ -114,6 +129,7 @@ namespace Statiq.Core
                 new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan));
         }
 
+        /// <inheritdoc/>
         public Stream OpenAppend(bool createDirectory = true)
         {
             _fileProvider.WrittenFiles.Add(this);
@@ -127,6 +143,7 @@ namespace Statiq.Core
                 new FileStream(_file.FullName, FileMode.Append, FileAccess.Write, FileShare.None, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan));
         }
 
+        /// <inheritdoc/>
         public Stream Open(bool createDirectory = true)
         {
             // We don't actually know if this is going to be used for writing, so include it just in case
@@ -142,17 +159,39 @@ namespace Statiq.Core
                 new FileStream(_file.FullName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, BufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan));
         }
 
+        /// <inheritdoc/>
         public TextReader OpenText() => LocalFileProvider.RetryPolicy.Execute(() => File.OpenText(_file.FullName));
 
         private void CreateDirectory() => Directory.Create();
 
+        /// <inheritdoc/>
         public IContentProvider GetContentProvider() => GetContentProvider(MediaType);
 
+        /// <inheritdoc/>
         public IContentProvider GetContentProvider(string mediaType) =>
             _file.Exists ? (IContentProvider)new FileContent(this, mediaType) : new NullContent(mediaType);
 
         public override string ToString() => Path.ToString();
 
+        /// <inheritdoc/>
         public string ToDisplayString() => Path.ToDisplayString();
+
+        /// <inheritdoc/>
+        public Task<int> GetCacheHashCodeAsync()
+        {
+            HashCode hashCode = default;
+            hashCode.Add(_file.FullName);
+            if (_file.Exists)
+            {
+                hashCode.Add(_file.Length);
+                hashCode.Add(_file.CreationTime);
+                hashCode.Add(_file.LastWriteTime);
+            }
+            else
+            {
+                hashCode.Add(-1);
+            }
+            return Task.FromResult(hashCode.ToHashCode());
+        }
     }
 }

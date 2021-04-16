@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Statiq.Common
 {
+    /// <summary>
+    /// Represents a sequence of documents as a file system (I.e., for use in the globber).
+    /// </summary>
     internal class DocumentFile : IFile
     {
         private readonly DocumentFileProvider _fileProvider;
@@ -71,5 +74,7 @@ namespace Statiq.Common
         public override string ToString() => Path.ToString();
 
         public string ToDisplayString() => Path.ToDisplayString();
+
+        public async Task<int> GetCacheHashCodeAsync() => _document is null ? 0 : await _document.GetCacheHashCodeAsync();
     }
 }

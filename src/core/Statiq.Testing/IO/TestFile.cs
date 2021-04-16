@@ -19,22 +19,31 @@ namespace Statiq.Testing
             Path = path;
         }
 
+        /// <inheritdoc/>
         public NormalizedPath Path { get; }
 
+        /// <inheritdoc/>
         NormalizedPath IFileSystemEntry.Path => Path;
 
+        /// <inheritdoc/>
         public bool Exists => _fileProvider.Files.ContainsKey(Path);
 
+        /// <inheritdoc/>
         public IDirectory Directory => _fileSystem.GetDirectory(Path.Parent);
 
+        /// <inheritdoc/>
         public long Length => _fileProvider.Files[Path].Length;
 
+        /// <inheritdoc/>
         public string MediaType => Path.MediaType;
 
+        /// <inheritdoc/>
         public DateTime LastWriteTime { get; set; }
 
+        /// <inheritdoc/>
         public DateTime CreationTime { get; set; }
 
+        /// <inheritdoc/>
         private void CreateDirectory(bool createDirectory, IFile file)
         {
             if (!createDirectory && !_fileProvider.Directories.Contains(file.Path.Parent))
@@ -52,6 +61,7 @@ namespace Statiq.Testing
             }
         }
 
+        /// <inheritdoc/>
         public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true, CancellationToken cancellationToken = default)
         {
             CreateDirectory(createDirectory, destination);
@@ -68,6 +78,7 @@ namespace Statiq.Testing
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc/>
         public Task MoveToAsync(IFile destination, CancellationToken cancellationToken = default)
         {
             if (!_fileProvider.Files.ContainsKey(Path))
@@ -83,10 +94,13 @@ namespace Statiq.Testing
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc/>
         public void Delete() => _fileProvider.Files.TryRemove(Path, out StringBuilder _);
 
+        /// <inheritdoc/>
         public Task<string> ReadAllTextAsync(CancellationToken cancellationToken = default) => Task.FromResult(_fileProvider.Files[Path].ToString());
 
+        /// <inheritdoc/>
         public Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default)
         {
             CreateDirectory(createDirectory, this);
@@ -94,6 +108,7 @@ namespace Statiq.Testing
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc/>
         public Stream OpenRead()
         {
             if (!_fileProvider.Files.TryGetValue(Path, out StringBuilder builder))
@@ -104,6 +119,7 @@ namespace Statiq.Testing
             return new MemoryStream(bytes);
         }
 
+        /// <inheritdoc/>
         public TextReader OpenText()
         {
             if (!_fileProvider.Files.TryGetValue(Path, out StringBuilder builder))
@@ -113,12 +129,14 @@ namespace Statiq.Testing
             return new StringReader(builder.ToString());
         }
 
+        /// <inheritdoc/>
         public Stream OpenWrite(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
             return new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path, new StringBuilder(), (x, y) => y));
         }
 
+        /// <inheritdoc/>
         public Stream OpenAppend(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
@@ -129,19 +147,41 @@ namespace Statiq.Testing
             return stream;
         }
 
+        /// <inheritdoc/>
         public Stream Open(bool createDirectory = true)
         {
             CreateDirectory(createDirectory, this);
             return new StringBuilderStream(_fileProvider.Files.AddOrUpdate(Path, new StringBuilder(), (x, y) => y));
         }
 
+        /// <inheritdoc/>
         public IContentProvider GetContentProvider() => GetContentProvider(MediaType);
 
+        /// <inheritdoc/>
         public IContentProvider GetContentProvider(string mediaType) =>
             _fileProvider.Files.ContainsKey(Path) ? (IContentProvider)new FileContent(this, mediaType) : new NullContent(mediaType);
 
         public override string ToString() => Path.ToString();
 
+        /// <inheritdoc/>
         public string ToDisplayString() => Path.ToSafeDisplayString();
+
+        /// <inheritdoc/>
+        public Task<int> GetCacheHashCodeAsync()
+        {
+            HashCode hashCode = default;
+            hashCode.Add(Path.FullPath);
+            if (Exists)
+            {
+                hashCode.Add(Length);
+                hashCode.Add(CreationTime);
+                hashCode.Add(LastWriteTime);
+            }
+            else
+            {
+                hashCode.Add(-1);
+            }
+            return Task.FromResult(hashCode.ToHashCode());
+        }
     }
 }

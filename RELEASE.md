@@ -1,5 +1,9 @@
 # 1.0.0-beta.41
 
+- Added a "smart" clean mode as the new default (`CleanMode.Smart`) that will wait to clean the output folder _after_ each execution and tries to avoid writing duplicate files to the file system.
+- Added `IFile.GetCacheHashCodeAsync()` which can be used to get a hash code representing the current state of a file.
+- Refactored `FileContent.GetCacheHashCodeAsync()` to use the new `IFile.GetCacheHashCodeAsync()` instead of attempting to read the entire file content.
+
 # 1.0.0-beta.40
 
 - Several optimizations to file IO and the `WriteFiles` and `CopyFiles` modules.

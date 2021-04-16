@@ -93,5 +93,8 @@ namespace Statiq.Common
             bool createDirectory = true,
             CancellationToken cancellationToken = default) =>
             _file.WriteAllTextAsync(contents, createDirectory, cancellationToken);
+
+        /// <inheritdoc/>
+        public async Task<int> GetCacheHashCodeAsync() => await _file.GetCacheHashCodeAsync();
     }
 }

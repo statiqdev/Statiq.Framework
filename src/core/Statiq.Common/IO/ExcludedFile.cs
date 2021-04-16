@@ -76,5 +76,8 @@ namespace Statiq.Common
 
         public Stream Open(bool createDirectory = true) =>
             throw new NotSupportedException("Not supported for an excluded path");
+
+        public Task<int> GetCacheHashCodeAsync() =>
+            throw new NotSupportedException("Not supported for an excluded path");
     }
 }

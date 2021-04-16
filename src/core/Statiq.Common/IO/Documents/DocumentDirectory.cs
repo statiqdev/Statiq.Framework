@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Statiq.Common
 {
+    /// <summary>
+    /// Represents a sequence of documents as a file system (I.e., for use in the globber).
+    /// </summary>
     internal class DocumentDirectory : IDirectory
     {
         private readonly DocumentFileProvider _fileProvider;

@@ -22,16 +22,22 @@ namespace Statiq.Core
             _directory = new System.IO.DirectoryInfo(Path.FullPath);
         }
 
+        /// <inheritdoc/>
         public NormalizedPath Path { get; }
 
+        /// <inheritdoc/>
         NormalizedPath IFileSystemEntry.Path => Path;
 
+        /// <inheritdoc/>
         public bool Exists => _directory.Exists;
 
+        /// <inheritdoc/>
         public DateTime LastWriteTime => _directory.LastWriteTime;
 
+        /// <inheritdoc/>
         public DateTime CreationTime => _directory.CreationTime;
 
+        /// <inheritdoc/>
         public IDirectory Parent
         {
             get
@@ -41,10 +47,13 @@ namespace Statiq.Core
             }
         }
 
+        /// <inheritdoc/>
         public void Create() => LocalFileProvider.RetryPolicy.Execute(() => _directory.Create());
 
+        /// <inheritdoc/>
         public void Delete(bool recursive) => LocalFileProvider.RetryPolicy.Execute(() => _directory.Delete(recursive));
 
+        /// <inheritdoc/>
         public void MoveTo(NormalizedPath destinationPath)
         {
             destinationPath.ThrowIfNull(nameof(destinationPath));
@@ -52,24 +61,28 @@ namespace Statiq.Core
             LocalFileProvider.RetryPolicy.Execute(() => _directory.MoveTo(destinationPath.FullPath));
         }
 
+        /// <inheritdoc/>
         public void MoveTo(IDirectory destinationDirectory)
         {
             destinationDirectory.ThrowIfNull(nameof(destinationDirectory));
             MoveTo(destinationDirectory.Path);
         }
 
+        /// <inheritdoc/>
         public IEnumerable<IDirectory> GetDirectories(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
             LocalFileProvider.RetryPolicy.Execute(() => _directory
                 .GetDirectories("*", searchOption)
                 .Select(directory => _fileProvider.FileSystem.GetDirectory(directory.FullName))
                 .Where(x => x.Exists));
 
+        /// <inheritdoc/>
         public IEnumerable<IFile> GetFiles(SearchOption searchOption = SearchOption.TopDirectoryOnly) =>
             LocalFileProvider.RetryPolicy.Execute(() => _directory
                 .GetFiles("*", searchOption)
                 .Select(file => _fileProvider.FileSystem.GetFile(file.FullName))
                 .Where(x => x.Exists));
 
+        /// <inheritdoc/>
         public IDirectory GetDirectory(NormalizedPath path)
         {
             path.ThrowIfNull(nameof(path));
@@ -78,6 +91,7 @@ namespace Statiq.Core
             return _fileProvider.FileSystem.GetDirectory(Path.Combine(path));
         }
 
+        /// <inheritdoc/>
         public IFile GetFile(NormalizedPath path)
         {
             path.ThrowIfNull(nameof(path));
@@ -88,6 +102,7 @@ namespace Statiq.Core
 
         public override string ToString() => Path.ToString();
 
+        /// <inheritdoc/>
         public string ToDisplayString() => Path.ToDisplayString();
     }
 }

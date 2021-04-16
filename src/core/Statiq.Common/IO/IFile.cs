@@ -113,5 +113,15 @@ namespace Statiq.Common
         /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
         /// <returns>The stream.</returns>
         Stream Open(bool createDirectory = true);
+
+        /// <summary>
+        /// Gets a hash of the content appropriate for caching.
+        /// </summary>
+        /// <remarks>
+        /// This value doesn't necessarily reflect the content of the file as much as it's state. For example, a local file system
+        /// file might use file attributes like size and/or last write time to construct a hash code representative of the file and whether it's changed.
+        /// </remarks>
+        /// <returns>A hash appropriate for caching.</returns>
+        Task<int> GetCacheHashCodeAsync();
     }
 }

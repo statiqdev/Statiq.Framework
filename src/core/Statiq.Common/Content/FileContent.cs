@@ -42,13 +42,6 @@ namespace Statiq.Common
             string.Equals(MediaType, mediaType, StringComparison.OrdinalIgnoreCase) ? this : new FileContent(File, mediaType);
 
         /// <inheritdoc />
-        public async Task<int> GetCacheHashCodeAsync()
-        {
-            // The file might have changed so we can't cache the hash code, get it fresh each time
-            using (Stream stream = GetStream())
-            {
-                return (int)await Crc32.CalculateAsync(stream);
-            }
-        }
+        public async Task<int> GetCacheHashCodeAsync() => await File.GetCacheHashCodeAsync();
     }
 }
