@@ -114,7 +114,7 @@ namespace Statiq.Core
             _serviceScope = GetServiceScope(serviceCollection, settings);
             Logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(this, Settings);
-            FileCleaner = new FileCleaner(Settings.Get(Keys.CleanMode, CleanMode.Unwritten), FileSystem, Logger);
+            FileCleaner = new FileCleaner(Settings, FileSystem, Logger);
             _diagnosticsTraceListener = new DiagnosticsTraceListener(Logger);
             Trace.Listeners.Add(_diagnosticsTraceListener);
 
@@ -385,7 +385,8 @@ namespace Statiq.Core
                 // Log
                 Logger.LogInformation("========== Execution ==========");
                 Logger.LogInformation($"Executing {ExecutingPipelines.Count} pipelines ({string.Join(", ", ExecutingPipelines.Keys.OrderBy(x => x))})");
-                Logger.LogDebug($"Execution ID {ExecutionId}");
+                Logger.LogDebug($"Execution ID: {ExecutionId}");
+                Logger.LogDebug($"Clean mode: {FileCleaner.CleanMode}");
 
                 // Do a check for the same input/output path
                 if (FileSystem.InputPaths.Any(x => x.Equals(FileSystem.OutputPath)))

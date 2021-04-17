@@ -164,8 +164,14 @@ namespace Statiq.Html
                 context.Settings.GetBool(Keys.LinkLowercase));
 
             // Download the resource, but only if we haven't already written it to disk
+            // Just assume that if it has been written to disk that it's the same (no need to compare hashes or content for mirrored resources)
             IFile outputFile = context.FileSystem.GetOutputFile(path);
-            if (!outputFile.Exists)
+            if (outputFile.Exists)
+            {
+                // Make sure to mark it as "written" though so it doesn't get cleaned up
+                context.FileSystem.WriteTracker.TrackWrite(outputFile.Path, await outputFile.GetCacheHashCodeAsync(), false);
+            }
+            else
             {
                 // Download the resource
                 context.LogDebug($"Downloading resource from {uri} to {path.FullPath}");

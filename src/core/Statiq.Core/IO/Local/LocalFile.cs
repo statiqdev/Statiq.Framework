@@ -107,8 +107,8 @@ namespace Statiq.Core
             {
                 CreateDirectory();
             }
-            _fileProvider.FileSystem.WriteTracker.TrackWrite(Path, GetCacheHashCode(), true);
             Refresh();
+            _fileProvider.FileSystem.WriteTracker.TrackWrite(Path, GetCacheHashCode(), true);
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents, cancellationToken));
         }
 
@@ -189,6 +189,7 @@ namespace Statiq.Core
         /// <inheritdoc/>
         public void Refresh() => _file.Refresh();
 
+        // Make sure to call Refresh() before calling this if the state has changed
         internal int GetCacheHashCode()
         {
             HashCode hashCode = default;

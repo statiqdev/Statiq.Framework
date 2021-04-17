@@ -20,7 +20,7 @@ namespace Statiq.App
 
         [CommandOption("--clean-mode")]
         [Description("Specifies how the output path will be cleaned between each execution.")]
-        public CleanMode CleanMode { get; set; }
+        public CleanMode CleanMode { get; set; } = CleanMode.Unwritten;
 
         [CommandOption("--nocache")]
         [Description("Prevents caching information during execution (less memory usage but slower execution).")]

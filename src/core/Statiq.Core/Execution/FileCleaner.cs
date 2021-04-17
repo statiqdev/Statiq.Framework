@@ -1,18 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
@@ -20,19 +7,20 @@ namespace Statiq.Core
 {
     public class FileCleaner
     {
+        private readonly IReadOnlySettings _settings;
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _logger;
 
         private bool _firstExecution = true;
 
-        internal FileCleaner(CleanMode cleanMode, IFileSystem fileSystem, ILogger logger)
+        internal FileCleaner(IReadOnlySettings settings, IFileSystem fileSystem, ILogger logger)
         {
-            CleanMode = cleanMode;
+            _settings = settings.ThrowIfNull(nameof(fileSystem));
             _fileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
             _logger = logger.ThrowIfNull(nameof(logger));
         }
 
-        public CleanMode CleanMode { get; }
+        public CleanMode CleanMode => _settings.Get(Keys.CleanMode, CleanMode.Unwritten);
 
         /// <summary>
         /// Cleans folders before execution.
