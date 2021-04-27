@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -25,6 +26,9 @@ namespace Statiq.App
 
         public ConsoleLoggerProvider(IReadOnlyFileSystem fileSystem = null, IOptions<LoggerFilterOptions> filterOptions = null)
         {
+            // Switch the console to UTF8 to things like emoji work
+            Console.OutputEncoding = Encoding.UTF8;
+
             _buildServerLogHelper = new BuildServerLogHelper(fileSystem);
             _filterOptions = filterOptions.Value ?? new LoggerFilterOptions();
             Instances.Add(this);

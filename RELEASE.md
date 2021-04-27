@@ -1,5 +1,7 @@
 # 1.0.0-beta.42
 
+- Changed the console output encoding and the `ProcessLauncher` child process console encodings to UTF-8 so emoji and other Unicode characters will render correctly from child processes.
+
 # 1.0.0-beta.41
 
 - Added support for the `PATH` and `PATHEXT` environment variables to the `ProcessLauncher` so it can resolve file names more like `cmd.exe`.
