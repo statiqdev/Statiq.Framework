@@ -1,3 +1,5 @@
+# 1.0.0-beta.42
+
 # 1.0.0-beta.41
 
 - Added support for the `PATH` and `PATHEXT` environment variables to the `ProcessLauncher` so it can resolve file names more like `cmd.exe`.
