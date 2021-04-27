@@ -70,6 +70,7 @@ namespace Statiq.App
             }
             _logger.LogInformation($"Output path:{Environment.NewLine}       {Engine.FileSystem.OutputPath}");
             _logger.LogInformation($"Temp path:{Environment.NewLine}       {Engine.FileSystem.TempPath}");
+            _logger.LogInformation($"Cache path:{Environment.NewLine}       {Engine.FileSystem.CachePath}");
         }
 
         public Engine Engine { get; }

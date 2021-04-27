@@ -3,6 +3,7 @@
 - **Breaking change:** Deleted `IFile.GetCacheHashCodeAsync()` and replaced it with an implementation of `ICacheCode`.
 - **Breaking change:** Renamed `IContentProvider.GetCacheHashCodeAsync()` and replaced it with an implementation of `ICacheCode`.
 - **Breaking change:** Renamed `IDocument.GetCacheHashCodeAsync()` and replaced it with an implementation of `ICacheCode`.
+- Added `IReadOnlyFileSystem.CachePath` and related extensions, methods, etc. to provide a path where cache files should be stored and set to "cache" by default (which should be excluded in `.gitignore`).
 - The write tracking data is now cached in a file so if the output folder has not changed and the content is the same, files don't need to be written even on the first execution.
 - Added an `ICacheCode` interface to provide a standard deterministic `.GetCacheCodeAsync()` method and implemented it in `IDocument`, `IContentProvider`, and `IFile`.
 - Changed the console output encoding and the `ProcessLauncher` child process console encodings to UTF-8 so emoji and other Unicode characters will render correctly from child processes.

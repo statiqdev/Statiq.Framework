@@ -45,12 +45,6 @@ namespace Statiq.Testing
             }
         }
 
-        public bool UntrackWrite(NormalizedPath path)
-        {
-            _currentActualWrites.TryRemove(path);
-            return _currentWrites.TryRemove(path, out int _);
-        }
-
         public void TrackContent(NormalizedPath path, int hashCode) => _currentContent[path] = hashCode;
 
         public bool TryGetCurrentWrite(NormalizedPath path, out int hashCode) => _currentWrites.TryGetValue(path, out hashCode);

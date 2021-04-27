@@ -78,6 +78,14 @@ namespace Statiq.Common
         NormalizedPath TempPath { get; }
 
         /// <summary>
+        /// Gets the cache file path.
+        /// </summary>
+        /// <value>
+        /// The cache file path.
+        /// </value>
+        NormalizedPath CachePath { get; }
+
+        /// <summary>
         /// Tracks the state of files being written to and their source content.
         /// This helps determine when a file should be overwritten when using <see cref="CleanMode.Unwritten"/>.
         /// </summary>

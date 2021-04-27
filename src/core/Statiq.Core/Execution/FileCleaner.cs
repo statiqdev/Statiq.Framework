@@ -9,7 +9,7 @@ namespace Statiq.Core
     public class FileCleaner
     {
         // Use a .tmp file extension since that's typically already added to .gitignore
-        private const string CacheFileName = "writecache.tmp";
+        private const string CacheFileName = "writecache.json";
 
         private readonly IReadOnlySettings _settings;
         private readonly IFileSystem _fileSystem;
@@ -39,7 +39,7 @@ namespace Statiq.Core
             // If this is the first execution, see if we've got a write tracker cache
             if (_firstExecution)
             {
-                IFile cacheFile = _fileSystem.GetRootFile(CacheFileName);
+                IFile cacheFile = _fileSystem.GetCacheFile(CacheFileName);
                 string result = await _fileSystem.WriteTracker.RestoreAsync(cacheFile);
                 if (result is null)
                 {
@@ -77,7 +77,7 @@ namespace Statiq.Core
             }
 
             // Save the write tracker state
-            IFile cacheFile = _fileSystem.GetRootFile(CacheFileName);
+            IFile cacheFile = _fileSystem.GetCacheFile(CacheFileName);
             await _fileSystem.WriteTracker.SaveAsync(cacheFile);
             _logger.LogDebug($"Saved write tracking data to {cacheFile}");
         }

@@ -36,14 +36,6 @@ namespace Statiq.Common
         void TrackWrite(NormalizedPath path, int hashCode, bool actualWrite);
 
         /// <summary>
-        /// Removes a path from write tracking. This is useful after writing engine or other overhead files (like caches) so
-        /// the writes don't end up being tracked.
-        /// </summary>
-        /// <param name="path">The path that was written to.</param>
-        /// <returns><c>true</c> if the path was being tracked and was removed, <c>false</c> otherwise.</returns>
-        bool UntrackWrite(NormalizedPath path);
-
-        /// <summary>
         /// Tracks data that was written using a hash code of it's content.
         /// </summary>
         /// <param name="path">The path that was written to.</param>

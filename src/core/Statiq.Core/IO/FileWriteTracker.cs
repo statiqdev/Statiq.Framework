@@ -12,6 +12,8 @@ namespace Statiq.Core
     {
         private readonly ConcurrentHashSet<NormalizedPath> _currentActualWrites = new ConcurrentHashSet<NormalizedPath>();
 
+        private readonly IFileSystem _fileSystem;
+
         private ConcurrentDictionary<NormalizedPath, int> _currentWrites
             = new ConcurrentDictionary<NormalizedPath, int>();
 
@@ -23,6 +25,11 @@ namespace Statiq.Core
 
         private ConcurrentDictionary<NormalizedPath, int> _previousContent
             = new ConcurrentDictionary<NormalizedPath, int>();
+
+        public FileWriteTracker(IFileSystem fileSystem)
+        {
+            _fileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
+        }
 
         public void Reset()
         {
@@ -41,7 +48,6 @@ namespace Statiq.Core
                 Content = _currentContent.ToDictionary(x => x.Key.FullPath, x => x.Value.ToString())
             };
             await destination.SerializeJsonAsync(state);
-            UntrackWrite(destination.Path);
         }
 
         public async Task<string> RestoreAsync(IFile source)
@@ -78,6 +84,13 @@ namespace Statiq.Core
 
         public void TrackWrite(NormalizedPath path, int hashCode, bool actualWrite)
         {
+            // Don't track writes to temp or cache paths
+            if (_fileSystem.GetTempPath().ContainsDescendantOrSelf(path)
+                || _fileSystem.GetCachePath().ContainsDescendantOrSelf(path))
+            {
+                return;
+            }
+
             _currentWrites[path] = hashCode;
             if (actualWrite)
             {
@@ -85,13 +98,17 @@ namespace Statiq.Core
             }
         }
 
-        public bool UntrackWrite(NormalizedPath path)
+        public void TrackContent(NormalizedPath path, int hashCode)
         {
-            _currentActualWrites.TryRemove(path);
-            return _currentWrites.TryRemove(path, out int _);
-        }
+            // Don't track writes to temp or cache paths
+            if (_fileSystem.GetTempPath().ContainsDescendantOrSelf(path)
+                || _fileSystem.GetCachePath().ContainsDescendantOrSelf(path))
+            {
+                return;
+            }
 
-        public void TrackContent(NormalizedPath path, int hashCode) => _currentContent[path] = hashCode;
+            _currentContent[path] = hashCode;
+        }
 
         public bool TryGetCurrentWrite(NormalizedPath path, out int hashCode) => _currentWrites.TryGetValue(path, out hashCode);
 

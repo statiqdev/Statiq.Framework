@@ -61,5 +61,10 @@ namespace Statiq.Common
         /// Gets or sets the temporary file path.
         /// </summary>
         new NormalizedPath TempPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cache file path.
+        /// </summary>
+        new NormalizedPath CachePath { get; set; }
     }
 }

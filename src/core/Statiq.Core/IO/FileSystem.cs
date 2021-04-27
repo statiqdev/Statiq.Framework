@@ -11,11 +11,13 @@ namespace Statiq.Core
         private NormalizedPath _rootPath = Directory.GetCurrentDirectory();
         private NormalizedPath _outputPath = "output";
         private NormalizedPath _tempPath = "temp";
+        private NormalizedPath _cachePath = "cache";
         private IFileProvider _fileProvider;
 
         public FileSystem()
         {
             FileProvider = new LocalFileProvider(this);
+            WriteTracker = new FileWriteTracker(this);
         }
 
         public IFileProvider FileProvider
@@ -73,6 +75,16 @@ namespace Statiq.Core
             }
         }
 
-        public IFileWriteTracker WriteTracker { get; } = new FileWriteTracker();
+        public NormalizedPath CachePath
+        {
+            get => _cachePath;
+            set
+            {
+                value.ThrowIfNull(nameof(value));
+                _cachePath = value;
+            }
+        }
+
+        public IFileWriteTracker WriteTracker { get; }
     }
 }

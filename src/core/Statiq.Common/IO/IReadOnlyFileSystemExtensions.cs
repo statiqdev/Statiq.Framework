@@ -377,6 +377,83 @@ namespace Statiq.Common
         }
 
         /// <summary>
+        /// Gets the cache path.
+        /// </summary>
+        /// <param name="fileSystem">The file system.</param>
+        /// <returns>The cache path.</returns>
+        public static NormalizedPath GetCachePath(this IReadOnlyFileSystem fileSystem) =>
+            fileSystem.GetCachePath(NormalizedPath.Null);
+
+        /// <summary>
+        /// Gets a cache path by combining it with the root path and cache path.
+        /// </summary>
+        /// <param name="fileSystem">The file system.</param>
+        /// <param name="path">The path to combine with the root path and cache path.
+        /// If this is <see cref="NormalizedPath.Null"/>, returns the root path combined with the cache path.</param>
+        /// <returns>The cache path.</returns>
+        public static NormalizedPath GetCachePath(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
+        {
+            fileSystem.ThrowIfNull(nameof(fileSystem));
+            return path.IsNull
+                ? fileSystem.RootPath.Combine(fileSystem.CachePath)
+                : fileSystem.RootPath.Combine(fileSystem.CachePath).Combine(path);
+        }
+
+        /// <summary>
+        /// Gets a file representing a cache file.
+        /// </summary>
+        /// <param name="fileSystem">The file system.</param>
+        /// <param name="path">
+        /// If this is an absolute path,
+        /// then a file representing the specified path is returned.
+        /// If it's a relative path, then it will be combined with the
+        /// current cache path.
+        /// </param>
+        /// <returns>A cache file.</returns>
+        public static IFile GetCacheFile(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
+        {
+            fileSystem.ThrowIfNull(nameof(fileSystem));
+            return fileSystem.GetFile(fileSystem.GetCachePath(path));
+        }
+
+        /// <summary>
+        /// Gets a file representing a cache file with a random file name.
+        /// </summary>
+        /// <param name="fileSystem">The file system.</param>
+        /// <returns>A cache file.</returns>
+        public static IFile GetCacheFile(this IReadOnlyFileSystem fileSystem)
+        {
+            fileSystem.ThrowIfNull(nameof(fileSystem));
+            return fileSystem.GetCacheFile(Path.ChangeExtension(Path.GetRandomFileName(), "tmp"));
+        }
+
+        /// <summary>
+        /// Gets a directory representing cache files.
+        /// </summary>
+        /// <param name="fileSystem">The file system.</param>
+        /// <returns>A cache directory.</returns>
+        public static IDirectory GetCacheDirectory(this IReadOnlyFileSystem fileSystem) =>
+            fileSystem.GetCacheDirectory(NormalizedPath.Null);
+
+        /// <summary>
+        /// Gets a directory representing cache files.
+        /// </summary>
+        /// <param name="fileSystem">The file system.</param>
+        /// <param name="path">
+        /// The path of the cache directory. If this is an absolute path,
+        /// then a directory representing the specified path is returned.
+        /// If it's a relative path, then it will be combined with the
+        /// current cache path. If this is <c>null</c> then the base
+        /// cache directory is returned.
+        /// </param>
+        /// <returns>A cache directory.</returns>
+        public static IDirectory GetCacheDirectory(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
+        {
+            fileSystem.ThrowIfNull(nameof(fileSystem));
+            return fileSystem.GetDirectory(fileSystem.GetCachePath(path));
+        }
+
+        /// <summary>
         /// Gets the root path.
         /// </summary>
         /// <param name="fileSystem">The file system.</param>
