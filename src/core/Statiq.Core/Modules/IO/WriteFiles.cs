@@ -155,9 +155,9 @@ namespace Statiq.Core
             if (outputFile is object)
             {
                 // Did we write this file last time and has no one messed with it?
-                int contentHash = await input.ContentProvider.GetCacheHashCodeAsync();
+                int contentHash = await input.ContentProvider.GetCacheCodeAsync();
                 if (context.FileSystem.WriteTracker.TryGetPreviousWrite(outputFile.Path, out int previousWriteHash)
-                    && previousWriteHash == await outputFile.GetCacheHashCodeAsync())
+                    && previousWriteHash == await outputFile.GetCacheCodeAsync())
                 {
                     // We wrote this file last time, it still exists, and it hasn't changed
                     // Now check if the content we're about to write is the same as last time

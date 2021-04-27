@@ -1,5 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using ConcurrentCollections;
 using Statiq.Common;
 
@@ -30,6 +32,10 @@ namespace Statiq.Testing
             _currentContent = new ConcurrentDictionary<NormalizedPath, int>();
         }
 
+        public Task SaveAsync(IFile destinationFile) => throw new NotImplementedException();
+
+        public Task<string> RestoreAsync(IFile sourceFile) => throw new NotImplementedException();
+
         public void TrackWrite(NormalizedPath path, int hashCode, bool actualWrite)
         {
             _currentWrites[path] = hashCode;
@@ -37,6 +43,12 @@ namespace Statiq.Testing
             {
                 _currentActualWrites.Add(path);
             }
+        }
+
+        public bool UntrackWrite(NormalizedPath path)
+        {
+            _currentActualWrites.TryRemove(path);
+            return _currentWrites.TryRemove(path, out int _);
         }
 
         public void TrackContent(NormalizedPath path, int hashCode) => _currentContent[path] = hashCode;

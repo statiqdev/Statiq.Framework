@@ -400,7 +400,7 @@ namespace Statiq.Core
 
                 // Clean paths and reset written files collection (do this before events since the events might kick off processes that write to the output path)
                 otherStopwatches.Push(("Before Engine Execution Clean", Stopwatch.StartNew()));
-                FileCleaner.CleanBeforeExecution();
+                await FileCleaner.CleanBeforeExecutionAsync();
                 otherStopwatches.Peek().Item2.Stop();
 
                 // Raise before event and analyzer before method
@@ -433,7 +433,7 @@ namespace Statiq.Core
 
                     // Do after execution cleaning
                     otherStopwatches.Push(("After Engine Execution Clean", Stopwatch.StartNew()));
-                    FileCleaner.CleanAfterExecution();
+                    await FileCleaner.CleanAfterExecutionAsync();
                     otherStopwatches.Peek().Item2.Stop();
                 }
                 finally
@@ -461,7 +461,7 @@ namespace Statiq.Core
 
                     // Clean up
                     Logger.LogInformation("========== Completed ==========");
-                    Logger.LogInformation($"{FileSystem.WriteTracker.CurrentTotalWritesCount} total files written or already existed");
+                    Logger.LogInformation($"{FileSystem.WriteTracker.CurrentTotalWritesCount} total files output (written or already existed)");
                     Logger.LogInformation($"{FileSystem.WriteTracker.CurrentActualWritesCount} actual files written");
                     Logger.LogInformation($"{FileSystem.WriteTracker.CurrentTotalWritesCount - FileSystem.WriteTracker.CurrentActualWritesCount} files already existed");
                     Logger.LogInformation($"Finished in {stopwatch.ElapsedMilliseconds} ms:");

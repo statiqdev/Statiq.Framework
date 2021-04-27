@@ -12,7 +12,7 @@ namespace Statiq.Common
     /// <summary>
     /// Contains content and metadata for each item as it propagates through the pipeline.
     /// </summary>
-    public interface IDocument : IMetadata, IDisplayable, IContentProviderFactory, ILogger
+    public interface IDocument : IMetadata, IDisplayable, IContentProviderFactory, ILogger, ICacheCode
     {
         /// <summary>
         /// An identifier that is generated when the document is created and stays the same after cloning.
@@ -65,23 +65,15 @@ namespace Statiq.Common
         string IDisplayable.ToDisplayString() => Source.IsNull ? "unknown source" : Source.ToDisplayString();
 
         /// <summary>
-        /// Gets a hash of the provided document content and metadata appropriate for caching.
-        /// Custom <see cref="IDocument"/> implementations may also contribute additional state
-        /// data to the resulting hash code by overriding this method.
+        /// A default implementation of <see cref="ICacheCode.GetCacheCodeAsync()"/>.
         /// </summary>
         /// <returns>A hash appropriate for caching.</returns>
-        Task<int> GetCacheHashCodeAsync();
-
-        /// <summary>
-        /// A default implementation of <see cref="GetCacheHashCodeAsync()"/>.
-        /// </summary>
-        /// <returns>A hash appropriate for caching.</returns>
-        public static async Task<int> GetCacheHashCodeAsync(IDocument document)
+        public static async Task<int> GetCacheCodeAsync(IDocument document)
         {
-            HashCode hash = default;
+            CacheCode cacheCode = default;
 
             // Add the content hash
-            hash.Add(await document.ContentProvider.GetCacheHashCodeAsync());
+            await cacheCode.AddAsync(document.ContentProvider);
 
             // We exclude ContentProvider from hash as we already added CRC for content above
             // Also exclude settings and IMetadataValue implementations
@@ -90,13 +82,28 @@ namespace Statiq.Common
                 .WithoutSettings()
                 .GetRawEnumerable()
                 .Where(x => x.Key != nameof(ContentProvider) && !(x.Value is IMetadataValue))
-                .Select(x => (x.Key, TypeHelper.TryConvert(x.Value, out string stringValue) ? stringValue : x.Value))
+                .Select(x => (x.Key, x.Value is ICacheCode ? x.Value : (TypeHelper.TryConvert(x.Value, out string stringValue) ? stringValue : x.Value)))
                 .OrderBy(x => x.Key))
             {
-                hash.Add(key);
-                hash.Add(value?.GetHashCode() ?? 0);
+                cacheCode.Add(key);
+
+                // The value is either an ICacheCode, a string, or an object
+                switch (value)
+                {
+                    case ICacheCode cacheCodeValue:
+                        await cacheCode.AddAsync(cacheCodeValue);
+                        break;
+                    case string stringValue:
+                        cacheCode.Add(stringValue);
+                        break;
+                    default:
+                        // Take our changes with the normal GetHashCode implementation which may not be deterministic,
+                        // but that probably means this thing shouldn't be persisted in a cache anyway
+                        cacheCode.Add(value?.GetHashCode() ?? 0);
+                        break;
+                }
             }
-            return hash.ToHashCode();
+            return cacheCode.ToCacheCode();
         }
 
         // ILogger default implementation

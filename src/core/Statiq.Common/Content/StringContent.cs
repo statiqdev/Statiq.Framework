@@ -43,7 +43,7 @@ namespace Statiq.Common
             new StringContent(_content, mediaType);
 
         /// <inheritdoc />
-        public Task<int> GetCacheHashCodeAsync()
+        public Task<int> GetCacheCodeAsync()
         {
             // Cache the hash code since the string can never change
             lock (_hashCodeLock)

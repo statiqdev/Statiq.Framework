@@ -169,7 +169,7 @@ namespace Statiq.Html
             if (outputFile.Exists)
             {
                 // Make sure to mark it as "written" though so it doesn't get cleaned up
-                context.FileSystem.WriteTracker.TrackWrite(outputFile.Path, await outputFile.GetCacheHashCodeAsync(), false);
+                context.FileSystem.WriteTracker.TrackWrite(outputFile.Path, await outputFile.GetCacheCodeAsync(), false);
             }
             else
             {

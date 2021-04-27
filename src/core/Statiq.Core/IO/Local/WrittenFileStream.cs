@@ -54,7 +54,7 @@ namespace Statiq.Core
             if (_wroteData)
             {
                 _file.Refresh();
-                _fileWriteTracker.TrackWrite(_file.Path, _file.GetCacheHashCode(), true);
+                _fileWriteTracker.TrackWrite(_file.Path, _file.GetCacheCode(), true);
             }
         }
 
@@ -64,7 +64,7 @@ namespace Statiq.Core
             if (_wroteData)
             {
                 _file.Refresh();
-                _fileWriteTracker.TrackWrite(_file.Path, _file.GetCacheHashCode(), true);
+                _fileWriteTracker.TrackWrite(_file.Path, _file.GetCacheCode(), true);
             }
         }
     }

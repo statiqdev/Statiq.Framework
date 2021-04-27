@@ -95,7 +95,7 @@ namespace Statiq.Common
             _file.WriteAllTextAsync(contents, createDirectory, cancellationToken);
 
         /// <inheritdoc/>
-        public async Task<int> GetCacheHashCodeAsync() => await _file.GetCacheHashCodeAsync();
+        public async Task<int> GetCacheCodeAsync() => await _file.GetCacheCodeAsync();
 
         /// <inheritdoc/>
         public void Refresh() => _file.Refresh();

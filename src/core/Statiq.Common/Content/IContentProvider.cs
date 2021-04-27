@@ -7,7 +7,7 @@ namespace Statiq.Common
     /// <summary>
     /// Contains the content for a document.
     /// </summary>
-    public interface IContentProvider
+    public interface IContentProvider : ICacheCode
     {
         /// <summary>
         /// Gets the content stream. The returned stream should be disposed after use.
@@ -45,11 +45,5 @@ namespace Statiq.Common
         /// <param name="mediaType">The new media type.</param>
         /// <returns>A clone of the current content provider.</returns>
         IContentProvider CloneWithMediaType(string mediaType);
-
-        /// <summary>
-        /// Gets a hash of the content appropriate for caching.
-        /// </summary>
-        /// <returns>A hash appropriate for caching.</returns>
-        Task<int> GetCacheHashCodeAsync();
     }
 }

@@ -252,7 +252,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public virtual async Task<int> GetCacheHashCodeAsync() => await IDocument.GetCacheHashCodeAsync(this);
+        public virtual async Task<int> GetCacheCodeAsync() => await IDocument.GetCacheCodeAsync(this);
 
         /// <inheritdoc />
         public virtual string ToDisplayString()

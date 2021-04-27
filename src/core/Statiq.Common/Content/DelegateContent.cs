@@ -28,7 +28,7 @@ namespace Statiq.Common
         public IContentProvider CloneWithMediaType(string mediaType) => new DelegateContent(_getStream, mediaType);
 
         /// <inheritdoc />
-        public async Task<int> GetCacheHashCodeAsync()
+        public async Task<int> GetCacheCodeAsync()
         {
             // The stream might have changed so we can't cache the hash code, get it fresh each time
             using (Stream stream = GetStream())

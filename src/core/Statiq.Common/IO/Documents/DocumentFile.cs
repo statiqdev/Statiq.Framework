@@ -75,7 +75,7 @@ namespace Statiq.Common
 
         public string ToDisplayString() => Path.ToDisplayString();
 
-        public async Task<int> GetCacheHashCodeAsync() => _document is null ? 0 : await _document.GetCacheHashCodeAsync();
+        public async Task<int> GetCacheCodeAsync() => _document is null ? 0 : await _document.GetCacheCodeAsync();
 
         public void Refresh()
         {

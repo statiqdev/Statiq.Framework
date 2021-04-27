@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
@@ -7,6 +8,9 @@ namespace Statiq.Core
 {
     public class FileCleaner
     {
+        // Use a .tmp file extension since that's typically already added to .gitignore
+        private const string CacheFileName = "writecache.tmp";
+
         private readonly IReadOnlySettings _settings;
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _logger;
@@ -25,10 +29,31 @@ namespace Statiq.Core
         /// <summary>
         /// Cleans folders before execution.
         /// </summary>
-        internal void CleanBeforeExecution()
+        internal async Task CleanBeforeExecutionAsync()
         {
             _fileSystem.WriteTracker.Reset();
+
+            // Always clean the temp directory between executions
             CleanDirectory(_fileSystem.GetTempDirectory(), "temp");
+
+            // If this is the first execution, see if we've got a write tracker cache
+            if (_firstExecution)
+            {
+                IFile cacheFile = _fileSystem.GetRootFile(CacheFileName);
+                string result = await _fileSystem.WriteTracker.RestoreAsync(cacheFile);
+                if (result is null)
+                {
+                    // If we were able to restore, don't treat this as the first execution anymore
+                    _logger.LogInformation($"Restored write tracking data from {cacheFile}");
+                    _firstExecution = false;
+                }
+                else
+                {
+                    _logger.LogDebug($"Could not restore write tracking data from {cacheFile}: {result}");
+                }
+            }
+
+            // Clean if we need to
             if (CleanMode == CleanMode.Full || _firstExecution)
             {
                 CleanDirectory(_fileSystem.GetOutputDirectory(), "output");
@@ -37,18 +62,24 @@ namespace Statiq.Core
             {
                 CleanSelf();
             }
+
             _firstExecution = false;
         }
 
         /// <summary>
         /// Cleans folders after execution.
         /// </summary>
-        internal void CleanAfterExecution()
+        internal async Task CleanAfterExecutionAsync()
         {
             if (CleanMode == CleanMode.Unwritten)
             {
                 CleanUnwritten();
             }
+
+            // Save the write tracker state
+            IFile cacheFile = _fileSystem.GetRootFile(CacheFileName);
+            await _fileSystem.WriteTracker.SaveAsync(cacheFile);
+            _logger.LogDebug($"Saved write tracking data to {cacheFile}");
         }
 
         /// <summary>

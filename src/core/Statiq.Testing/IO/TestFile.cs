@@ -167,21 +167,21 @@ namespace Statiq.Testing
         public string ToDisplayString() => Path.ToSafeDisplayString();
 
         /// <inheritdoc/>
-        public Task<int> GetCacheHashCodeAsync()
+        public Task<int> GetCacheCodeAsync()
         {
-            HashCode hashCode = default;
-            hashCode.Add(Path.FullPath);
+            CacheCode cacheCode = default;
+            cacheCode.Add(Path.FullPath);
             if (Exists)
             {
-                hashCode.Add(Length);
-                hashCode.Add(CreationTime);
-                hashCode.Add(LastWriteTime);
+                cacheCode.Add(Length);
+                cacheCode.Add(CreationTime);
+                cacheCode.Add(LastWriteTime);
             }
             else
             {
-                hashCode.Add(-1);
+                cacheCode.Add(-1);
             }
-            return Task.FromResult(hashCode.ToHashCode());
+            return Task.FromResult(cacheCode.ToCacheCode());
         }
 
         /// <inheritdoc/>

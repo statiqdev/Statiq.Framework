@@ -133,13 +133,13 @@ namespace Statiq.Core
             if (_pipelineDependencies?.Length > 0)
             {
                 // If we've specified some dependent pipelines, calculate the hash of all their outputs
-                dependentPipelinesHash = await CombineCacheHashCodesAsync(
+                dependentPipelinesHash = await CombineCacheCodesAsync(
                     context.Outputs.FromPipelines(_pipelineDependencies), null);
             }
             else if (_pipelineDependencies is null && context.Phase == Phase.Process)
             {
                 // If we're in the process phase, the default behavior is to depend on all pipeline dependencies
-                dependentPipelinesHash = await CombineCacheHashCodesAsync(
+                dependentPipelinesHash = await CombineCacheCodesAsync(
                     context.Outputs.FromPipelines(context.Pipeline.Dependencies.ToArray()), null);
             }
             if (_dependentPipelinesHash != dependentPipelinesHash)
@@ -175,7 +175,7 @@ namespace Statiq.Core
                     .GroupBy(input => input.Source);
                 foreach (IGrouping<NormalizedPath, IDocument> inputGroup in inputGroups)
                 {
-                    missesBySource.Add(inputGroup.Key, await CombineCacheHashCodesAsync(inputGroup, context));
+                    missesBySource.Add(inputGroup.Key, await CombineCacheCodesAsync(inputGroup, context));
                 }
             }
             else
@@ -191,7 +191,7 @@ namespace Statiq.Core
                     {
                         // Get the aggregate input hash for all documents with this source and all document dependencies
                         // (we need it one way or the other to check if it's a hit or to record for next time)
-                        int inputsHash = await CombineCacheHashCodesAsync(inputGroup, context);
+                        int inputsHash = await CombineCacheCodesAsync(inputGroup, context);
 
                         // Get the cache entry for this source if there is one
                         if (currentCache.TryGetValue(inputGroup.Key, out CacheEntry entry))
@@ -268,9 +268,9 @@ namespace Statiq.Core
         }
 
         // Pass null context to disable checking document dependencies
-        private async Task<int> CombineCacheHashCodesAsync(IEnumerable<IDocument> documents, IExecutionContext context)
+        private async Task<int> CombineCacheCodesAsync(IEnumerable<IDocument> documents, IExecutionContext context)
         {
-            HashCode hashCode = default;
+            CacheCode cacheCode = default;
 
             // Get document dependencies in a first pass so we can de-dupe them
             if (context is object)
@@ -287,7 +287,7 @@ namespace Statiq.Core
                             {
                                 if (documentDependencies.Add(dependency))
                                 {
-                                    hashCode.Add(await dependency.GetCacheHashCodeAsync());
+                                    await cacheCode.AddAsync(dependency);
                                 }
                             }
                         }
@@ -298,10 +298,10 @@ namespace Statiq.Core
             // Now add hash codes for all input documents
             foreach (IDocument document in documents)
             {
-                hashCode.Add(await document.GetCacheHashCodeAsync());
+                await cacheCode.AddAsync(document);
             }
 
-            return hashCode.ToHashCode();
+            return cacheCode.ToCacheCode();
         }
 
         private class CacheEntry

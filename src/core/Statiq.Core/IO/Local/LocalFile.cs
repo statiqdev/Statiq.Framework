@@ -108,7 +108,7 @@ namespace Statiq.Core
                 CreateDirectory();
             }
             Refresh();
-            _fileProvider.FileSystem.WriteTracker.TrackWrite(Path, GetCacheHashCode(), true);
+            _fileProvider.FileSystem.WriteTracker.TrackWrite(Path, GetCacheCode(), true);
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents, cancellationToken));
         }
 
@@ -184,27 +184,27 @@ namespace Statiq.Core
         public string ToDisplayString() => Path.ToDisplayString();
 
         /// <inheritdoc/>
-        public Task<int> GetCacheHashCodeAsync() => Task.FromResult(GetCacheHashCode());
+        public Task<int> GetCacheCodeAsync() => Task.FromResult(GetCacheCode());
 
         /// <inheritdoc/>
         public void Refresh() => _file.Refresh();
 
         // Make sure to call Refresh() before calling this if the state has changed
-        internal int GetCacheHashCode()
+        internal int GetCacheCode()
         {
-            HashCode hashCode = default;
-            hashCode.Add(_file.FullName);
+            CacheCode cacheCode = default;
+            cacheCode.Add(_file.FullName);
             if (_file.Exists)
             {
-                hashCode.Add(_file.Length);
-                hashCode.Add(_file.CreationTime);
-                hashCode.Add(_file.LastWriteTime);
+                cacheCode.Add(_file.Length);
+                cacheCode.Add(_file.CreationTime);
+                cacheCode.Add(_file.LastWriteTime);
             }
             else
             {
-                hashCode.Add(-1);
+                cacheCode.Add(-1);
             }
-            return hashCode.ToHashCode();
+            return cacheCode.ToCacheCode();
         }
     }
 }

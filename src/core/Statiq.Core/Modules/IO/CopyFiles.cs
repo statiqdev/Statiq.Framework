@@ -134,7 +134,7 @@ namespace Statiq.Core
                 }
 
                 // Did we copy this file last time and has no one messed with it?
-                int outputFileHash = await outputFile.GetCacheHashCodeAsync();
+                int outputFileHash = await outputFile.GetCacheCodeAsync();
                 if (context.FileSystem.WriteTracker.TryGetPreviousWrite(outputFile.Path, out int previousWriteHash)
                     && previousWriteHash == outputFileHash)
                 {

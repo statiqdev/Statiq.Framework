@@ -74,7 +74,7 @@ namespace Statiq.Common
             new MemoryContent(_buffer, _index, _count, mediaType);
 
         /// <inheritdoc />
-        public Task<int> GetCacheHashCodeAsync()
+        public Task<int> GetCacheCodeAsync()
         {
             // Cache the hash code since the bytes can never change
             lock (_hashCodeLock)

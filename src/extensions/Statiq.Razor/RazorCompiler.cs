@@ -250,15 +250,15 @@ namespace Statiq.Razor
             RazorProjectItem projectItem = projectFileSystem.GetItem(relativePath, request.Document);
 
             // Compute a hash for the content since pipelines could have changed it from the underlying file
-            int hashCode = await request.Document.ContentProvider.GetCacheHashCodeAsync();
+            int cacheCode = await request.Document.ContentProvider.GetCacheCodeAsync();
 
-            CompilationResult compilationResult = CompilePage(request, hashCode, projectItem);
+            CompilationResult compilationResult = CompilePage(request, cacheCode, projectItem);
             return compilationResult.GetPage(request.RelativePath);
         }
 
-        private CompilationResult CompilePage(RenderRequest request, int hashCode, RazorProjectItem projectItem)
+        private CompilationResult CompilePage(RenderRequest request, int cacheCode, RazorProjectItem projectItem)
         {
-            CompilerCacheKey cacheKey = new CompilerCacheKey(request, hashCode);
+            CompilerCacheKey cacheKey = new CompilerCacheKey(request, cacheCode);
             return _compilationCache.GetOrAdd(cacheKey, _ => GetCompilation(projectItem));
         }
 

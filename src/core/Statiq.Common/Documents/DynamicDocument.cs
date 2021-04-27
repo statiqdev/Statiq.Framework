@@ -58,7 +58,7 @@ namespace Statiq.Common
         public bool ContainsKey(string key) => _document.ContainsKey(key);
 
         /// <inheritdoc />
-        public Task<int> GetCacheHashCodeAsync() => _document.GetCacheHashCodeAsync();
+        public Task<int> GetCacheCodeAsync() => _document.GetCacheCodeAsync();
 
         /// <inheritdoc />
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _document.GetEnumerator();

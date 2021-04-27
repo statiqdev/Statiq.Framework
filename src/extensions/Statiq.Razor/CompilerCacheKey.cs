@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Statiq.Common;
 
 namespace Statiq.Razor
 {
@@ -13,27 +14,28 @@ namespace Statiq.Razor
     {
         private readonly RenderRequest _request;
         private readonly int _fileHash;
-        private readonly int _hashCode;
+        private readonly int _cacheCode;
 
         public CompilerCacheKey(RenderRequest request, int fileHash)
         {
             _request = request;
             _fileHash = fileHash;
 
-            // Precalculate hash code since we know we'll need it
-            _hashCode = 17;
-            _hashCode = (_hashCode * 31) + (_request.LayoutLocation?.GetHashCode() ?? 0);
-            _hashCode = (_hashCode * 31) + (_request.ViewStartLocation?.GetHashCode() ?? 0);
-            _hashCode = (_hashCode * 31) + fileHash;
+            // Precalculate the cache code since we know we'll need it
+            CacheCode cacheCode = default;
+            cacheCode.Add(_request.LayoutLocation);
+            cacheCode.Add(_request.ViewStartLocation);
+            cacheCode.Add(fileHash);
+            _cacheCode = cacheCode.ToCacheCode();
         }
 
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => _cacheCode;
 
         public override bool Equals(object obj) => Equals(obj as CompilerCacheKey);
 
         public bool Equals(CompilerCacheKey other)
         {
-            if (other is null || other._hashCode != _hashCode)
+            if (other is null || other._cacheCode != _cacheCode)
             {
                 return false;
             }

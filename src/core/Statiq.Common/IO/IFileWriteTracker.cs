@@ -15,12 +15,33 @@ namespace Statiq.Common
         void Reset();
 
         /// <summary>
+        /// Saves the current state to a file.
+        /// </summary>
+        /// <param name="destinationFile">The file to save to.</param>
+        Task SaveAsync(IFile destinationFile);
+
+        /// <summary>
+        /// Restores the state saved by <see cref="SaveAsync(IFile)"/> to the previous state.
+        /// </summary>
+        /// <param name="sourceFile">The file to restore from.</param>
+        /// <returns>A message if the file could not be restored, or null if the file was restored successfully.</returns>
+        Task<string> RestoreAsync(IFile sourceFile);
+
+        /// <summary>
         /// Tracks a written file using a hash code that represents the file state after the write operation.
         /// </summary>
         /// <param name="path">The path that was written to.</param>
         /// <param name="hashCode">A hash code that represents the file state.</param>
         /// <param name="actualWrite"><c>true</c> if a file what actually written, <c>false</c> if only tracking information was added (used primarily for reporting).</param>
         void TrackWrite(NormalizedPath path, int hashCode, bool actualWrite);
+
+        /// <summary>
+        /// Removes a path from write tracking. This is useful after writing engine or other overhead files (like caches) so
+        /// the writes don't end up being tracked.
+        /// </summary>
+        /// <param name="path">The path that was written to.</param>
+        /// <returns><c>true</c> if the path was being tracked and was removed, <c>false</c> otherwise.</returns>
+        bool UntrackWrite(NormalizedPath path);
 
         /// <summary>
         /// Tracks data that was written using a hash code of it's content.
