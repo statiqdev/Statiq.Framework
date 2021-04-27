@@ -23,7 +23,10 @@ namespace Statiq.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 IServiceCollection serviceCollection = new ServiceCollection()
                     .AddSingleton<ILoggerProvider>(new TestLoggerProvider());
-                Engine engine = new Engine(serviceCollection);
+                Engine engine = new Engine(serviceCollection)
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d => content.Add(await d.GetContentStringAsync()))).ForEachDocument();
@@ -46,7 +49,10 @@ namespace Statiq.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 IServiceCollection serviceCollection = new ServiceCollection()
                     .AddSingleton<ILoggerProvider>(new TestLoggerProvider());
-                Engine engine = new Engine(serviceCollection);
+                Engine engine = new Engine(serviceCollection)
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d => content.Add(await d.GetContentStringAsync()))).ForEachDocument();
@@ -72,7 +78,10 @@ namespace Statiq.Core.Tests.Modules.Control
                 List<string> content = new List<string>();
                 IServiceCollection serviceCollection = new ServiceCollection()
                     .AddSingleton<ILoggerProvider>(new TestLoggerProvider());
-                Engine engine = new Engine(serviceCollection);
+                Engine engine = new Engine(serviceCollection)
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 ForEachDocument gatherData = new ExecuteConfig(
                     Config.FromDocument(async d => content.Add(await d.GetContentStringAsync()))).ForEachDocument();

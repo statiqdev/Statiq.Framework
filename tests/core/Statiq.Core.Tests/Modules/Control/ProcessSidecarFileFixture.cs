@@ -16,7 +16,10 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task LoadsSidecarFile()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument[] inputs =
                 {
@@ -41,7 +44,10 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task LoadsCustomSidecarFile()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument[] inputs =
                 {
@@ -66,7 +72,10 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task ReturnsOriginalDocumentForMissingSidecarFile()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument[] inputs =
                 {

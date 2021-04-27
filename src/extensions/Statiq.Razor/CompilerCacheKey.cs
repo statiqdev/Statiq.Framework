@@ -22,7 +22,7 @@ namespace Statiq.Razor
             _fileHash = fileHash;
 
             // Precalculate the cache code since we know we'll need it
-            CacheCode cacheCode = default;
+            CacheCode cacheCode = new CacheCode();
             cacheCode.Add(_request.LayoutLocation);
             cacheCode.Add(_request.ViewStartLocation);
             cacheCode.Add(fileHash);

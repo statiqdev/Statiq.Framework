@@ -134,7 +134,10 @@ namespace Statiq.Core.Tests.Execution
 
             private Engine GetEngine()
             {
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 engine.Pipelines.Add("A", new TestPipeline
                 {
                     ExecutionPolicy = ExecutionPolicy.Normal
@@ -411,7 +414,10 @@ namespace Statiq.Core.Tests.Execution
             public void GetsEngineService()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
 
                 // When
                 IReadOnlyFileSystem fileSystem = engine.Services.GetRequiredService<IReadOnlyFileSystem>();
@@ -427,7 +433,10 @@ namespace Statiq.Core.Tests.Execution
                 TestFileProvider testFileProvider = new TestFileProvider();
                 ServiceCollection serviceCollection = new ServiceCollection();
                 serviceCollection.AddSingleton<IFileProvider>(testFileProvider);
-                Engine engine = new Engine(serviceCollection);
+                Engine engine = new Engine(serviceCollection)
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
 
                 // When
                 IFileProvider fileProvider = engine.Services.GetRequiredService<IFileProvider>();
@@ -440,7 +449,10 @@ namespace Statiq.Core.Tests.Execution
             public void GetsEngineServiceInNestedScope()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 IServiceScopeFactory serviceScopeFactory = engine.Services.GetRequiredService<IServiceScopeFactory>();
                 IServiceScope serviceScope = serviceScopeFactory.CreateScope();
 
@@ -458,7 +470,10 @@ namespace Statiq.Core.Tests.Execution
             public async Task ExecutesModule()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 IPipeline pipeline = engine.Pipelines.Add("TestPipeline");
                 CountModule module = new CountModule("Foo")
                 {
@@ -479,7 +494,10 @@ namespace Statiq.Core.Tests.Execution
             public async Task BeforeModuleEventOverriddesOutputs()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 IPipeline pipeline = engine.Pipelines.Add("TestPipeline");
                 CountModule module = new CountModule("Foo")
                 {
@@ -504,7 +522,10 @@ namespace Statiq.Core.Tests.Execution
             public async Task AfterModuleEventOverriddesOutputs()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 IPipeline pipeline = engine.Pipelines.Add("TestPipeline");
                 CountModule module = new CountModule("Foo")
                 {
@@ -529,7 +550,10 @@ namespace Statiq.Core.Tests.Execution
             public async Task RaisesBeforeDeploymentEventWhenDeploymentPipelinesAreNotRun()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 List<string> results = new List<string>();
                 IPipeline deploymentPipeline = engine.Pipelines.Add("DeploymentPipeline");
                 deploymentPipeline.Deployment = true;
@@ -550,7 +574,10 @@ namespace Statiq.Core.Tests.Execution
             public async Task RaisesBeforeDeploymentEventWhenDeploymentPipelinesAreRun()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 List<string> results = new List<string>();
                 IPipeline deploymentPipeline = engine.Pipelines.Add("DeploymentPipeline");
                 deploymentPipeline.Deployment = true;
@@ -571,7 +598,10 @@ namespace Statiq.Core.Tests.Execution
             public async Task RaisesBeforeDeploymentEventWhenOnlyDeploymentPipelinesAreRun()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 List<string> results = new List<string>();
                 IPipeline deploymentPipeline = engine.Pipelines.Add("DeploymentPipeline");
                 deploymentPipeline.Deployment = true;
@@ -592,7 +622,10 @@ namespace Statiq.Core.Tests.Execution
             public async Task RaisesBeforeDeploymentEventWhenNoDeploymentPipelines()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 List<string> results = new List<string>();
                 IPipeline normalPipeline = engine.Pipelines.Add("NormalPipeline");
                 normalPipeline.ProcessModules.Add(new ExecuteConfig(Config.FromContext(ctx => results.Add(ctx.PipelineName))));
@@ -610,7 +643,10 @@ namespace Statiq.Core.Tests.Execution
             public async Task RaisesBeforeDeploymentEventWhenOnlyDeploymentPipelines()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 List<string> results = new List<string>();
                 IPipeline deploymentPipeline = engine.Pipelines.Add("DeploymentPipeline");
                 deploymentPipeline.Deployment = true;

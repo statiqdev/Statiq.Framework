@@ -70,7 +70,7 @@ namespace Statiq.Common
         /// <returns>A hash appropriate for caching.</returns>
         public static async Task<int> GetCacheCodeAsync(IDocument document)
         {
-            CacheCode cacheCode = default;
+            CacheCode cacheCode = new CacheCode();
 
             // Add the content hash
             await cacheCode.AddAsync(document.ContentProvider);

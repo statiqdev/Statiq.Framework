@@ -136,6 +136,9 @@ namespace Statiq.Testing
         IAnalyzerCollection IEngine.Analyzers => Analyzers;
 
         /// <inheritdoc />
+        public IFileCleaner FileCleaner { get; set; } = new TestFileCleaner();
+
+        /// <inheritdoc />
         public FilteredDocumentList<IDocument> OutputPages =>
             new FilteredDocumentList<IDocument>(
                 Outputs

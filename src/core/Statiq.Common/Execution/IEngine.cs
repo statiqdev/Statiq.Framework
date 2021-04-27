@@ -56,6 +56,11 @@ namespace Statiq.Common
         IAnalyzerCollection Analyzers { get; }
 
         /// <summary>
+        /// The file cleaner used by the engine to clean files before and after execution.
+        /// </summary>
+        IFileCleaner FileCleaner { get; set; }
+
+        /// <summary>
         /// Sets the default document type produced by this engine (and resulting <see cref="IExecutionContext"/> contexts).
         /// </summary>
         /// <remarks>

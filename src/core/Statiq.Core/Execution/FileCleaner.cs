@@ -6,9 +6,8 @@ using Statiq.Common;
 
 namespace Statiq.Core
 {
-    public class FileCleaner
+    public class FileCleaner : IFileCleaner
     {
-        // Use a .tmp file extension since that's typically already added to .gitignore
         private const string CacheFileName = "writecache.json";
 
         private readonly IReadOnlySettings _settings;
@@ -24,12 +23,11 @@ namespace Statiq.Core
             _logger = logger.ThrowIfNull(nameof(logger));
         }
 
+        /// <inheritdoc/>
         public CleanMode CleanMode => _settings.Get(Keys.CleanMode, CleanMode.Unwritten);
 
-        /// <summary>
-        /// Cleans folders before execution.
-        /// </summary>
-        internal async Task CleanBeforeExecutionAsync()
+        /// <inheritdoc/>
+        public async Task CleanBeforeExecutionAsync()
         {
             _fileSystem.WriteTracker.Reset();
 
@@ -66,10 +64,8 @@ namespace Statiq.Core
             _firstExecution = false;
         }
 
-        /// <summary>
-        /// Cleans folders after execution.
-        /// </summary>
-        internal async Task CleanAfterExecutionAsync()
+        /// <inheritdoc/>
+        public async Task CleanAfterExecutionAsync()
         {
             if (CleanMode == CleanMode.Unwritten)
             {
@@ -82,11 +78,7 @@ namespace Statiq.Core
             _logger.LogDebug($"Saved write tracking data to {cacheFile}");
         }
 
-        /// <summary>
-        /// Recursively deletes a directory and then recreates it.
-        /// </summary>
-        /// <param name="directory">The directory to clean.</param>
-        /// <param name="name">A name for logging purposes.</param>
+        /// <inheritdoc/>
         public void CleanDirectory(IDirectory directory, string name = null)
         {
             _ = directory.ThrowIfNull(nameof(directory));

@@ -21,7 +21,10 @@ namespace Statiq.Core.Tests.Execution
             public async Task ExecutesCorrectPipelines()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 engine.Pipelines.Add(new TestExecutionPipeline());
                 CancellationTokenSource cts = new CancellationTokenSource();
 

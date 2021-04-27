@@ -32,6 +32,7 @@ namespace Statiq.Core
         private readonly IServiceScope _serviceScope;
 
         private FailureLoggerProvider _failureLoggerProvider;
+        private IFileCleaner _fileCleaner;
 
         // Gets initialized on first execute and reset when the pipeline collection changes
         private PipelinePhase[] _phases;
@@ -114,7 +115,7 @@ namespace Statiq.Core
             _serviceScope = GetServiceScope(serviceCollection, settings);
             Logger = Services.GetRequiredService<ILogger<Engine>>();
             DocumentFactory = new DocumentFactory(this, Settings);
-            FileCleaner = new FileCleaner(Settings, FileSystem, Logger);
+            _fileCleaner = new FileCleaner(Settings, FileSystem, Logger);
             _diagnosticsTraceListener = new DiagnosticsTraceListener(Logger);
             Trace.Listeners.Add(_diagnosticsTraceListener);
 
@@ -268,11 +269,12 @@ namespace Statiq.Core
         /// <inheritdoc />
         public bool SerialExecution { get; set; }
 
-        /// <summary>
-        /// Cleans files and folders from the file system, usually before or after an execution
-        /// using the <see cref="CleanMode"/> setting.
-        /// </summary>
-        public FileCleaner FileCleaner { get; }
+        /// <inheritdoc />
+        public IFileCleaner FileCleaner
+        {
+            get => _fileCleaner;
+            set => _fileCleaner = value.ThrowIfNull(nameof(value));
+        }
 
         internal DocumentFactory DocumentFactory { get; }
 

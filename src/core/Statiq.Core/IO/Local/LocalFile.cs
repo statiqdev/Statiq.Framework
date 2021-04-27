@@ -192,7 +192,7 @@ namespace Statiq.Core
         // Make sure to call Refresh() before calling this if the state has changed
         internal int GetCacheCode()
         {
-            CacheCode cacheCode = default;
+            CacheCode cacheCode = new CacheCode();
             cacheCode.Add(_file.FullName);
             if (_file.Exists)
             {

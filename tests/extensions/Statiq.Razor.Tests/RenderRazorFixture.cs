@@ -21,7 +21,10 @@ namespace Statiq.Razor.Tests
             public async Task SimpleTemplate()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = new TestDocument("@for(int c = 0 ; c < 5 ; c++) { <p>@c</p> }");
                 RenderRazor razor = new RenderRazor();
@@ -37,7 +40,10 @@ namespace Statiq.Razor.Tests
             public async Task SimpleTemplateWithPreregisteredServices()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 context.Services.AddRazor(null, context.ClassCatalog);
                 TestDocument document = new TestDocument("@for(int c = 0 ; c < 5 ; c++) { <p>@c</p> }");
@@ -54,7 +60,10 @@ namespace Statiq.Razor.Tests
             public async Task Metadata()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = new TestDocument(@"<p>@Metadata[""MyKey""]</p>")
                 {
@@ -73,7 +82,10 @@ namespace Statiq.Razor.Tests
             public async Task Document()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = new TestDocument(
                     new NormalizedPath("/input/Temp/temp.txt"),
@@ -92,7 +104,10 @@ namespace Statiq.Razor.Tests
             public async Task DocumentAsModel()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/Temp/temp.txt",
@@ -110,7 +125,10 @@ namespace Statiq.Razor.Tests
             public async Task AlternateModel()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/Temp/temp.txt",
@@ -130,7 +148,10 @@ namespace Statiq.Razor.Tests
             public async Task ViewData()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/Temp/temp.txt",
@@ -149,7 +170,10 @@ namespace Statiq.Razor.Tests
             public async Task ViewDataMultiple()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/Temp/temp.txt",
@@ -172,7 +196,10 @@ namespace Statiq.Razor.Tests
             public async Task ViewDataException()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/Temp/temp.txt",
@@ -192,7 +219,10 @@ namespace Statiq.Razor.Tests
             public async Task AlternateModelWithLayout()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/ViewStartAndLayout/Test.cshtml",
@@ -215,7 +245,10 @@ namespace Statiq.Razor.Tests
             public async Task LoadLayoutFile()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/Layout/Test.cshtml",
@@ -239,7 +272,10 @@ namespace Statiq.Razor.Tests
             public async Task RenderModuleDefinedLayoutFile()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/Layout/Test.cshtml",
@@ -260,7 +296,10 @@ namespace Statiq.Razor.Tests
             public async Task RenderModuleDefinedRelativeLayoutFile()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/Layout/Test.cshtml",
@@ -281,7 +320,10 @@ namespace Statiq.Razor.Tests
             public async Task RenderModuleDefinedViewStartFile()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/Layout/Test.cshtml",
@@ -302,7 +344,10 @@ namespace Statiq.Razor.Tests
             public async Task RenderModuleDefinedLayoutFileOverridesViewStart()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/ViewStartAndLayout/Test.cshtml",
@@ -323,7 +368,10 @@ namespace Statiq.Razor.Tests
             public async Task LoadViewStartAndLayoutFile()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/ViewStartAndLayout/Test.cshtml",
@@ -344,7 +392,10 @@ namespace Statiq.Razor.Tests
             public async Task AlternateViewStartPath()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/AlternateViewStartPath/Test.cshtml",
@@ -365,7 +416,10 @@ namespace Statiq.Razor.Tests
             public async Task AlternateViewStartPathWithRelativeLayout()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/AlternateViewStartPath/Test.cshtml",
@@ -386,7 +440,10 @@ namespace Statiq.Razor.Tests
             public async Task AlternateRelativeViewStartPathWithRelativeLayout()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/AlternateViewStartPath/Test.cshtml",
@@ -407,7 +464,10 @@ namespace Statiq.Razor.Tests
             public async Task IgnoresUnderscoresByDefault()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document1 = GetDocument(
                     "/input/IgnoreUnderscores/Test.cshtml",
@@ -435,7 +495,10 @@ namespace Statiq.Razor.Tests
             public async Task AlternateIgnorePrefix()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document1 = GetDocument(
                     "/input/AlternateIgnorePrefix/Test.cshtml",
@@ -456,7 +519,10 @@ namespace Statiq.Razor.Tests
             public async Task RenderLayoutSection()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/LayoutWithSection/Test.cshtml",
@@ -486,7 +552,10 @@ namespace Statiq.Razor.Tests
             public async Task RenderLayoutSectionOnMultipleExecution()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/LayoutWithSection/Test.cshtml",
@@ -525,7 +594,10 @@ namespace Statiq.Razor.Tests
             public async Task RenderRelativePartial()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/RelativePartial/Test.cshtml",
@@ -549,7 +621,10 @@ namespace Statiq.Razor.Tests
             public async Task RenderRelativePartialFromLayout()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/RelativePartial/Test.cshtml",
@@ -576,7 +651,10 @@ namespace Statiq.Razor.Tests
             public async Task RenderAbsolutePartial()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/RootRelativePartial/Test.cshtml",
@@ -600,7 +678,10 @@ namespace Statiq.Razor.Tests
             public async Task PartialTagHelper()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/RelativePartial/Test.cshtml",
@@ -625,7 +706,10 @@ namespace Statiq.Razor.Tests
             public async Task CustomTagHelper()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = GetDocument(
                     "/input/RelativePartial/Test.cshtml",
@@ -650,7 +734,10 @@ namespace Statiq.Razor.Tests
             public async Task IgnoresTildeLinks()
             {
                 // Given
-                Engine engine = new Engine();
+                Engine engine = new Engine
+                {
+                    FileCleaner = new TestFileCleaner()
+                };
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument document = new TestDocument("<p><a href=\"~/foo\">Foo</a></p>");
                 RenderRazor razor = new RenderRazor();

@@ -270,7 +270,7 @@ namespace Statiq.Core
         // Pass null context to disable checking document dependencies
         private async Task<int> CombineCacheCodesAsync(IEnumerable<IDocument> documents, IExecutionContext context)
         {
-            CacheCode cacheCode = default;
+            CacheCode cacheCode = new CacheCode();
 
             // Get document dependencies in a first pass so we can de-dupe them
             if (context is object)

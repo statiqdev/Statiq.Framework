@@ -169,7 +169,7 @@ namespace Statiq.Testing
         /// <inheritdoc/>
         public Task<int> GetCacheCodeAsync()
         {
-            CacheCode cacheCode = default;
+            CacheCode cacheCode = new CacheCode();
             cacheCode.Add(Path.FullPath);
             if (Exists)
             {
