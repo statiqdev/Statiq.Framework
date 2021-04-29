@@ -1,4 +1,5 @@
-﻿using Statiq.Common;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Statiq.Common;
 
 namespace Statiq.Razor
 {

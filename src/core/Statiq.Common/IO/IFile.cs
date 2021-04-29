@@ -43,22 +43,6 @@ namespace Statiq.Common
         string MediaType { get; }
 
         /// <summary>
-        /// Copies the file to the specified destination file.
-        /// </summary>
-        /// <param name="destination">The destination file.</param>
-        /// <param name="overwrite">Will overwrite existing destination file if set to <c>true</c>.</param>
-        /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
-        /// <param name="cancellationToken">A cancellation token.</param>
-        Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true, CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Moves the file to the specified destination file.
-        /// </summary>
-        /// <param name="destination">The destination file.</param>
-        /// <param name="cancellationToken">A cancellation token.</param>
-        Task MoveToAsync(IFile destination, CancellationToken cancellationToken = default);
-
-        /// <summary>
         /// Deletes the file.
         /// </summary>
         void Delete();
@@ -79,6 +63,21 @@ namespace Statiq.Common
         Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Reads all bytes from the file.
+        /// </summary>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        /// <returns>All bytes in the file.</returns>
+        Task<byte[]> ReadAllBytesAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Writes the specified bytes to a file.
+        /// </summary>
+        /// <param name="bytes">The bytes to write.</param>
+        /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
+        /// <param name="cancellationToken">A cancellation token.</param>
+        Task WriteAllBytesAsync(byte[] bytes, bool createDirectory = true, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Opens the file for reading. If it does not exist, an exception will be thrown.
         /// </summary>
         /// <returns>A <see cref="Stream"/> for the file.</returns>
@@ -93,6 +92,8 @@ namespace Statiq.Common
         /// <summary>
         /// Opens the file for writing. This will either create the file
         /// if it doesn't exist or overwrite it if it does.
+        /// You must manually call <see cref="Stream.SetLength(long)"/>
+        /// when done to ensure previously existing data is truncated.
         /// </summary>
         /// <param name="createDirectory">Will create any needed directories that don't already exist if set to <c>true</c>.</param>
         /// <returns>The stream.</returns>

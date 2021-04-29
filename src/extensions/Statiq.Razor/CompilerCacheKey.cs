@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Statiq.Common;
 
 namespace Statiq.Razor
@@ -12,36 +11,45 @@ namespace Statiq.Razor
     /// </summary>
     internal class CompilerCacheKey : IEquatable<CompilerCacheKey>
     {
-        private readonly RenderRequest _request;
-        private readonly int _fileHash;
-        private readonly int _cacheCode;
-
-        public CompilerCacheKey(RenderRequest request, int fileHash)
+        public static CompilerCacheKey Get(RenderRequest request, int contentCacheCode)
         {
-            _request = request;
-            _fileHash = fileHash;
-
-            // Precalculate the cache code since we know we'll need it
             CacheCode cacheCode = new CacheCode();
-            cacheCode.Add(_request.LayoutLocation);
-            cacheCode.Add(_request.ViewStartLocation);
-            cacheCode.Add(fileHash);
-            _cacheCode = cacheCode.ToCacheCode();
+            cacheCode.Add(request.LayoutLocation);
+            cacheCode.Add(request.ViewStartLocation);
+            cacheCode.Add(contentCacheCode);
+            return new CompilerCacheKey(request.LayoutLocation, request.ViewStartLocation, contentCacheCode, cacheCode.ToCacheCode());
         }
 
-        public override int GetHashCode() => _cacheCode;
+        // Single parameterized constructor required for JSON deserialization
+        public CompilerCacheKey(string layoutLocation, string viewStartLocation, int contentCacheCode, int cacheCode)
+        {
+            LayoutLocation = layoutLocation;
+            ViewStartLocation = viewStartLocation;
+            ContentCacheCode = contentCacheCode;
+            CacheCode = cacheCode;
+        }
+
+        public string LayoutLocation { get; }
+
+        public string ViewStartLocation { get; }
+
+        public int ContentCacheCode { get; }
+
+        public int CacheCode { get; }
+
+        public override int GetHashCode() => CacheCode;
 
         public override bool Equals(object obj) => Equals(obj as CompilerCacheKey);
 
         public bool Equals(CompilerCacheKey other)
         {
-            if (other is null || other._cacheCode != _cacheCode)
+            if (other is null || other.CacheCode != CacheCode)
             {
                 return false;
             }
-            return _request.LayoutLocation == other._request.LayoutLocation
-                && _request.ViewStartLocation == other._request.ViewStartLocation
-                && _fileHash == other._fileHash;
+            return LayoutLocation == other.LayoutLocation
+                && ViewStartLocation == other.ViewStartLocation
+                && ContentCacheCode == other.ContentCacheCode;
         }
     }
 }

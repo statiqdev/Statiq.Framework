@@ -216,7 +216,11 @@ namespace Statiq.Common
         /// Gets a path to the specified file relative to the output directory.
         /// If this path is not relative to the output directory, then a null path is returned.
         /// </summary>
-        /// <returns>A path to this file relative to the output directory.</returns>
+        /// <returns>
+        /// A path to this file relative to the output directory,
+        /// the original path if the path is relative,
+        /// or a null path if the path is not relative to the output directory.
+        /// </returns>
         public static NormalizedPath GetRelativeOutputPath(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
         {
             fileSystem.ThrowIfNull(nameof(fileSystem));
@@ -231,6 +235,20 @@ namespace Statiq.Common
             return outputPath.ContainsDescendantOrSelf(path)
                 ? outputPath.GetRelativePath(path)
                 : NormalizedPath.Null;
+        }
+
+        /// <summary>
+        /// Gets a path to the specified file relative to the output directory.
+        /// If this path is not relative to the output directory, then the original path is returned.
+        /// </summary>
+        /// <returns>
+        /// A path to this file relative to the output directory,
+        /// the original path if the path is relative,
+        /// or the original path if the path is not relative to the output directory.</returns>
+        public static NormalizedPath GetRelativeOutputPathOrSelf(this IReadOnlyFileSystem fileSystem, in NormalizedPath path)
+        {
+            NormalizedPath relativeOutputPath = fileSystem.GetRelativeOutputPath(path);
+            return relativeOutputPath.IsNull ? path : relativeOutputPath;
         }
 
         /// <summary>

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -49,6 +47,9 @@ namespace Statiq.Common
         public async Task<string> ReadAllTextAsync(CancellationToken cancellationToken = default) =>
             _document is null ? throw new FileNotFoundException() : await _document.GetContentStringAsync();
 
+        public async Task<byte[]> ReadAllBytesAsync(CancellationToken cancellationToken = default) =>
+            _document is null ? throw new FileNotFoundException() : await _document.GetContentBytesAsync();
+
         public long Length => _document?.ContentProvider.GetLength() ?? throw new FileNotFoundException();
 
         public string MediaType => _document?.ContentProvider.MediaType ?? throw new FileNotFoundException();
@@ -56,10 +57,6 @@ namespace Statiq.Common
         public DateTime LastWriteTime => throw new NotSupportedException();
 
         public DateTime CreationTime => throw new NotSupportedException();
-
-        public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true, CancellationToken cancellationToken = default) => throw new NotSupportedException();
-
-        public Task MoveToAsync(IFile destination, CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
         public void Delete() => throw new NotSupportedException();
 
@@ -70,6 +67,8 @@ namespace Statiq.Common
         public Stream OpenWrite(bool createDirectory = true) => throw new NotSupportedException();
 
         public Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+
+        public Task WriteAllBytesAsync(byte[] bytes, bool createDirectory = true, CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
         public override string ToString() => Path.ToString();
 

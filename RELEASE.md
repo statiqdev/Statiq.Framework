@@ -3,6 +3,8 @@
 - **Breaking change:** Deleted `IFile.GetCacheHashCodeAsync()` and replaced it with an implementation of `ICacheCode`.
 - **Breaking change:** Renamed `IContentProvider.GetCacheHashCodeAsync()` and replaced it with an implementation of `ICacheCode`.
 - **Breaking change:** Renamed `IDocument.GetCacheHashCodeAsync()` and replaced it with an implementation of `ICacheCode`.
+- Added `IFile.ReadAllBytesAsync()` and `IFile.WriteAllBytesAsync()`.
+- Added `IFile.WriteFromAsync()`, `IFile.AppendFromAsync()`, and `IFile.CopyToAsync()` extension methods to more easily copy a file from/to a stream.
 - Added `IReadOnlyFileSystem.CachePath` and related extensions, methods, etc. to provide a path where cache files should be stored and set to "cache" by default (which should be excluded in `.gitignore`).
 - The write tracking data is now cached in a file so if the output folder has not changed and the content is the same, files don't need to be written even on the first execution.
 - Added an `ICacheCode` interface to provide a standard deterministic `.GetCacheCodeAsync()` method and implemented it in `IDocument`, `IContentProvider`, and `IFile`.

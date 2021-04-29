@@ -32,9 +32,9 @@ namespace Statiq.Testing
             _currentContent = new ConcurrentDictionary<NormalizedPath, int>();
         }
 
-        public Task SaveAsync(IFile destinationFile) => throw new NotImplementedException();
+        public Task SaveAsync(IReadOnlyFileSystem fileSystem, IFile destinationFile) => throw new NotImplementedException();
 
-        public Task<string> RestoreAsync(IFile sourceFile) => throw new NotImplementedException();
+        public Task<string> RestoreAsync(IReadOnlyFileSystem fileSystem, IFile sourceFile) => throw new NotImplementedException();
 
         public void TrackWrite(NormalizedPath path, int hashCode, bool actualWrite)
         {

@@ -50,46 +50,6 @@ namespace Statiq.Core
         public DateTime CreationTime => _file.CreationTime;
 
         /// <inheritdoc/>
-        public async Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true, CancellationToken cancellationToken = default)
-        {
-            destination.ThrowIfNull(nameof(destination));
-
-            // Create the directory
-            if (createDirectory)
-            {
-                destination.Directory.Create();
-            }
-
-            // Use streams instead of System.IO since they're async
-            if (!destination.Exists || overwrite)
-            {
-                using (Stream sourceStream = OpenRead())
-                {
-                    using (Stream destinationStream = destination.OpenWrite())
-                    {
-                        await sourceStream.CopyToAsync(destinationStream, cancellationToken);
-                    }
-                }
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task MoveToAsync(IFile destination, CancellationToken cancellationToken = default)
-        {
-            destination.ThrowIfNull(nameof(destination));
-
-            // Use streams instead of System.IO since they're async
-            using (Stream sourceStream = OpenRead())
-            {
-                using (Stream destinationStream = destination.OpenWrite())
-                {
-                    await sourceStream.CopyToAsync(destinationStream, cancellationToken);
-                }
-            }
-            Delete();
-        }
-
-        /// <inheritdoc/>
         public void Delete() => LocalFileProvider.RetryPolicy.Execute(() =>
         {
             _file.Delete();
@@ -110,6 +70,22 @@ namespace Statiq.Core
             Refresh();
             _fileProvider.FileSystem.WriteTracker.TrackWrite(Path, GetCacheCode(), true);
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents, cancellationToken));
+        }
+
+        /// <inheritdoc/>
+        public async Task<byte[]> ReadAllBytesAsync(CancellationToken cancellationToken = default) =>
+            await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.ReadAllBytesAsync(_file.FullName, cancellationToken));
+
+        /// <inheritdoc/>
+        public async Task WriteAllBytesAsync(byte[] bytes, bool createDirectory = true, CancellationToken cancellationToken = default)
+        {
+            if (createDirectory)
+            {
+                CreateDirectory();
+            }
+            Refresh();
+            _fileProvider.FileSystem.WriteTracker.TrackWrite(Path, GetCacheCode(), true);
+            await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllBytesAsync(_file.FullName, bytes, cancellationToken));
         }
 
         /// <inheritdoc/>

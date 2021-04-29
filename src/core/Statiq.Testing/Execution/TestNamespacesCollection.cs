@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using ConcurrentCollections;
 using Statiq.Common;
 
@@ -10,6 +11,9 @@ namespace Statiq.Testing
     public class TestNamespacesCollection : INamespacesCollection
     {
         private readonly ConcurrentHashSet<string> _namespaces = new ConcurrentHashSet<string>();
+
+        private readonly object _cacheCodeLock = new object();
+        private int _cacheCode;
 
         public TestNamespacesCollection()
         {
@@ -43,5 +47,22 @@ namespace Statiq.Testing
         public IEnumerator<string> GetEnumerator() => _namespaces.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public Task<int> GetCacheCodeAsync()
+        {
+            if (_cacheCode == 0)
+            {
+                lock (_cacheCodeLock)
+                {
+                    CacheCode cacheCode = new CacheCode();
+                    foreach (string ns in _namespaces.OrderBy(x => x))
+                    {
+                        cacheCode.Add(ns);
+                    }
+                    _cacheCode = cacheCode.ToCacheCode();
+                }
+            }
+            return Task.FromResult(_cacheCode);
+        }
     }
 }

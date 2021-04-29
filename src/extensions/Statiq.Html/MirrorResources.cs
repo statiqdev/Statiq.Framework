@@ -181,7 +181,10 @@ namespace Statiq.Html
                 // Copy the result to output
                 using (Stream outputStream = outputFile.OpenWrite())
                 {
+                    long initialPosition = outputStream.Position;
                     await response.Content.CopyToAsync(outputStream);
+                    long length = outputStream.Position - initialPosition;
+                    outputStream.SetLength(length);
                 }
             }
 

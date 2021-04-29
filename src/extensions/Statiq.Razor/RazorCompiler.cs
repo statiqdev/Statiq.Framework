@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using ConcurrentCollections;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -20,6 +21,8 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.Hosting;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
@@ -34,23 +37,35 @@ namespace Statiq.Razor
     {
         private const string ViewStartFileName = "_ViewStart.cshtml";
 
-        private static readonly MethodInfo CompileAndEmitMethod;
+        private static readonly RazorCompiledItemLoader CompiledItemLoader = new RazorCompiledItemLoader();
+
+        private static readonly EmitOptions AssemblyEmitOptions = new EmitOptions(debugInformationFormat: DebugInformationFormat.PortablePdb);
+
+        private static readonly MethodInfo CreateCompilationMethod;
         private static readonly MethodInfo CreateCompilationFailedException;
 
         private readonly ConcurrentCache<CompilerCacheKey, CompilationResult> _compilationCache
             = new ConcurrentCache<CompilerCacheKey, CompilationResult>();
 
+        // Used to track compilation result requests on each execution so stale cache entries can be cleared
+        private readonly ConcurrentHashSet<CompilerCacheKey> _requestedCompilationResults = new ConcurrentHashSet<CompilerCacheKey>();
+
+        private readonly RazorProjectEngine _projectEngine;
+
         private readonly IServiceScopeFactory _serviceScopeFactory;
+
+        private readonly object _phasesInitializationLock = new object();
+        private bool _phasesInitialized;
 
         static RazorCompiler()
         {
             Type runtimeViewCompilerType = typeof(FileProviderRazorProjectItem).Assembly
                 .GetType("Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.RuntimeViewCompiler");
-            CompileAndEmitMethod = runtimeViewCompilerType.GetMethod(
-                "CompileAndEmit",
+            CreateCompilationMethod = runtimeViewCompilerType.GetMethod(
+                "CreateCompilation",
                 BindingFlags.Instance | BindingFlags.NonPublic,
                 Type.DefaultBinder,
-                new Type[] { typeof(RazorCodeDocument), typeof(string) },
+                new Type[] { typeof(string), typeof(string) },
                 null);
             Type compilationFailedExceptionFactory = typeof(FileProviderRazorProjectItem).Assembly
                 .GetType("Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.CompilationFailedExceptionFactory");
@@ -68,11 +83,11 @@ namespace Statiq.Razor
         {
             serviceProvider.ThrowIfNull(nameof(serviceProvider));
 
-            IExecutionContext.Current.LogDebug($"Creating new {nameof(RazorCompiler)} for {parameters.BasePageType?.Name ?? "null base page type"}");
+            IExecutionContext.Current.LogDebug($"Creating new {nameof(RazorCompiler)} for {parameters.BasePageType ?? "null base page type"}");
 
             // Do a check to make sure required services are registered
-            RazorProjectEngine razorProjectEngine = serviceProvider.GetService<RazorProjectEngine>();
-            if (razorProjectEngine is null)
+            _projectEngine = serviceProvider.GetService<RazorProjectEngine>();
+            if (_projectEngine is null)
             {
                 // Razor services haven't been registered so create a new services container for this compiler
                 ServiceCollection serviceCollection = new ServiceCollection();
@@ -81,69 +96,93 @@ namespace Statiq.Razor
                     serviceProvider.GetRequiredService<IReadOnlyFileSystem>(),
                     serviceProvider.GetService<ClassCatalog>());
                 serviceProvider = serviceCollection.BuildServiceProvider();
-                razorProjectEngine = serviceProvider.GetRequiredService<RazorProjectEngine>();
+                _projectEngine = serviceProvider.GetRequiredService<RazorProjectEngine>();
             }
 
             _serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+        }
 
-            // We need to register a new document classifier phase because builder.SetBaseType() (which uses builder.ConfigureClass())
-            // use the DefaultRazorDocumentClassifierPhase which stops applying document classifier passes after DocumentIntermediateNode.DocumentKind is set
-            // (which gets set by the Razor document classifier passes registered in RazorExtensions.Register())
-            // Also need to add it just after the DocumentClassifierPhase, otherwise it'll miss the C# lowering phase
-            string basePageType = GetBasePageType(parameters.BasePageType);
-            List<IRazorEnginePhase> phases = razorProjectEngine.Engine.Phases.ToList();
-            StatiqDocumentClassifierPhase phase =
-                new StatiqDocumentClassifierPhase(basePageType, parameters.Namespaces, parameters.IsDocumentModel, razorProjectEngine.Engine);
-            phases.Insert(phases.IndexOf(phases.OfType<IRazorDocumentClassifierPhase>().Last()) + 1, phase);
-            FieldInfo phasesField = razorProjectEngine.Engine.GetType().GetField("<Phases>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
-            phasesField.SetValue(razorProjectEngine.Engine, phases.ToArray());
+        // We need to initialize lazily since restoring from the cache won't have the actual namespaces, only a cache code
+        public void EnsurePhases(CompilationParameters parameters, string[] namespaces)
+        {
+            parameters.ThrowIfNull(nameof(parameters));
+
+            if (!_phasesInitialized)
+            {
+                lock (_phasesInitializationLock)
+                {
+                    // We need to register a new document classifier phase because builder.SetBaseType() (which uses builder.ConfigureClass())
+                    // use the DefaultRazorDocumentClassifierPhase which stops applying document classifier passes after DocumentIntermediateNode.DocumentKind is set
+                    // (which gets set by the Razor document classifier passes registered in RazorExtensions.Register())
+                    // Also need to add it just after the DocumentClassifierPhase, otherwise it'll miss the C# lowering phase
+                    List<IRazorEnginePhase> phases = _projectEngine.Engine.Phases.ToList();
+                    StatiqDocumentClassifierPhase phase =
+                        new StatiqDocumentClassifierPhase(parameters.BasePageType, namespaces, parameters.IsDocumentModel, _projectEngine.Engine);
+                    phases.Insert(phases.IndexOf(phases.OfType<IRazorDocumentClassifierPhase>().Last()) + 1, phase);
+                    FieldInfo phasesField = _projectEngine.Engine.GetType().GetField("<Phases>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
+                    phasesField.SetValue(_projectEngine.Engine, phases.ToArray());
+                }
+                _phasesInitialized = true;
+            }
         }
 
         /// <summary>
-        /// Gets the type string for the base page type so it can be injected into the page source code by the <see cref="StatiqDocumentClassifierPhase"/>.
+        /// Populates the compiler cache with existing items.
         /// </summary>
-        private static string GetBasePageType(Type basePageType)
+        public int PopulateCache(IEnumerable<KeyValuePair<AssemblyCacheKey, string>> items)
         {
-            // We need to distinguish between the default base type and an explicit base type that happens to be the same generic class, so return null for the default
-            if (basePageType is null)
+            int count = 0;
+            foreach (KeyValuePair<AssemblyCacheKey, string> item in items)
             {
-                return null;
-            }
-
-            string baseType = basePageType.ToString();
-
-            // Open generic
-            if (basePageType.IsGenericTypeDefinition)
-            {
-                if (basePageType.GenericTypeArguments.Length > 1)
+                try
                 {
-                    throw new ArgumentException($"Open generic Razor base pages should only have a single generic type argument, {baseType} has {basePageType.GenericTypeArguments.Length}");
+                    Assembly assembly = Assembly.LoadFile(item.Value);
+                    CompilationResult compilationResult = new CompilationResult(
+                        Path.GetFileName(item.Value),
+                        null,
+                        null,
+                        assembly,
+                        CompiledItemLoader.LoadItems(assembly).SingleOrDefault());
+                    _compilationCache.TryAdd(item.Key.CompilerCacheKey, () => compilationResult);
+                    count++;
                 }
-                int tickIndex = baseType.IndexOf('`');
-                return $"{baseType.Substring(0, tickIndex)}<TModel>";
+                catch (Exception ex)
+                {
+                    IExecutionContext.Current.LogDebug($"Could not load Razor assembly at {item.Value}: {ex.Message}");
+                }
             }
-
-            // Closed generic
-            if (basePageType.IsGenericType)
-            {
-                int tickIndex = baseType.IndexOf('`');
-                int openBraceIndex = baseType.IndexOf('[');
-                return $"{baseType.Substring(0, tickIndex)}<{baseType.Substring(openBraceIndex + 1, baseType.Length - openBraceIndex - 2)}>";
-            }
-
-            // Regular type
-            return baseType;
+            return count;
         }
 
-        public void ExpireChangeTokens()
+        /// <summary>
+        /// Resets the cache and expires change tokens (typically called after each execution).
+        /// </summary>
+        /// <returns>The current compiler cache after removing stale entries.</returns>
+        public IReadOnlyDictionary<CompilerCacheKey, CompilationResult> ResetCache()
         {
-            // Use a new scope to get the file provider
+            // Remove any compilations that weren't requested in the last run
+            int removed = 0;
+            foreach (CompilerCacheKey compilationCacheKey in _compilationCache.Keys.ToArray())
+            {
+                if (!_requestedCompilationResults.Contains(compilationCacheKey)
+                    && _compilationCache.TryRemove(compilationCacheKey, out CompilationResult compilationResult))
+                {
+                    compilationResult.DisposeMemoryStreams(); // Just in case
+                    removed++;
+                }
+            }
+            _requestedCompilationResults.Clear();
+            IExecutionContext.Current.LogDebug($"Removed {removed} stale Razor compilation results from the cache");
+
+            // Use a new scope to get the file provider and expire change tokens
             using (IServiceScope scope = _serviceScopeFactory.CreateScope())
             {
                 Microsoft.Extensions.FileProviders.IFileProvider fileProvider =
                     scope.ServiceProvider.GetService<Microsoft.Extensions.FileProviders.IFileProvider>();
                 ((FileSystemFileProvider)fileProvider).ExpireChangeTokens();
             }
+
+            return _compilationCache;
         }
 
         public async Task RenderPageAsync(RenderRequest request)
@@ -250,18 +289,25 @@ namespace Statiq.Razor
             RazorProjectItem projectItem = projectFileSystem.GetItem(relativePath, request.Document);
 
             // Compute a hash for the content since pipelines could have changed it from the underlying file
-            int cacheCode = await request.Document.ContentProvider.GetCacheCodeAsync();
+            int contentCacheCode = await request.Document.ContentProvider.GetCacheCodeAsync();
 
-            CompilationResult compilationResult = CompilePage(request, cacheCode, projectItem);
+            CompilationResult compilationResult = CompilePage(request, contentCacheCode, projectItem);
             return compilationResult.GetPage(request.RelativePath);
         }
 
-        private CompilationResult CompilePage(RenderRequest request, int cacheCode, RazorProjectItem projectItem)
+        /// <summary>
+        /// Checks the cache for a matching compilation and then compiles and loads the dynamic assembly if a miss.
+        /// </summary>
+        private CompilationResult CompilePage(RenderRequest request, int contentCacheCode, RazorProjectItem projectItem)
         {
-            CompilerCacheKey cacheKey = new CompilerCacheKey(request, cacheCode);
-            return _compilationCache.GetOrAdd(cacheKey, _ => GetCompilation(projectItem));
+            CompilerCacheKey compilerCacheKey = CompilerCacheKey.Get(request, contentCacheCode);
+            _requestedCompilationResults.Add(compilerCacheKey);
+            return _compilationCache.GetOrAdd(compilerCacheKey, _ => GetCompilation(projectItem));
         }
 
+        /// <summary>
+        /// Gets the assembly and loads it for a compilation cache miss.
+        /// </summary>
         private CompilationResult GetCompilation(RazorProjectItem projectItem)
         {
             IExecutionContext.Current.LogDebug($"Compiling " + projectItem.FilePath);
@@ -270,8 +316,7 @@ namespace Statiq.Razor
                 IServiceProvider serviceProvider = scope.ServiceProvider;
 
                 // See RazorViewCompiler.CompileAndEmit()
-                RazorProjectEngine projectEngine = serviceProvider.GetRequiredService<RazorProjectEngine>();
-                RazorCodeDocument codeDocument = projectEngine.Process(projectItem);
+                RazorCodeDocument codeDocument = _projectEngine.Process(projectItem);
                 RazorCSharpDocument cSharpDocument = codeDocument.GetCSharpDocument();
                 if (cSharpDocument.Diagnostics.Count > 0)
                 {
@@ -283,15 +328,43 @@ namespace Statiq.Razor
                 // Use the RazorViewCompiler to finish compiling the view for consistency with layouts
                 IViewCompilerProvider viewCompilerProvider = serviceProvider.GetRequiredService<IViewCompilerProvider>();
                 IViewCompiler viewCompiler = viewCompilerProvider.GetCompiler();
-                Assembly assembly = (Assembly)CompileAndEmitMethod.Invoke(
-                    viewCompiler,
-                    new object[] { codeDocument, cSharpDocument.GeneratedCode });
-
-                // Get the runtime item
-                RazorCompiledItemLoader compiledItemLoader = new RazorCompiledItemLoader();
-                RazorCompiledItem compiledItem = compiledItemLoader.LoadItems(assembly).SingleOrDefault();
-                return new CompilationResult(compiledItem);
+                IMemoryStreamFactory memoryStreamFactory = serviceProvider.GetRequiredService<IMemoryStreamFactory>();
+                return CompileAndEmit(memoryStreamFactory, viewCompiler, codeDocument, cSharpDocument.GeneratedCode);
             }
+        }
+
+        // Adapted from RuntimeViewCompiler.CompileAndEmit() (Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.dll) to save assembly to disk for caching
+        private CompilationResult CompileAndEmit(IMemoryStreamFactory memoryStreamFactory, IViewCompiler viewCompiler, RazorCodeDocument codeDocument, string generatedCode)
+        {
+            // Create the compilation
+            string assemblyName = Path.GetRandomFileName();
+            CSharpCompilation compilation = (CSharpCompilation)CreateCompilationMethod.Invoke(
+                    viewCompiler,
+                    new object[] { generatedCode, assemblyName });
+
+            // Emit the compilation to memory streams (disposed later at the end of this execution round)
+            MemoryStream assemblyStream = memoryStreamFactory.GetStream();
+            MemoryStream pdbStream = memoryStreamFactory.GetStream();
+            EmitResult result = compilation.Emit(
+                assemblyStream,
+                pdbStream,
+                options: AssemblyEmitOptions);
+
+            if (!result.Success)
+            {
+                throw (Exception)CreateCompilationFailedException.Invoke(
+                    null,
+                    new object[] { codeDocument, result.Diagnostics });
+            }
+
+            // Load the assembly from the streams
+            assemblyStream.Seek(0, SeekOrigin.Begin);
+            pdbStream.Seek(0, SeekOrigin.Begin);
+            Assembly assembly = Assembly.Load(assemblyStream.ToArray(), pdbStream.ToArray());
+
+            // Get the Razor item and return
+            RazorCompiledItem razorCompiledItem = CompiledItemLoader.LoadItems(assembly).SingleOrDefault();
+            return new CompilationResult(assemblyName, assemblyStream, pdbStream, assembly, razorCompiledItem);
         }
     }
 }

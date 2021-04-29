@@ -40,17 +40,17 @@ namespace Statiq.Core
             _currentContent = new ConcurrentDictionary<NormalizedPath, int>();
         }
 
-        public async Task SaveAsync(IFile destination)
+        public async Task SaveAsync(IReadOnlyFileSystem fileSystem, IFile destination)
         {
             TrackerState state = new TrackerState
             {
-                Writes = _currentWrites.ToDictionary(x => x.Key.FullPath, x => x.Value.ToString()),
-                Content = _currentContent.ToDictionary(x => x.Key.FullPath, x => x.Value.ToString())
+                Writes = _currentWrites.ToDictionary(x => fileSystem.GetRelativeOutputPathOrSelf(x.Key).FullPath, x => x.Value.ToString()),
+                Content = _currentContent.ToDictionary(x => fileSystem.GetRelativeOutputPathOrSelf(x.Key).FullPath, x => x.Value.ToString())
             };
             await destination.SerializeJsonAsync(state);
         }
 
-        public async Task<string> RestoreAsync(IFile source)
+        public async Task<string> RestoreAsync(IReadOnlyFileSystem fileSystem, IFile source)
         {
             if (!source.Exists)
             {
@@ -61,9 +61,9 @@ namespace Statiq.Core
             {
                 TrackerState state = await source.DeserializeJsonAsync<TrackerState>();
                 _previousWrites = new ConcurrentDictionary<NormalizedPath, int>(
-                    state.Writes.Select(x => new KeyValuePair<NormalizedPath, int>(new NormalizedPath(x.Key), int.Parse(x.Value))));
+                    state.Writes.Select(x => new KeyValuePair<NormalizedPath, int>(fileSystem.GetOutputPath(x.Key), int.Parse(x.Value))));
                 _previousContent = new ConcurrentDictionary<NormalizedPath, int>(
-                    state.Content.Select(x => new KeyValuePair<NormalizedPath, int>(new NormalizedPath(x.Key), int.Parse(x.Value))));
+                    state.Content.Select(x => new KeyValuePair<NormalizedPath, int>(fileSystem.GetOutputPath(x.Key), int.Parse(x.Value))));
             }
             catch (Exception ex)
             {

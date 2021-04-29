@@ -13,10 +13,10 @@ namespace Statiq.Razor
         private static string _urlResolutionTagHelperTypeName = typeof(UrlResolutionTagHelper).FullName;
 
         private readonly string _baseType;  // null indicates the default StatiqRazorPage<>
-        private readonly NamespaceCollection _namespaces;
+        private readonly string[] _namespaces;
         private readonly bool _isDocumentModel;
 
-        public StatiqDocumentClassifierPhase(string baseType, NamespaceCollection namespaces, bool isDocumentModel, RazorEngine engine)
+        public StatiqDocumentClassifierPhase(string baseType, string[] namespaces, bool isDocumentModel, RazorEngine engine)
         {
             _baseType = baseType;
             _namespaces = namespaces ?? throw new ArgumentNullException(nameof(namespaces));

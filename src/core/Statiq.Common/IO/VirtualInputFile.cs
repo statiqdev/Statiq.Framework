@@ -44,14 +44,6 @@ namespace Statiq.Common
         public DateTime CreationTime => _file.CreationTime;
 
         /// <inheritdoc/>
-        public Task CopyToAsync(
-            IFile destination,
-            bool overwrite = true,
-            bool createDirectory = true,
-            CancellationToken cancellationToken = default) =>
-            _file.CopyToAsync(destination, overwrite, createDirectory, cancellationToken);
-
-        /// <inheritdoc/>
         public void Delete() => _file.Delete();
 
         /// <inheritdoc/>
@@ -60,10 +52,6 @@ namespace Statiq.Common
         /// <inheritdoc/>
         public IContentProvider GetContentProvider(string mediaType) =>
             _file.GetContentProvider(mediaType);
-
-        /// <inheritdoc/>
-        public Task MoveToAsync(IFile destination, CancellationToken cancellationToken = default) =>
-            _file.MoveToAsync(destination, cancellationToken);
 
         /// <inheritdoc/>
         public Stream Open(bool createDirectory = true) => _file.Open(createDirectory);
@@ -85,6 +73,10 @@ namespace Statiq.Common
             _file.ReadAllTextAsync(cancellationToken);
 
         /// <inheritdoc/>
+        public Task<byte[]> ReadAllBytesAsync(CancellationToken cancellationToken = default) =>
+            _file.ReadAllBytesAsync(cancellationToken);
+
+        /// <inheritdoc/>
         public string ToDisplayString() => _file.ToDisplayString();
 
         /// <inheritdoc/>
@@ -93,6 +85,13 @@ namespace Statiq.Common
             bool createDirectory = true,
             CancellationToken cancellationToken = default) =>
             _file.WriteAllTextAsync(contents, createDirectory, cancellationToken);
+
+        /// <inheritdoc/>
+        public Task WriteAllBytesAsync(
+            byte[] bytes,
+            bool createDirectory = true,
+            CancellationToken cancellationToken = default) =>
+            _file.WriteAllBytesAsync(bytes, createDirectory, cancellationToken);
 
         /// <inheritdoc/>
         public async Task<int> GetCacheCodeAsync() => await _file.GetCacheCodeAsync();

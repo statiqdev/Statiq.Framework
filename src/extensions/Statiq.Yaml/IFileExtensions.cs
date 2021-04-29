@@ -42,10 +42,13 @@ namespace Statiq.Yaml
             Serializer serializer = new Serializer();
             using (Stream stream = file.OpenWrite(createDirectory))
             {
+                long initialPosition = stream.Position;
                 using (StreamWriter writer = new StreamWriter(stream))
                 {
                     serializer.Serialize(writer, value, typeof(TValue));
                 }
+                long length = stream.Position - initialPosition;
+                stream.SetLength(length);
             }
         }
 
@@ -58,10 +61,13 @@ namespace Statiq.Yaml
             Serializer serializer = new Serializer();
             using (Stream stream = file.OpenWrite(createDirectory))
             {
+                long initialPosition = stream.Position;
                 using (StreamWriter writer = new StreamWriter(stream))
                 {
                     serializer.Serialize(writer, value, valueType);
                 }
+                long length = stream.Position - initialPosition;
+                stream.SetLength(length);
             }
         }
 
@@ -74,10 +80,13 @@ namespace Statiq.Yaml
             Serializer serializer = new Serializer();
             using (Stream stream = file.OpenWrite(createDirectory))
             {
+                long initialPosition = stream.Position;
                 using (StreamWriter writer = new StreamWriter(stream))
                 {
                     serializer.Serialize(writer, value);
                 }
+                long length = stream.Position - initialPosition;
+                stream.SetLength(length);
             }
         }
 

@@ -11,12 +11,12 @@ namespace Statiq.Core
         private const string CacheFileName = "writecache.json";
 
         private readonly IReadOnlySettings _settings;
-        private readonly IFileSystem _fileSystem;
+        private readonly IReadOnlyFileSystem _fileSystem;
         private readonly ILogger _logger;
 
         private bool _firstExecution = true;
 
-        internal FileCleaner(IReadOnlySettings settings, IFileSystem fileSystem, ILogger logger)
+        internal FileCleaner(IReadOnlySettings settings, IReadOnlyFileSystem fileSystem, ILogger logger)
         {
             _settings = settings.ThrowIfNull(nameof(fileSystem));
             _fileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
@@ -38,7 +38,7 @@ namespace Statiq.Core
             if (_firstExecution)
             {
                 IFile cacheFile = _fileSystem.GetCacheFile(CacheFileName);
-                string result = await _fileSystem.WriteTracker.RestoreAsync(cacheFile);
+                string result = await _fileSystem.WriteTracker.RestoreAsync(_fileSystem, cacheFile);
                 if (result is null)
                 {
                     // If we were able to restore, don't treat this as the first execution anymore
@@ -74,7 +74,7 @@ namespace Statiq.Core
 
             // Save the write tracker state
             IFile cacheFile = _fileSystem.GetCacheFile(CacheFileName);
-            await _fileSystem.WriteTracker.SaveAsync(cacheFile);
+            await _fileSystem.WriteTracker.SaveAsync(_fileSystem, cacheFile);
             _logger.LogDebug($"Saved write tracking data to {cacheFile}");
         }
 

@@ -6,7 +6,7 @@ namespace Statiq.Common
     /// A collection of namespace strings used to inform modules of which namespaces
     /// should be available during dynamic code generation and/or execution.
     /// </summary>
-    public interface INamespacesCollection : IReadOnlyCollection<string>
+    public interface INamespacesCollection : IReadOnlyCollection<string>, ICacheCode
     {
         /// <summary>
         /// Adds a namespace to the collection.

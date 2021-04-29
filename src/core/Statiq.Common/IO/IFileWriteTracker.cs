@@ -17,15 +17,17 @@ namespace Statiq.Common
         /// <summary>
         /// Saves the current state to a file.
         /// </summary>
+        /// <param name="fileSystem">The current file system.</param>
         /// <param name="destinationFile">The file to save to.</param>
-        Task SaveAsync(IFile destinationFile);
+        Task SaveAsync(IReadOnlyFileSystem fileSystem, IFile destinationFile);
 
         /// <summary>
-        /// Restores the state saved by <see cref="SaveAsync(IFile)"/> to the previous state.
+        /// Restores the state saved by <see cref="SaveAsync(IReadOnlyFileSystem, IFile)"/> to the previous state.
         /// </summary>
+        /// <param name="fileSystem">The current file system.</param>
         /// <param name="sourceFile">The file to restore from.</param>
         /// <returns>A message if the file could not be restored, or null if the file was restored successfully.</returns>
-        Task<string> RestoreAsync(IFile sourceFile);
+        Task<string> RestoreAsync(IReadOnlyFileSystem fileSystem, IFile sourceFile);
 
         /// <summary>
         /// Tracks a written file using a hash code that represents the file state after the write operation.

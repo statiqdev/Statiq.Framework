@@ -62,49 +62,27 @@ namespace Statiq.Testing
         }
 
         /// <inheritdoc/>
-        public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true, CancellationToken cancellationToken = default)
-        {
-            CreateDirectory(createDirectory, destination);
-
-            if (overwrite)
-            {
-                _fileProvider.Files[destination.Path] = new StringBuilder(_fileProvider.Files[Path].ToString());
-            }
-            else
-            {
-                _fileProvider.Files.TryAdd(destination.Path, new StringBuilder(_fileProvider.Files[Path].ToString()));
-            }
-
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc/>
-        public Task MoveToAsync(IFile destination, CancellationToken cancellationToken = default)
-        {
-            if (!_fileProvider.Files.ContainsKey(Path))
-            {
-                throw new FileNotFoundException();
-            }
-
-            if (_fileProvider.Files.TryRemove(Path, out StringBuilder builder))
-            {
-                _fileProvider.Files.TryAdd(destination.Path, builder);
-            }
-
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc/>
         public void Delete() => _fileProvider.Files.TryRemove(Path, out StringBuilder _);
 
         /// <inheritdoc/>
         public Task<string> ReadAllTextAsync(CancellationToken cancellationToken = default) => Task.FromResult(_fileProvider.Files[Path].ToString());
 
         /// <inheritdoc/>
+        public Task<byte[]> ReadAllBytesAsync(CancellationToken cancellationToken = default) => Task.FromResult(Encoding.UTF8.GetBytes(_fileProvider.Files[Path].ToString()));
+
+        /// <inheritdoc/>
         public Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default)
         {
             CreateDirectory(createDirectory, this);
             _fileProvider.Files[Path] = new StringBuilder(contents);
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public Task WriteAllBytesAsync(byte[] bytes, bool createDirectory = true, CancellationToken cancellationToken = default)
+        {
+            CreateDirectory(createDirectory, this);
+            _fileProvider.Files[Path] = new StringBuilder(Encoding.UTF8.GetString(bytes));
             return Task.CompletedTask;
         }
 

@@ -47,12 +47,6 @@ namespace Statiq.Common
         public DateTime CreationTime =>
             throw new NotSupportedException("Not supported for an excluded path");
 
-        public Task CopyToAsync(IFile destination, bool overwrite = true, bool createDirectory = true, CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException("Not supported for an excluded path");
-
-        public Task MoveToAsync(IFile destination, CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException("Not supported for an excluded path");
-
         public void Delete() =>
             throw new NotSupportedException("Not supported for an excluded path");
 
@@ -60,6 +54,12 @@ namespace Statiq.Common
             throw new NotSupportedException("Not supported for an excluded path");
 
         public Task WriteAllTextAsync(string contents, bool createDirectory = true, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException("Not supported for an excluded path");
+
+        public Task<byte[]> ReadAllBytesAsync(CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException("Not supported for an excluded path");
+
+        public Task WriteAllBytesAsync(byte[] bytes, bool createDirectory = true, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException("Not supported for an excluded path");
 
         public Stream OpenRead() =>

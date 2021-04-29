@@ -179,11 +179,6 @@ namespace Statiq.Razor
             // Get the Razor service from the service collection if it's in there
             RazorService razorService = context.GetService<RazorService>() ?? new RazorService();
 
-            // Expire the internal Razor cache if this is a new execution
-            // This needs to be done so that layouts/partials can be re-rendered if they've changed,
-            // otherwise Razor will just use the previously cached version of them
-            razorService.ExpireChangeTokensOnNewExecution(context.ExecutionId);
-
             // Eliminate input documents that we shouldn't process
             ImmutableArray<IDocument> validInputs = context.Inputs
                 .Where(x => _ignorePrefix is null || x.Source.IsNull || !x.Source.FileName.FullPath.StartsWith(_ignorePrefix))
