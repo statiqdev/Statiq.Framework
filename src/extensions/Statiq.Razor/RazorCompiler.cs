@@ -37,13 +37,6 @@ namespace Statiq.Razor
     {
         private const string ViewStartFileName = "_ViewStart.cshtml";
 
-        private static readonly RazorCompiledItemLoader CompiledItemLoader = new RazorCompiledItemLoader();
-
-        private static readonly EmitOptions AssemblyEmitOptions = new EmitOptions(debugInformationFormat: DebugInformationFormat.PortablePdb);
-
-        private static readonly MethodInfo CreateCompilationMethod;
-        private static readonly MethodInfo CreateCompilationFailedException;
-
         private readonly ConcurrentCache<CompilerCacheKey, CompilationResult> _compilationCache
             = new ConcurrentCache<CompilerCacheKey, CompilationResult>();
 
@@ -56,23 +49,6 @@ namespace Statiq.Razor
 
         private readonly object _phasesInitializationLock = new object();
         private bool _phasesInitialized;
-
-        static RazorCompiler()
-        {
-            Type runtimeViewCompilerType = typeof(FileProviderRazorProjectItem).Assembly
-                .GetType("Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.RuntimeViewCompiler");
-            CreateCompilationMethod = runtimeViewCompilerType.GetMethod(
-                "CreateCompilation",
-                BindingFlags.Instance | BindingFlags.NonPublic,
-                Type.DefaultBinder,
-                new Type[] { typeof(string), typeof(string) },
-                null);
-            Type compilationFailedExceptionFactory = typeof(FileProviderRazorProjectItem).Assembly
-                .GetType("Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.CompilationFailedExceptionFactory");
-            CreateCompilationFailedException = compilationFailedExceptionFactory.GetMethod(
-                "Create",
-                new Type[] { typeof(RazorCodeDocument), typeof(IEnumerable<RazorDiagnostic>) });
-        }
 
         /// <summary>
         /// Creates a Razor compiler using an existing set of services (which must already have Razor services registered).
@@ -142,7 +118,7 @@ namespace Statiq.Razor
                         null,
                         null,
                         assembly,
-                        CompiledItemLoader.LoadItems(assembly).SingleOrDefault());
+                        StatiqViewCompiler.CompiledItemLoader.LoadItems(assembly).SingleOrDefault());
                     _compilationCache.TryAdd(item.Key.CompilerCacheKey, () => compilationResult);
                     count++;
                 }
@@ -320,51 +296,14 @@ namespace Statiq.Razor
                 RazorCSharpDocument cSharpDocument = codeDocument.GetCSharpDocument();
                 if (cSharpDocument.Diagnostics.Count > 0)
                 {
-                    throw (Exception)CreateCompilationFailedException.Invoke(
-                        null,
-                        new object[] { codeDocument, cSharpDocument.Diagnostics });
+                    throw StatiqViewCompiler.CreateCompilationFailedException(codeDocument, cSharpDocument.Diagnostics);
                 }
 
                 // Use the RazorViewCompiler to finish compiling the view for consistency with layouts
-                IViewCompilerProvider viewCompilerProvider = serviceProvider.GetRequiredService<IViewCompilerProvider>();
-                IViewCompiler viewCompiler = viewCompilerProvider.GetCompiler();
-                IMemoryStreamFactory memoryStreamFactory = serviceProvider.GetRequiredService<IMemoryStreamFactory>();
-                return CompileAndEmit(memoryStreamFactory, viewCompiler, codeDocument, cSharpDocument.GeneratedCode);
+                StatiqViewCompiler viewCompiler = (StatiqViewCompiler)serviceProvider.GetRequiredService<IViewCompilerProvider>();
+                IMemoryStreamFactory memoryStreamFactory = serviceProvider.GetService<IMemoryStreamFactory>();
+                return viewCompiler.CompileAndEmit(memoryStreamFactory, codeDocument, cSharpDocument.GeneratedCode);
             }
-        }
-
-        // Adapted from RuntimeViewCompiler.CompileAndEmit() (Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.dll) to save assembly to disk for caching
-        private CompilationResult CompileAndEmit(IMemoryStreamFactory memoryStreamFactory, IViewCompiler viewCompiler, RazorCodeDocument codeDocument, string generatedCode)
-        {
-            // Create the compilation
-            string assemblyName = Path.GetRandomFileName();
-            CSharpCompilation compilation = (CSharpCompilation)CreateCompilationMethod.Invoke(
-                    viewCompiler,
-                    new object[] { generatedCode, assemblyName });
-
-            // Emit the compilation to memory streams (disposed later at the end of this execution round)
-            MemoryStream assemblyStream = memoryStreamFactory.GetStream();
-            MemoryStream pdbStream = memoryStreamFactory.GetStream();
-            EmitResult result = compilation.Emit(
-                assemblyStream,
-                pdbStream,
-                options: AssemblyEmitOptions);
-
-            if (!result.Success)
-            {
-                throw (Exception)CreateCompilationFailedException.Invoke(
-                    null,
-                    new object[] { codeDocument, result.Diagnostics });
-            }
-
-            // Load the assembly from the streams
-            assemblyStream.Seek(0, SeekOrigin.Begin);
-            pdbStream.Seek(0, SeekOrigin.Begin);
-            Assembly assembly = Assembly.Load(assemblyStream.ToArray(), pdbStream.ToArray());
-
-            // Get the Razor item and return
-            RazorCompiledItem razorCompiledItem = CompiledItemLoader.LoadItems(assembly).SingleOrDefault();
-            return new CompilationResult(assemblyName, assemblyStream, pdbStream, assembly, razorCompiledItem);
         }
     }
 }

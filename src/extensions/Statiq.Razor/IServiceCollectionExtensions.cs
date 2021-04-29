@@ -1,33 +1,16 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Razor.Compilation;
-using Microsoft.AspNetCore.Mvc.Razor.Extensions;
-using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
-using Microsoft.AspNetCore.Mvc.ViewEngines;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.Razor.Hosting;
 using Microsoft.AspNetCore.Razor.Language;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
 using Statiq.Common;
 
@@ -75,6 +58,14 @@ namespace Statiq.Razor
                 .AddMvcCore()
                 .AddRazorViewEngine()
                 .AddRazorRuntimeCompilation();
+
+            // Replace the runtime view compiler provider with our own
+            // Create a short-lived service provider to get an instance we can inject
+            ServiceDescriptor serviceDescriptor = serviceCollection.First((ServiceDescriptor f) => f.ServiceType == typeof(IViewCompilerProvider));
+            serviceCollection.Replace(ServiceDescriptor.Describe(
+                typeof(IViewCompilerProvider),
+                serviceProvider => new StatiqViewCompiler((IViewCompilerProvider)serviceProvider.CreateInstance(serviceDescriptor)),
+                serviceDescriptor.Lifetime));
 
             // Add all loaded assemblies
             CompilationReferencesProvider referencesProvider = new CompilationReferencesProvider();
