@@ -22,10 +22,10 @@ namespace Statiq.Razor
         /// Adds all services required for the <see cref="RenderRazor"/> module.
         /// </summary>
         /// <param name="serviceCollection">The service collection to register services in.</param>
-        /// <param name="fileSystem">The file system or <c>null</c> to skip.</param>
+        /// <param name="fileSystem">The file system or <c>null</c> if we're expecting one to already be registered.</param>
         /// <param name="classCatalog">An existing class catalog or <c>null</c> to scan assemblies during registration.</param>
         /// <returns>The service collection.</returns>
-        public static IServiceCollection AddRazor(this IServiceCollection serviceCollection, IReadOnlyFileSystem fileSystem, ClassCatalog classCatalog = null)
+        public static IServiceCollection AddRazor(this IServiceCollection serviceCollection, IReadOnlyFileSystem fileSystem = null, ClassCatalog classCatalog = null)
         {
             // Register the file system if we're not expecting one from an engine
             if (fileSystem is object)
@@ -59,18 +59,25 @@ namespace Statiq.Razor
                 .AddRazorViewEngine()
                 .AddRazorRuntimeCompilation();
 
+            // Make the project engine scoped because we have to replace the phases based on base page type and namespaces
+            ServiceDescriptor razorProjectEngineDescriptor = serviceCollection.First(x => x.ServiceType == typeof(RazorProjectEngine));
+            serviceCollection.Replace(ServiceDescriptor.Describe(
+                typeof(RazorProjectEngine),
+                razorProjectEngineDescriptor.ImplementationFactory,
+                ServiceLifetime.Scoped));
+
             // Replace the runtime view compiler provider with our own
             // Create a short-lived service provider to get an instance we can inject
-            ServiceDescriptor serviceDescriptor = serviceCollection.First((ServiceDescriptor f) => f.ServiceType == typeof(IViewCompilerProvider));
+            ServiceDescriptor viewCompilerProviderDescriptor = serviceCollection.First((ServiceDescriptor f) => f.ServiceType == typeof(IViewCompilerProvider));
             serviceCollection.Replace(ServiceDescriptor.Describe(
                 typeof(IViewCompilerProvider),
                 serviceProvider =>
                     new StatiqViewCompiler(
-                        (IViewCompilerProvider)serviceProvider.CreateInstance(serviceDescriptor),
+                        (IViewCompilerProvider)serviceProvider.CreateInstance(viewCompilerProviderDescriptor),
                         serviceProvider.GetRequiredService<RazorProjectEngine>(),
                         serviceProvider.GetRequiredService<Microsoft.Extensions.FileProviders.IFileProvider>(),
                         serviceProvider.GetService<IMemoryStreamFactory>()),
-                serviceDescriptor.Lifetime));
+                viewCompilerProviderDescriptor.Lifetime));
 
             // Add all loaded assemblies
             CompilationReferencesProvider referencesProvider = new CompilationReferencesProvider();

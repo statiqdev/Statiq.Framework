@@ -263,10 +263,20 @@ namespace Statiq.Testing
         /// <inheritdoc/>
         public async Task<ImmutableArray<IDocument>> ExecuteModulesAsync(IEnumerable<IModule> modules, IEnumerable<IDocument> inputs)
         {
+            if (Engine is object)
+            {
+                await Events.RaiseAsync(new BeforeEngineExecution(Engine, ExecutionId));
+            }
+
             if (modules is null)
             {
+                if (Engine is object)
+                {
+                    await Events.RaiseAsync(new AfterEngineExecution(Engine, ExecutionId, Outputs, 0));
+                }
                 return ImmutableArray<IDocument>.Empty;
             }
+
             foreach (IModule module in modules)
             {
                 // We need a new context for each module so just do a member-wise clone of this one and set module and documents
@@ -275,6 +285,11 @@ namespace Statiq.Testing
                 moduleContext.Module = module;
                 moduleContext.Parent = this;
                 inputs = await module.ExecuteAsync(moduleContext);
+            }
+
+            if (Engine is object)
+            {
+                await Events.RaiseAsync(new AfterEngineExecution(Engine, ExecutionId, Outputs, 0));
             }
             return inputs?.Where(x => x is object).ToImmutableArray() ?? ImmutableArray<IDocument>.Empty;
         }

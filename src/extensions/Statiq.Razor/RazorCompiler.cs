@@ -33,68 +33,44 @@ namespace Statiq.Razor
     /// Holds references to Razor objects based on the compilation parameters. This ensures the compilation cache and other
     /// service objects are persisted from one generation to the next, given the same compilation parameters.
     /// </summary>
-    internal class RazorCompiler : CachingCompiler
+    /// <remarks>
+    /// This holds on to a service scope, so it needs to be disposed when we're done.
+    /// </remarks>
+    internal class RazorCompiler : CachingCompiler, IDisposable
     {
         private const string ViewStartFileName = "_ViewStart.cshtml";
 
         private readonly RazorProjectEngine _projectEngine;
 
+        private readonly IServiceScope _compilerServiceScope;
+
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        private readonly object _phasesInitializationLock = new object();
-        private bool _phasesInitialized;
-
         /// <summary>
-        /// Creates a Razor compiler using an existing set of services (which must already have Razor services registered).
+        /// Creates a Razor compiler using an existing set of services, which must already have Razor services registered using
+        /// <see cref="IServiceCollectionExtensions.AddRazor(IServiceCollection, IReadOnlyFileSystem, ClassCatalog)"/>.
         /// </summary>
-        /// <param name="parameters">The compilation parameters.</param>
         /// <param name="serviceProvider">The service provider to use.</param>
-        public RazorCompiler(CompilationParameters parameters, IServiceProvider serviceProvider)
+        public RazorCompiler(IServiceProvider serviceProvider)
         {
             serviceProvider.ThrowIfNull(nameof(serviceProvider));
 
-            IExecutionContext.Current.LogDebug($"Creating new {nameof(RazorCompiler)} for {parameters.BasePageType ?? "null base page type"}");
+            // Create a service provider scope to get a distinct project engine
+            IServiceScopeFactory serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+            _compilerServiceScope = serviceScopeFactory.CreateScope();
+            _projectEngine = _compilerServiceScope.ServiceProvider.GetRequiredService<RazorProjectEngine>();
 
-            // Do a check to make sure required services are registered
-            _projectEngine = serviceProvider.GetService<RazorProjectEngine>();
-            if (_projectEngine is null)
-            {
-                // Razor services haven't been registered so create a new services container for this compiler
-                ServiceCollection serviceCollection = new ServiceCollection();
-                serviceCollection.AddSingleton(serviceProvider.GetRequiredService<ILoggerFactory>());
-                serviceCollection.AddRazor(
-                    serviceProvider.GetRequiredService<IReadOnlyFileSystem>(),
-                    serviceProvider.GetService<ClassCatalog>());
-                serviceProvider = serviceCollection.BuildServiceProvider();
-                _projectEngine = serviceProvider.GetRequiredService<RazorProjectEngine>();
-            }
+            // Create an inner service scope factory so that each rendering can use a separate scope
+            _serviceScopeFactory = _compilerServiceScope.ServiceProvider.GetRequiredService<IServiceScopeFactory>();
+        }
 
-            _serviceScopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+        public void Dispose()
+        {
+            _compilerServiceScope.Dispose();
         }
 
         // We need to initialize lazily since restoring from the cache won't have the actual namespaces, only a cache code
-        public void EnsurePhases(CompilationParameters parameters, string[] namespaces)
-        {
-            parameters.ThrowIfNull(nameof(parameters));
-
-            if (!_phasesInitialized)
-            {
-                lock (_phasesInitializationLock)
-                {
-                    // We need to register a new document classifier phase because builder.SetBaseType() (which uses builder.ConfigureClass())
-                    // use the DefaultRazorDocumentClassifierPhase which stops applying document classifier passes after DocumentIntermediateNode.DocumentKind is set
-                    // (which gets set by the Razor document classifier passes registered in RazorExtensions.Register())
-                    // Also need to add it just after the DocumentClassifierPhase, otherwise it'll miss the C# lowering phase
-                    List<IRazorEnginePhase> phases = _projectEngine.Engine.Phases.ToList();
-                    StatiqDocumentClassifierPhase phase =
-                        new StatiqDocumentClassifierPhase(parameters.BasePageType, namespaces, parameters.IsDocumentModel, _projectEngine.Engine);
-                    phases.Insert(phases.IndexOf(phases.OfType<IRazorDocumentClassifierPhase>().Last()) + 1, phase);
-                    FieldInfo phasesField = _projectEngine.Engine.GetType().GetField("<Phases>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
-                    phasesField.SetValue(_projectEngine.Engine, phases.ToArray());
-                }
-                _phasesInitialized = true;
-            }
-        }
+        public void EnsurePhases(CompilationParameters parameters, string[] namespaces) => EnsurePhases(_projectEngine, parameters, namespaces);
 
         public async Task RenderPageAsync(RenderRequest request)
         {

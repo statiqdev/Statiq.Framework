@@ -29,6 +29,11 @@ namespace Statiq.Razor
     /// and code intended to extend the capabilities of Razor in ASP.NET MVC probably won't work.
     /// That said, a lot of functionality does function the same as it does in ASP.NET MVC.
     /// </para>
+    /// <para>
+    /// This module requires Razor services to be registered before use with
+    /// <see cref="IServiceCollectionExtensions.AddRazor(IServiceCollection, IReadOnlyFileSystem, ClassCatalog)"/>.
+    /// This is done automatically when using Statiq.App and the Bootstrapper.
+    /// </para>
     /// </remarks>
     /// Used to determine if the source file name contains the ignore prefix.
     /// <category>Templates</category>
@@ -177,7 +182,7 @@ namespace Statiq.Razor
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             // Get the Razor service from the service collection if it's in there
-            RazorService razorService = context.GetService<RazorService>() ?? new RazorService();
+            RazorService razorService = context.GetRequiredService<RazorService>();
 
             // Eliminate input documents that we shouldn't process
             ImmutableArray<IDocument> validInputs = context.Inputs

@@ -13,7 +13,7 @@ namespace Statiq.Razor
     /// <summary>
     /// Razor compiler should be shared so that pages are only compiled once.
     /// </summary>
-    internal class RazorService
+    internal class RazorService : IDisposable
     {
         private const string CacheFileName = "razorcache.json";
 
@@ -24,6 +24,12 @@ namespace Statiq.Razor
 
         private bool _firstExecution = true;
 
+        private static RazorCompiler GetRazorCompiler(CompilationParameters parameters, IServiceProvider serviceProvider)
+        {
+            IExecutionContext.Current.LogDebug($"Creating new {nameof(RazorCompiler)} for {parameters.BasePageType ?? "null base page type"}");
+            return new RazorCompiler(serviceProvider);
+        }
+
         public async Task RenderAsync(RenderRequest request)
         {
             int namespacesCacheCode = await request.Context.Namespaces.GetCacheCodeAsync();
@@ -31,12 +37,14 @@ namespace Statiq.Razor
                 CompilationParameters.Get(namespacesCacheCode, request.BaseType, request.Model is IDocument),
                 parameters =>
                 {
-                    RazorCompiler compiler = new RazorCompiler(parameters, request.Context);
+                    // No compiler exists for these parameters so create a new one
+                    RazorCompiler compiler = GetRazorCompiler(parameters, request.Context);
                     compiler.EnsurePhases(parameters, request.Context.Namespaces.ToArray());
                     return compiler;
                 },
                 (parameters, compiler) =>
                 {
+                    // We already have a compiler, so ensure the phases are set since it might have been from the cache
                     compiler.EnsurePhases(parameters, request.Context.Namespaces.ToArray());
                     return compiler;
                 })
@@ -77,7 +85,7 @@ namespace Statiq.Razor
                     {
                         CachingCompiler compiler = cacheGroup.Key.Equals(viewCompiler.CompilationParameters)
                             ? (CachingCompiler)viewCompiler
-                            : _compilers.GetOrAdd(cacheGroup.Key, parameters => new RazorCompiler(parameters, args.Engine.Services));
+                            : _compilers.GetOrAdd(cacheGroup.Key, parameters => GetRazorCompiler(parameters, args.Engine.Services));
                         count += compiler.PopulateCache(cacheGroup.Select(x => new KeyValuePair<AssemblyCacheKey, string>(x.Key, args.Engine.FileSystem.GetCachePath(x.Value).FullPath)));
                     }
                     IExecutionContext.Current.LogInformation($"Restored Razor compilation cache from {cacheFile.Path.FullPath} with {count} assemblies");
@@ -184,6 +192,15 @@ namespace Statiq.Razor
             IFile cacheFile = args.Engine.FileSystem.GetCacheFile(CacheFileName);
             KeyValuePair<AssemblyCacheKey, string>[] cachedAssembliesArray = _cachedAssemblies.ToArray();
             await cacheFile.SerializeJsonAsync(cachedAssembliesArray, null, args.Engine.CancellationToken);
+        }
+
+        public void Dispose()
+        {
+            foreach (RazorCompiler razorCompiler in _compilers.Values)
+            {
+                razorCompiler.Dispose();
+            }
+            _compilers.Clear();
         }
     }
 }

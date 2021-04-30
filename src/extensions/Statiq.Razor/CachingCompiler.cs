@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using ConcurrentCollections;
+using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
@@ -16,6 +17,34 @@ namespace Statiq.Razor
 
         // Used to track compilation result requests on each execution so stale cache entries can be cleared
         private readonly ConcurrentHashSet<CompilerCacheKey> _requestedCompilationResults = new ConcurrentHashSet<CompilerCacheKey>();
+
+        private readonly object _phasesInitializationLock = new object();
+        private bool _phasesInitialized;
+
+        // We need to initialize lazily since restoring from the cache won't have the actual namespaces, only a cache code
+        // This also needs to be initialized once-per-compiler and each one must have a different RazorProjectEngine for each
+        protected void EnsurePhases(RazorProjectEngine projectEngine, CompilationParameters parameters, string[] namespaces)
+        {
+            parameters.ThrowIfNull(nameof(parameters));
+
+            if (!_phasesInitialized)
+            {
+                lock (_phasesInitializationLock)
+                {
+                    // We need to register a new document classifier phase because builder.SetBaseType() (which uses builder.ConfigureClass())
+                    // use the DefaultRazorDocumentClassifierPhase which stops applying document classifier passes after DocumentIntermediateNode.DocumentKind is set
+                    // (which gets set by the Razor document classifier passes registered in RazorExtensions.Register())
+                    // Also need to add it just after the DocumentClassifierPhase, otherwise it'll miss the C# lowering phase
+                    List<IRazorEnginePhase> phases = projectEngine.Engine.Phases.ToList();
+                    StatiqDocumentClassifierPhase phase =
+                        new StatiqDocumentClassifierPhase(parameters.BasePageType, namespaces, parameters.IsDocumentModel, projectEngine.Engine);
+                    phases.Insert(phases.IndexOf(phases.OfType<IRazorDocumentClassifierPhase>().Last()) + 1, phase);
+                    FieldInfo phasesField = projectEngine.Engine.GetType().GetField("<Phases>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
+                    phasesField.SetValue(projectEngine.Engine, phases.ToArray());
+                }
+                _phasesInitialized = true;
+            }
+        }
 
         /// <summary>
         /// Populates the compiler cache with existing items.
