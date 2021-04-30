@@ -14,10 +14,10 @@ namespace Statiq.Razor
         public static CompilerCacheKey Get(RenderRequest request, int contentCacheCode)
         {
             CacheCode cacheCode = new CacheCode();
-            cacheCode.Add(request.LayoutLocation);
-            cacheCode.Add(request.ViewStartLocation);
+            cacheCode.Add(request?.LayoutLocation);
+            cacheCode.Add(request?.ViewStartLocation);
             cacheCode.Add(contentCacheCode);
-            return new CompilerCacheKey(request.LayoutLocation, request.ViewStartLocation, contentCacheCode, cacheCode.ToCacheCode());
+            return new CompilerCacheKey(request?.LayoutLocation, request?.ViewStartLocation, contentCacheCode, cacheCode.ToCacheCode());
         }
 
         // Single parameterized constructor required for JSON deserialization

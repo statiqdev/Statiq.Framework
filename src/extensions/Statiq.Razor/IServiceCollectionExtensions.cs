@@ -64,7 +64,12 @@ namespace Statiq.Razor
             ServiceDescriptor serviceDescriptor = serviceCollection.First((ServiceDescriptor f) => f.ServiceType == typeof(IViewCompilerProvider));
             serviceCollection.Replace(ServiceDescriptor.Describe(
                 typeof(IViewCompilerProvider),
-                serviceProvider => new StatiqViewCompiler((IViewCompilerProvider)serviceProvider.CreateInstance(serviceDescriptor)),
+                serviceProvider =>
+                    new StatiqViewCompiler(
+                        (IViewCompilerProvider)serviceProvider.CreateInstance(serviceDescriptor),
+                        serviceProvider.GetRequiredService<RazorProjectEngine>(),
+                        serviceProvider.GetRequiredService<Microsoft.Extensions.FileProviders.IFileProvider>(),
+                        serviceProvider.GetService<IMemoryStreamFactory>()),
                 serviceDescriptor.Lifetime));
 
             // Add all loaded assemblies

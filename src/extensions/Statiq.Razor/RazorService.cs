@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Razor.Compilation;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
@@ -69,10 +69,15 @@ namespace Statiq.Razor
                 // Populate the compiler caches
                 if (restoredCache)
                 {
+                    // Get the single global view compiler
+                    StatiqViewCompiler viewCompiler = (StatiqViewCompiler)args.Engine.Services.GetRequiredService<IViewCompilerProvider>().GetCompiler();
+
                     int count = 0;
                     foreach (IGrouping<CompilationParameters, KeyValuePair<AssemblyCacheKey, string>> cacheGroup in _cachedAssemblies.GroupBy(x => x.Key.CompilationParameters))
                     {
-                        RazorCompiler compiler = _compilers.GetOrAdd(cacheGroup.Key, parameters => new RazorCompiler(parameters, args.Engine.Services));
+                        CachingCompiler compiler = cacheGroup.Key.Equals(viewCompiler.CompilationParameters)
+                            ? (CachingCompiler)viewCompiler
+                            : _compilers.GetOrAdd(cacheGroup.Key, parameters => new RazorCompiler(parameters, args.Engine.Services));
                         count += compiler.PopulateCache(cacheGroup.Select(x => new KeyValuePair<AssemblyCacheKey, string>(x.Key, args.Engine.FileSystem.GetCachePath(x.Value).FullPath)));
                     }
                     IExecutionContext.Current.LogInformation($"Restored Razor compilation cache from {cacheFile.Path.FullPath} with {count} assemblies");
@@ -86,12 +91,21 @@ namespace Statiq.Razor
             // Expire the internal Razor cache change tokens if this is a new execution
             // This needs to be done so that layouts/partials can be re-rendered if they've changed,
             // otherwise Razor will just use the previously cached version of them
-            foreach (KeyValuePair<CompilationParameters, RazorCompiler> compilerItem in _compilers)
+            ((FileSystemFileProvider)args.Engine.Services.GetRequiredService<Microsoft.Extensions.FileProviders.IFileProvider>()).ExpireChangeTokens();
+
+            // Get the single global view compiler
+            StatiqViewCompiler viewCompiler = (StatiqViewCompiler)args.Engine.Services.GetRequiredService<IViewCompilerProvider>().GetCompiler();
+
+            // Cache and clean up compilation assemblies from the compilers
+            int removeCount = 0;
+            int addCount = 0;
+            foreach (KeyValuePair<CompilationParameters, CachingCompiler> compilerItem in _compilers
+                .Select(x => new KeyValuePair<CompilationParameters, CachingCompiler>(x.Key, x.Value))
+                .Append(new KeyValuePair<CompilationParameters, CachingCompiler>(viewCompiler.CompilationParameters, viewCompiler)))
             {
                 IReadOnlyDictionary<CompilerCacheKey, CompilationResult> compilerCache = compilerItem.Value.ResetCache();
 
                 // Remove stale entries
-                int removeCount = 0;
                 foreach (AssemblyCacheKey removeAssemblyCacheKey in _cachedAssemblies.Keys.Where(x => x.CompilationParameters.Equals(compilerItem.Key)).ToArray())
                 {
                     if (!compilerCache.ContainsKey(removeAssemblyCacheKey.CompilerCacheKey))
@@ -101,10 +115,8 @@ namespace Statiq.Razor
                         removeCount++;
                     }
                 }
-                args.Engine.Logger.LogDebug($"Removed {removeCount} stale Razor assemblies from the cache");
 
                 // Add new entries
-                int addCount = 0;
                 foreach (KeyValuePair<CompilerCacheKey, CompilationResult> compilerCacheItem in compilerCache)
                 {
                     AssemblyCacheKey addAssemblyCacheKey = AssemblyCacheKey.Get(compilerItem.Key, compilerCacheItem.Key);
@@ -138,31 +150,32 @@ namespace Statiq.Razor
                     // Whether we saved the assembly or not, go ahead and dispose the memory streams so they can be collected
                     compilerCacheItem.Value.DisposeMemoryStreams();
                 }
-                args.Engine.Logger.LogDebug($"Cached and saved {addCount} new Razor assemblies");
+            }
+            args.Engine.Logger.LogDebug($"Removed {removeCount} stale Razor assemblies from the cache");
+            args.Engine.Logger.LogDebug($"Cached and saved {addCount} new Razor assemblies");
 
-                // Clean up the cache folder
-                IDirectory cacheDirectory = args.Engine.FileSystem.GetCacheDirectory("razor");
-                if (cacheDirectory.Exists)
+            // Clean up the cache folder
+            IDirectory cacheDirectory = args.Engine.FileSystem.GetCacheDirectory("razor");
+            if (cacheDirectory.Exists)
+            {
+                int deleteCount = 0;
+                HashSet<string> cachedAssemblyFiles = new HashSet<string>(_cachedAssemblies.Values);
+                foreach (IFile assemblyFile in cacheDirectory.GetFiles())
                 {
-                    int deleteCount = 0;
-                    HashSet<string> cachedAssemblyFiles = new HashSet<string>(_cachedAssemblies.Values);
-                    foreach (IFile assemblyFile in cacheDirectory.GetFiles())
+                    if (!_cachedAssemblies.Values.Contains($"razor/{assemblyFile.Path.FileNameWithoutExtension}.dll"))
                     {
-                        if (!_cachedAssemblies.Values.Contains($"razor/{assemblyFile.Path.FileNameWithoutExtension}.dll"))
+                        try
                         {
-                            try
-                            {
-                                assemblyFile.Delete();
-                                deleteCount++;
-                            }
-                            catch (Exception ex)
-                            {
-                                args.Engine.Logger.LogDebug($"Error while deleting stale cached assembly or pdb file {assemblyFile.Path.FullPath}: {ex.Message}");
-                            }
+                            assemblyFile.Delete();
+                            deleteCount++;
+                        }
+                        catch (Exception ex)
+                        {
+                            args.Engine.Logger.LogDebug($"Error while deleting stale cached assembly or pdb file {assemblyFile.Path.FullPath}: {ex.Message}");
                         }
                     }
-                    args.Engine.Logger.LogDebug($"Deleted {deleteCount} stale cached Razor assembly files");
                 }
+                args.Engine.Logger.LogDebug($"Deleted {deleteCount} stale cached Razor assembly files");
             }
 
             // Write the updated cache file

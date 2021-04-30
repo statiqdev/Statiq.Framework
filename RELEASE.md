@@ -3,6 +3,9 @@
 - **Breaking change:** Deleted `IFile.GetCacheHashCodeAsync()` and replaced it with an implementation of `ICacheCode`.
 - **Breaking change:** Renamed `IContentProvider.GetCacheHashCodeAsync()` and replaced it with an implementation of `ICacheCode`.
 - **Breaking change:** Renamed `IDocument.GetCacheHashCodeAsync()` and replaced it with an implementation of `ICacheCode`.
+- Added a new "cache" folder that contains caching artifacts to improve performance, deleting it won't harm anything but it should be left if possible to improve initial generation performance.
+  Also note that the "cache" folder likely shouldn't be committed to a repository, though it's designed to support that scenario when warranted (I.e. relative paths, etc.).
+- Compiled Razor assemblies (including layouts and partials) are now cached to disk which dramatically improved initial generation performance by not recompiling files that haven't changed.
 - Added `IFile.ReadAllBytesAsync()` and `IFile.WriteAllBytesAsync()`.
 - Added `IFile.WriteFromAsync()`, `IFile.AppendFromAsync()`, and `IFile.CopyToAsync()` extension methods to more easily copy a file from/to a stream.
 - Added `IReadOnlyFileSystem.CachePath` and related extensions, methods, etc. to provide a path where cache files should be stored and set to "cache" by default (which should be excluded in `.gitignore`).
