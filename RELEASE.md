@@ -1,3 +1,5 @@
+# 1.0.0-beta.43
+
 # 1.0.0-beta.42
 
 - **Breaking change:** Deleted `IFile.GetCacheHashCodeAsync()` and replaced it with an implementation of `ICacheCode`.

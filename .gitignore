@@ -38,3 +38,4 @@ TestResult.xml
 *.pfx
 .idea
 .ionide
+cache/
