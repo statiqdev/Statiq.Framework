@@ -53,7 +53,9 @@ namespace Statiq.Razor
 
         public async Task BeforeEngineExecutionAsync(BeforeEngineExecution args)
         {
-            if (_firstExecution)
+            // Populate the cache if it's the first execution, but not if caching is disabled
+            bool useCache = args.Engine.Settings.GetBool(Keys.UseCache);
+            if (_firstExecution && useCache)
             {
                 // See if we have an exiting assembly cache
                 IFile cacheFile = args.Engine.FileSystem.GetCacheFile(CacheFileName);
@@ -105,6 +107,7 @@ namespace Statiq.Razor
             StatiqViewCompiler viewCompiler = (StatiqViewCompiler)args.Engine.Services.GetRequiredService<IViewCompilerProvider>().GetCompiler();
 
             // Cache and clean up compilation assemblies from the compilers
+            bool useCache = args.Engine.Settings.GetBool(Keys.UseCache);
             int removeCount = 0;
             int addCount = 0;
             foreach (KeyValuePair<CompilationParameters, CachingCompiler> compilerItem in _compilers
@@ -128,30 +131,35 @@ namespace Statiq.Razor
                 foreach (KeyValuePair<CompilerCacheKey, CompilationResult> compilerCacheItem in compilerCache)
                 {
                     AssemblyCacheKey addAssemblyCacheKey = AssemblyCacheKey.Get(compilerItem.Key, compilerCacheItem.Key);
-                    if (!_cachedAssemblies.ContainsKey(addAssemblyCacheKey) && compilerCacheItem.Value.AssemblyStream is object)
+                    if (!_cachedAssemblies.ContainsKey(addAssemblyCacheKey)
+                        && compilerCacheItem.Value.AssemblyStream is object)
                     {
-                        // Make a best effort to same the assemblies, but don't panic if they don't
-                        try
+                        // Only cache to disk if using the cache
+                        if (useCache)
                         {
-                            string assemblyFileName = $"razor/{compilerCacheItem.Value.AssemblyName}.dll";
-                            IFile assemblyFile = args.Engine.FileSystem.GetCacheFile(assemblyFileName);
-                            compilerCacheItem.Value.AssemblyStream.Seek(0, SeekOrigin.Begin);
-                            await assemblyFile.WriteFromAsync(compilerCacheItem.Value.AssemblyStream, cancellationToken: args.Engine.CancellationToken);
-
-                            // Also save the PDB if we have one
-                            if (compilerCacheItem.Value.PdbStream is object)
+                            // Make a best effort to save the assemblies, but don't panic if they don't
+                            try
                             {
-                                IFile pdbFile = args.Engine.FileSystem.GetCacheFile(Path.ChangeExtension(assemblyFileName, ".pdb"));
-                                compilerCacheItem.Value.PdbStream.Seek(0, SeekOrigin.Begin);
-                                await pdbFile.WriteFromAsync(compilerCacheItem.Value.PdbStream, cancellationToken: args.Engine.CancellationToken);
-                            }
+                                string assemblyFileName = $"razor/{compilerCacheItem.Value.AssemblyName}.dll";
+                                IFile assemblyFile = args.Engine.FileSystem.GetCacheFile(assemblyFileName);
+                                compilerCacheItem.Value.AssemblyStream.Seek(0, SeekOrigin.Begin);
+                                await assemblyFile.WriteFromAsync(compilerCacheItem.Value.AssemblyStream, cancellationToken: args.Engine.CancellationToken);
 
-                            _cachedAssemblies.Add(addAssemblyCacheKey, assemblyFileName);
-                            addCount++;
-                        }
-                        catch (Exception ex)
-                        {
-                            args.Engine.Logger.LogDebug($"Error while saving assembly or pdb file {compilerCacheItem.Value.AssemblyName} to cache: {ex.Message}");
+                                // Also save the PDB if we have one
+                                if (compilerCacheItem.Value.PdbStream is object)
+                                {
+                                    IFile pdbFile = args.Engine.FileSystem.GetCacheFile(Path.ChangeExtension(assemblyFileName, ".pdb"));
+                                    compilerCacheItem.Value.PdbStream.Seek(0, SeekOrigin.Begin);
+                                    await pdbFile.WriteFromAsync(compilerCacheItem.Value.PdbStream, cancellationToken: args.Engine.CancellationToken);
+                                }
+
+                                _cachedAssemblies.Add(addAssemblyCacheKey, assemblyFileName);
+                                addCount++;
+                            }
+                            catch (Exception ex)
+                            {
+                                args.Engine.Logger.LogDebug($"Error while saving assembly or pdb file {compilerCacheItem.Value.AssemblyName} to cache: {ex.Message}");
+                            }
                         }
                     }
 
@@ -162,36 +170,40 @@ namespace Statiq.Razor
             args.Engine.Logger.LogDebug($"Removed {removeCount} stale Razor assemblies from the cache");
             args.Engine.Logger.LogDebug($"Cached and saved {addCount} new Razor assemblies");
 
-            // Clean up the cache folder
-            IDirectory cacheDirectory = args.Engine.FileSystem.GetCacheDirectory("razor");
-            if (cacheDirectory.Exists)
+            // Clean up and write the cache index if we're caching
+            if (useCache)
             {
-                int deleteCount = 0;
-                HashSet<string> cachedAssemblyFiles = new HashSet<string>(_cachedAssemblies.Values);
-                foreach (IFile assemblyFile in cacheDirectory.GetFiles())
+                // Clean up the cache folder
+                IDirectory cacheDirectory = args.Engine.FileSystem.GetCacheDirectory("razor");
+                if (cacheDirectory.Exists)
                 {
-                    if (!_cachedAssemblies.Values.Contains($"razor/{assemblyFile.Path.FileNameWithoutExtension}.dll"))
+                    int deleteCount = 0;
+                    HashSet<string> cachedAssemblyFiles = new HashSet<string>(_cachedAssemblies.Values);
+                    foreach (IFile assemblyFile in cacheDirectory.GetFiles())
                     {
-                        try
+                        if (!_cachedAssemblies.Values.Contains($"razor/{assemblyFile.Path.FileNameWithoutExtension}.dll"))
                         {
-                            assemblyFile.Delete();
-                            deleteCount++;
-                        }
-                        catch (Exception ex)
-                        {
-                            args.Engine.Logger.LogDebug($"Error while deleting stale cached assembly or pdb file {assemblyFile.Path.FullPath}: {ex.Message}");
+                            try
+                            {
+                                assemblyFile.Delete();
+                                deleteCount++;
+                            }
+                            catch (Exception ex)
+                            {
+                                args.Engine.Logger.LogDebug($"Error while deleting stale cached assembly or pdb file {assemblyFile.Path.FullPath}: {ex.Message}");
+                            }
                         }
                     }
+                    args.Engine.Logger.LogDebug($"Deleted {deleteCount} stale cached Razor assembly files");
                 }
-                args.Engine.Logger.LogDebug($"Deleted {deleteCount} stale cached Razor assembly files");
-            }
 
-            // Write the updated cache file
-            // System.Text.Json doesn't current support non-string dictionary keys, so write out as an array
-            // See https://github.com/dotnet/runtime/issues/30524
-            IFile cacheFile = args.Engine.FileSystem.GetCacheFile(CacheFileName);
-            KeyValuePair<AssemblyCacheKey, string>[] cachedAssembliesArray = _cachedAssemblies.ToArray();
-            await cacheFile.SerializeJsonAsync(cachedAssembliesArray, null, args.Engine.CancellationToken);
+                // Write the updated cache file
+                // System.Text.Json doesn't current support non-string dictionary keys, so write out as an array
+                // See https://github.com/dotnet/runtime/issues/30524
+                IFile cacheFile = args.Engine.FileSystem.GetCacheFile(CacheFileName);
+                KeyValuePair<AssemblyCacheKey, string>[] cachedAssembliesArray = _cachedAssemblies.ToArray();
+                await cacheFile.SerializeJsonAsync(cachedAssembliesArray, null, args.Engine.CancellationToken);
+            }
         }
 
         public void Dispose()

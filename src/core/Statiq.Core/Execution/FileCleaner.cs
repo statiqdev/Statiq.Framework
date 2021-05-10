@@ -34,8 +34,8 @@ namespace Statiq.Core
             // Always clean the temp directory between executions
             CleanDirectory(_fileSystem.GetTempDirectory(), "temp");
 
-            // If this is the first execution, see if we've got a write tracker cache
-            if (_firstExecution)
+            // If this is the first execution and we're caching, see if we've got a write tracker cache
+            if (_firstExecution && _settings.GetBool(Keys.UseCache))
             {
                 IFile cacheFile = _fileSystem.GetCacheFile(CacheFileName);
                 string result = await _fileSystem.WriteTracker.RestoreAsync(_fileSystem, cacheFile);
@@ -72,10 +72,13 @@ namespace Statiq.Core
                 CleanUnwritten();
             }
 
-            // Save the write tracker state
-            IFile cacheFile = _fileSystem.GetCacheFile(CacheFileName);
-            await _fileSystem.WriteTracker.SaveAsync(_fileSystem, cacheFile);
-            _logger.LogDebug($"Saved write tracking data to {cacheFile}");
+            // Save the write tracker state, but only if we're caching
+            if (_settings.GetBool(Keys.UseCache))
+            {
+                IFile cacheFile = _fileSystem.GetCacheFile(CacheFileName);
+                await _fileSystem.WriteTracker.SaveAsync(_fileSystem, cacheFile);
+                _logger.LogDebug($"Saved write tracking data to {cacheFile}");
+            }
         }
 
         /// <inheritdoc/>
