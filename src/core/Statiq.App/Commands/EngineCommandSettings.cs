@@ -39,7 +39,7 @@ namespace Statiq.App
         public string RootPath { get; set; }
 
         [CommandOption("-a|--analyzer <ANALYZER>")]
-        [Description("Specifies the log level for the specified analyzer as \"[analyzer]=[log level]\" (log level is optional, \"All\" to set all analyzers).")]
+        [Description("Specifies the log level for the specified analyzer as \"[[analyzer]]=[[log level]]\" (log level is optional, \"All\" to set all analyzers).")]
         public string[] Analyzers { get; set; }
     }
 }

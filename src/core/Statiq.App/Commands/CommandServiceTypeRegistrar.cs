@@ -10,11 +10,14 @@ namespace Statiq.App
     {
         private readonly IServiceCollection _serviceCollection = new ServiceCollection();
 
-        public void Register(Type service, Type implementation) =>
-            _serviceCollection.AddScoped(service, implementation);
+        public void Register(Type serviceType, Type implementation) =>
+            _serviceCollection.AddScoped(serviceType, implementation);
 
-        public void RegisterInstance(Type service, object implementation) =>
-            _serviceCollection.AddScoped(service, _ => implementation);
+        public void RegisterInstance(Type serviceType, object implementation) =>
+            _serviceCollection.AddScoped(serviceType, _ => implementation);
+
+        public void RegisterLazy(Type serviceType, Func<object> factory) =>
+            _serviceCollection.AddScoped(serviceType, _ => factory());
 
         public ITypeResolver Build() => new CommandServiceTypeResolver(_serviceCollection.BuildServiceProvider());
     }
