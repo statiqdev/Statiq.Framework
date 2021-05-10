@@ -142,6 +142,14 @@ namespace Statiq.App
             {
                 engine.FileSystem.OutputPath = commandSettings.OutputPath;
             }
+            if (!string.IsNullOrEmpty(commandSettings.TempPath))
+            {
+                engine.FileSystem.TempPath = commandSettings.TempPath;
+            }
+            if (!string.IsNullOrEmpty(commandSettings.CachePath))
+            {
+                engine.FileSystem.CachePath = commandSettings.CachePath;
+            }
 
             // Clean mode
             engine.Settings[Keys.CleanMode] = commandSettings.NoClean ? CleanMode.None : commandSettings.CleanMode;

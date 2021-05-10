@@ -14,6 +14,14 @@ namespace Statiq.App
         [Description("The path to output files, can be absolute or relative to the current folder.")]
         public string OutputPath { get; set; }
 
+        [CommandOption("--temp <PATH>")]
+        [Description("The path to output temporary files, can be absolute or relative to the current folder.")]
+        public string TempPath { get; set; }
+
+        [CommandOption("--cache <PATH>")]
+        [Description("The path to output cache files, can be absolute or relative to the current folder.")]
+        public string CachePath { get; set; }
+
         [CommandOption("--noclean")]
         [Description("Prevents cleaning of the output path on each execution (same as \"--clean-mode None\").")]
         public bool NoClean { get; set; }

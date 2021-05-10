@@ -12,6 +12,8 @@
 - The write tracking data is now cached in a file so if the output folder has not changed and the content is the same, files don't need to be written even on the first execution.
 - Added an `ICacheCode` interface to provide a standard deterministic `.GetCacheCodeAsync()` method and implemented it in `IDocument`, `IContentProvider`, and `IFile`.
 - Changed the console output encoding and the `ProcessLauncher` child process console encodings to UTF-8 so emoji and other Unicode characters will render correctly from child processes.
+- Fixed a bug with the `--help` CLI option and command description escaping (#186).
+- Added ability to set the temp and cache paths via the CLI or settings.
 
 # 1.0.0-beta.41
 
