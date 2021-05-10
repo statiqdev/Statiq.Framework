@@ -76,7 +76,12 @@ namespace Statiq.Razor
             _fileProvider = fileProvider;
             _memoryStreamFactory = memoryStreamFactory;
 
-            CompilationParameters = new CompilationParameters(null, false, 0);
+            CompilationParameters = new CompilationParameters
+            {
+                BasePageType = null,
+                IsDocumentModel = false,
+                CacheCode = 0
+            };
         }
 
         public IViewCompilerProvider InnerViewCompilerProvider { get; }

@@ -13,22 +13,21 @@ namespace Statiq.Razor
             Common.CacheCode cacheCode = new Common.CacheCode();
             cacheCode.Add(compilationParameters.CacheCode);
             cacheCode.Add(compilerCacheKey.CacheCode);
-            return new AssemblyCacheKey(compilationParameters, compilerCacheKey, cacheCode.ToCacheCode());
+            return new AssemblyCacheKey
+            {
+                CompilationParameters = compilationParameters,
+                CompilerCacheKey = compilerCacheKey,
+                CacheCode = cacheCode.ToCacheCode()
+            };
         }
 
-        // Single parameterized constructor required for JSON deserialization
-        public AssemblyCacheKey(CompilationParameters compilationParameters, CompilerCacheKey compilerCacheKey, int cacheCode)
-        {
-            CompilationParameters = compilationParameters;
-            CompilerCacheKey = compilerCacheKey;
-            CacheCode = cacheCode;
-        }
+        // Setters for JSON deserialization, don't actually mutate this object
 
-        public CompilationParameters CompilationParameters { get; }
+        public CompilationParameters CompilationParameters { get; set; }
 
-        public CompilerCacheKey CompilerCacheKey { get; }
+        public CompilerCacheKey CompilerCacheKey { get; set; }
 
-        public int CacheCode { get; }
+        public int CacheCode { get; set; }
 
         public override int GetHashCode() => CacheCode;
 

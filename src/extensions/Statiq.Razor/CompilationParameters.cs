@@ -18,22 +18,21 @@ namespace Statiq.Razor
             cacheCode.Add(namespacesCacheCode);
             cacheCode.Add(basePageTypeName);
             cacheCode.Add(isDocumentModel);
-            return new CompilationParameters(basePageTypeName, isDocumentModel, cacheCode.ToCacheCode());
+            return new CompilationParameters
+            {
+                BasePageType = basePageTypeName,
+                IsDocumentModel = isDocumentModel,
+                CacheCode = cacheCode.ToCacheCode()
+            };
         }
 
-        // Single parameterized constructor required for JSON deserialization
-        public CompilationParameters(string basePageType, bool isDocumentModel, int cacheCode)
-        {
-            BasePageType = basePageType;
-            IsDocumentModel = isDocumentModel;
-            CacheCode = cacheCode;
-        }
+        // Setters for JSON deserialization, don't actually mutate this object
 
-        public string BasePageType { get; }
+        public string BasePageType { get; set; }
 
-        public bool IsDocumentModel { get; }
+        public bool IsDocumentModel { get;  set; }
 
-        public int CacheCode { get; }
+        public int CacheCode { get; set; }
 
         public override int GetHashCode() => CacheCode;
 

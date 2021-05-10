@@ -17,25 +17,24 @@ namespace Statiq.Razor
             cacheCode.Add(request?.LayoutLocation);
             cacheCode.Add(request?.ViewStartLocation);
             cacheCode.Add(contentCacheCode);
-            return new CompilerCacheKey(request?.LayoutLocation, request?.ViewStartLocation, contentCacheCode, cacheCode.ToCacheCode());
+            return new CompilerCacheKey
+            {
+                LayoutLocation = request?.LayoutLocation,
+                ViewStartLocation = request?.ViewStartLocation,
+                ContentCacheCode = contentCacheCode,
+                CacheCode = cacheCode.ToCacheCode()
+            };
         }
 
-        // Single parameterized constructor required for JSON deserialization
-        public CompilerCacheKey(string layoutLocation, string viewStartLocation, int contentCacheCode, int cacheCode)
-        {
-            LayoutLocation = layoutLocation;
-            ViewStartLocation = viewStartLocation;
-            ContentCacheCode = contentCacheCode;
-            CacheCode = cacheCode;
-        }
+        // Setters for JSON deserialization, don't actually mutate this object
 
-        public string LayoutLocation { get; }
+        public string LayoutLocation { get; set; }
 
-        public string ViewStartLocation { get; }
+        public string ViewStartLocation { get; set; }
 
-        public int ContentCacheCode { get; }
+        public int ContentCacheCode { get; set; }
 
-        public int CacheCode { get; }
+        public int CacheCode { get; set; }
 
         public override int GetHashCode() => CacheCode;
 
