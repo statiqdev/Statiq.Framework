@@ -152,7 +152,18 @@ namespace Statiq.App
             }
 
             // Clean mode
-            engine.Settings[Keys.CleanMode] = commandSettings.NoClean ? CleanMode.None : commandSettings.CleanMode;
+            if (commandSettings.NoClean)
+            {
+                engine.Settings[Keys.CleanMode] = CleanMode.None;
+            }
+            else if (commandSettings.CleanMode.HasValue)
+            {
+                engine.Settings[Keys.CleanMode] = commandSettings.CleanMode.Value;
+            }
+            else
+            {
+                engine.Settings.AddIfNonExisting(Keys.CleanMode, CleanMode.Unwritten);
+            }
 
             // Set no cache if requested
             if (commandSettings.NoCache)

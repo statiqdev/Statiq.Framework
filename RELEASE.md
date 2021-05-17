@@ -1,5 +1,7 @@
 # 1.0.0-beta.44
 
+- Fixed a bug when changing the `CleanMode` setting via the bootstrapper.
+
 # 1.0.0-beta.43
 
 - Fixed a bug with using statements not being added to Razor layouts and partials (#953).
