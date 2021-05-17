@@ -1,5 +1,7 @@
 # 1.0.0-beta.43
 
+- Fixed a bug with using statements not being added to Razor layouts and partials (#953).
+
 # 1.0.0-beta.42
 
 - **Breaking change:** Deleted `IFile.GetCacheHashCodeAsync()` and replaced it with an implementation of `ICacheCode`.
