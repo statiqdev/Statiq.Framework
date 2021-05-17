@@ -641,6 +641,7 @@ namespace Statiq.Razor.Tests
                     FileSystem = GetFileSystem(),
                 };
                 context.Services.AddSingleton<IReadOnlyFileSystem>(context.FileSystem);
+                context.Services.AddSingleton<INamespacesCollection>(context.Namespaces);
                 context.Services.AddRazor();
                 new RazorEngineInitializer().Initialize(context.Engine);
                 return context;
