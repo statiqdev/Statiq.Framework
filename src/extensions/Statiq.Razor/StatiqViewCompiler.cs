@@ -69,7 +69,8 @@ namespace Statiq.Razor
             IViewCompilerProvider innerViewCompilerProvider,
             RazorProjectEngine projectEngine,
             Microsoft.Extensions.FileProviders.IFileProvider fileProvider,
-            IMemoryStreamFactory memoryStreamFactory)
+            IMemoryStreamFactory memoryStreamFactory,
+            INamespacesCollection namespaces)
         {
             InnerViewCompilerProvider = innerViewCompilerProvider;
             _projectEngine = projectEngine;
@@ -82,6 +83,9 @@ namespace Statiq.Razor
                 IsDocumentModel = false,
                 CacheCode = 0
             };
+
+            // Ensure that the custom phases are registered for the global view engine
+            EnsurePhases(projectEngine, CompilationParameters, namespaces.ToArray());
         }
 
         public IViewCompilerProvider InnerViewCompilerProvider { get; }
@@ -140,6 +144,7 @@ namespace Statiq.Razor
             (string)GetNormalizedPathMethod.Invoke(InnerViewCompilerProvider.GetCompiler(), new object[] { relativePath });
 
         // Adapted from RuntimeViewCompiler.CompileAndEmit() (Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.dll) to save assembly to disk for caching
+        // Also called from RazorCompiler for consistency (from the single global StatiqViewCompiler instance for access to the InnerViewCompilerProvider)
         public CompilationResult CompileAndEmit(RazorCodeDocument codeDocument, string generatedCode)
         {
             // Create the compilation

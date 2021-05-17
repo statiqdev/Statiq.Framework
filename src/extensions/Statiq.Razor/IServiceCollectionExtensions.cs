@@ -76,7 +76,8 @@ namespace Statiq.Razor
                         (IViewCompilerProvider)serviceProvider.CreateInstance(viewCompilerProviderDescriptor),
                         serviceProvider.GetRequiredService<RazorProjectEngine>(),
                         serviceProvider.GetRequiredService<Microsoft.Extensions.FileProviders.IFileProvider>(),
-                        serviceProvider.GetService<IMemoryStreamFactory>()),
+                        serviceProvider.GetService<IMemoryStreamFactory>(),
+                        serviceProvider.GetRequiredService<INamespacesCollection>()),
                 viewCompilerProviderDescriptor.Lifetime));
 
             // Add all loaded assemblies
