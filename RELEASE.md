@@ -1,3 +1,5 @@
+# 1.0.0-beta.46
+
 # 1.0.0-beta.45
 
 - Fixed several bugs related to caching in the `CopyFiles` module (#189).
