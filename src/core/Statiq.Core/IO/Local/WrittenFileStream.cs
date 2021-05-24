@@ -48,6 +48,24 @@ namespace Statiq.Core
             base.WriteByte(value);
         }
 
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            _wroteData = true;
+            base.Write(buffer);
+        }
+
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            _wroteData = true;
+            return base.WriteAsync(buffer, cancellationToken);
+        }
+
+        public override void EndWrite(IAsyncResult asyncResult)
+        {
+            _wroteData = true;
+            base.EndWrite(asyncResult);
+        }
+
         protected override void Dispose(bool disposing)
         {
             Stream.Dispose();

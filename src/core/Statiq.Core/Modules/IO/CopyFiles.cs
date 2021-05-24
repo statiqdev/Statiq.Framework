@@ -125,37 +125,44 @@ namespace Statiq.Core
             {
                 // Get the default destination file
                 NormalizedPath relativePath = file.Path.GetRelativeInputPath();
-                IFile outputFile = context.FileSystem.GetOutputFile(relativePath);
+                IFile destinationFile = context.FileSystem.GetOutputFile(relativePath);
 
                 // Calculate an alternate destination if needed
                 if (_destinationPath is object)
                 {
-                    outputFile = context.FileSystem.GetOutputFile(await _destinationPath(file, outputFile));
+                    destinationFile = context.FileSystem.GetOutputFile(await _destinationPath(file, destinationFile));
                 }
 
-                // Did we copy this file last time and has no one messed with it?
-                int outputFileHash = await outputFile.GetCacheCodeAsync();
-                if (context.FileSystem.WriteTracker.TryGetPreviousWrite(outputFile.Path, out int previousWriteHash)
-                    && previousWriteHash == outputFileHash)
+                // Did we copy this file last time and has no one messed with it? (I.e. check the destination file)
+                // Then check if the content we're about to write is the same as last time (I.e. check the source file)
+                int destinationFileHash = await destinationFile.GetCacheCodeAsync();
+                int sourceFileHash = await file.GetCacheCodeAsync(); // Get a source file hash that will represent the "content" (since we don't want to read the entire file to get a hash)
+                if (context.FileSystem.WriteTracker.TryGetPreviousWrite(destinationFile.Path, out int previousWriteHash)
+                    && previousWriteHash == destinationFileHash
+                    && context.FileSystem.WriteTracker.TryGetPreviousContent(destinationFile.Path, out int previousContentHash)
+                    && previousContentHash == sourceFileHash)
                 {
                     // We wrote this file last time, it still exists, and it hasn't changed
-                    // Now check if the content we're about to write is the same as last time
-                    if (context.FileSystem.WriteTracker.TryGetPreviousContent(outputFile.Path, out int previousContentHash)
-                        && previousContentHash == outputFileHash)
-                    {
-                        // We used the same content last time, so we can skip writing this file
-                        // Make sure to add the appropriate entries so it looks like we wrote it this time
-                        context.LogDebug($"Skipped copying file {outputFile.Path.FullPath} from {input.Source.ToSafeDisplayString()} because it already exists and the content is the same");
-                        context.FileSystem.WriteTracker.TrackWrite(outputFile.Path, previousWriteHash, false);
-                        context.FileSystem.WriteTracker.TrackContent(outputFile.Path, previousContentHash);
-                    }
+                    // Make sure to add the appropriate entries so it looks like we wrote it this time
+                    context.LogDebug($"Skipped copying file {destinationFile.Path.FullPath} from {relativePath} because it already exists and the content is the same");
+                    context.FileSystem.WriteTracker.TrackWrite(destinationFile.Path, previousWriteHash, false);
+                    context.FileSystem.WriteTracker.TrackContent(destinationFile.Path, previousContentHash);
                 }
                 else
                 {
                     // Copy to the destination
-                    await file.CopyToAsync(outputFile, cancellationToken: context.CancellationToken);
-                    context.FileSystem.WriteTracker.TrackContent(outputFile.Path, outputFileHash); // The file write hash will be tracked when the file write actually occurs
-                    context.LogDebug("Copied file {0} to {1}", file.Path.FullPath, outputFile.Path.FullPath);
+                    await file.CopyToAsync(destinationFile, cancellationToken: context.CancellationToken);
+                    context.FileSystem.WriteTracker.TrackContent(destinationFile.Path, sourceFileHash);
+                    context.LogDebug("Copied file {0} to {1}", file.Path.FullPath, destinationFile.Path.FullPath);
+
+                    // Don't need to set write hash since it'll be tracked when the file write actually occurs
+                    // unless the length is 0 in which case no write will have been recorded so we should manually add it
+                    destinationFile.Refresh();
+                    if (destinationFile.Length == 0)
+                    {
+                        destinationFileHash = await destinationFile.GetCacheCodeAsync(); // Get a new output file hash that includes the newly written file metadata since we just touched it
+                        context.FileSystem.WriteTracker.TrackWrite(destinationFile.Path, destinationFileHash, true);
+                    }
                 }
 
                 // Return the document

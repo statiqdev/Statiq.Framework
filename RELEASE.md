@@ -1,5 +1,7 @@
 # 1.0.0-beta.45
 
+- Fixed several bugs related to caching in the `CopyFiles` module (#189).
+
 # 1.0.0-beta.44
 
 - **Breaking change:** Fixed a bug with Razor layouts and partials and explicit model types. Previously all layouts and partials were assuming
