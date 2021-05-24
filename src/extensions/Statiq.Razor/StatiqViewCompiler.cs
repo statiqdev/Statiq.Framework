@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Razor.Compilation;
 using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 using Microsoft.AspNetCore.Razor.Hosting;
 using Microsoft.AspNetCore.Razor.Language;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.Extensions.Logging;
@@ -30,7 +31,9 @@ namespace Statiq.Razor
 
         private static readonly MethodInfo GetNormalizedPathMethod;
 
-        private static readonly MethodInfo CreateCompilationFailedExceptionMethod;
+        private static readonly MethodInfo CreateCompilationFailedExceptionFromRazorMethod;
+
+        private static readonly MethodInfo CreateCompilationFailedExceptionFromDiagnosticsMethod;
 
         static StatiqViewCompiler()
         {
@@ -51,13 +54,23 @@ namespace Statiq.Razor
 
             Type compilationFailedExceptionFactory = typeof(FileProviderRazorProjectItem).Assembly
                 .GetType("Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.CompilationFailedExceptionFactory");
-            CreateCompilationFailedExceptionMethod = compilationFailedExceptionFactory.GetMethod(
+            CreateCompilationFailedExceptionFromRazorMethod = compilationFailedExceptionFactory.GetMethod(
                 "Create",
                 new Type[] { typeof(RazorCodeDocument), typeof(IEnumerable<RazorDiagnostic>) });
+            CreateCompilationFailedExceptionFromDiagnosticsMethod = compilationFailedExceptionFactory.GetMethod(
+                "Create",
+                new Type[] { typeof(RazorCodeDocument), typeof(string), typeof(string), typeof(IEnumerable<Diagnostic>) });
         }
 
-        public static Exception CreateCompilationFailedException(RazorCodeDocument codeDocument, IEnumerable<RazorDiagnostic> diagnostics) =>
-            (Exception)CreateCompilationFailedExceptionMethod.Invoke(null, new object[] { codeDocument, diagnostics });
+        public static Exception CreateCompilationFailedExceptionFromRazor(RazorCodeDocument codeDocument, IEnumerable<RazorDiagnostic> diagnostics) =>
+            (Exception)CreateCompilationFailedExceptionFromRazorMethod.Invoke(null, new object[] { codeDocument, diagnostics });
+
+        public static Exception CreateCompilationFailedExceptionFromDiagnostics(
+            RazorCodeDocument codeDocument,
+            string compilationContext,
+            string assemblyName,
+            IEnumerable<Diagnostic> diagnostics) =>
+            (Exception)CreateCompilationFailedExceptionFromDiagnosticsMethod.Invoke(null, new object[] { codeDocument, compilationContext, assemblyName, diagnostics });
 
         private readonly RazorProjectEngine _projectEngine;
 
@@ -77,20 +90,14 @@ namespace Statiq.Razor
             _fileProvider = fileProvider;
             _memoryStreamFactory = memoryStreamFactory;
 
-            CompilationParameters = new CompilationParameters
-            {
-                BasePageType = null,
-                IsDocumentModel = false,
-                CacheCode = 0
-            };
-
             // Ensure that the custom phases are registered for the global view engine
-            EnsurePhases(projectEngine, CompilationParameters, namespaces.ToArray());
+            EnsurePhases(projectEngine, namespaces.ToArray(), null);
         }
 
         public IViewCompilerProvider InnerViewCompilerProvider { get; }
 
-        public CompilationParameters CompilationParameters { get; }
+        // The 0 cache code for this compiler indicates the global view/partial compiler (other compilers have a non-zero cache code)
+        public CompilationParameters CompilationParameters { get; } = new CompilationParameters();
 
         // This is the reason this whole class exists - it's the only place and way to intercept layout and partial compilation
         public async Task<CompiledViewDescriptor> CompileAsync(string relativePath)
@@ -121,7 +128,7 @@ namespace Statiq.Razor
                 RazorCSharpDocument cSharpDocument = codeDocument.GetCSharpDocument();
                 if (cSharpDocument.Diagnostics.Count > 0)
                 {
-                    throw CreateCompilationFailedException(codeDocument, cSharpDocument.Diagnostics);
+                    throw CreateCompilationFailedExceptionFromRazor(codeDocument, cSharpDocument.Diagnostics);
                 }
                 IExecutionContext.Current.LogDebug($"Compiling " + projectItem.FilePath);
                 return CompileAndEmit(codeDocument, cSharpDocument.GeneratedCode);
@@ -161,7 +168,7 @@ namespace Statiq.Razor
 
             if (!result.Success)
             {
-                throw CreateCompilationFailedException(codeDocument, Array.Empty<RazorDiagnostic>());
+                throw CreateCompilationFailedExceptionFromDiagnostics(codeDocument, generatedCode, assemblyName, result.Diagnostics);
             }
 
             // Load the assembly from the streams

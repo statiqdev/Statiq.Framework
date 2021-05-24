@@ -1,6 +1,14 @@
 # 1.0.0-beta.44
 
+- **Breaking change:** Fixed a bug with Razor layouts and partials and explicit model types. Previously all layouts and partials were assuming
+  the model type was an `IDocument`. This meant that extension methods and other `IDocument` oriented functionality worked in a layout or partial
+  when using the `@Model` property to access the document, but it also meant they didn't work for alternate models. Layouts and partials are
+  supposed to generally handle all model types (since different views can call them), so now the model is `dynamic` for layouts and partials
+  unless explicitly specified. This has the side-effect of making some `@Model` access like `IDocument` extension methods that used to work fail.
+  If you see "does not contain a definition" error messages in Razor compilation, try changing `@Model` property access to `@Document` in your layouts
+  and partials, or using an explicit `@model` directive at the top of the layout pr partial file to explicitly specify the model type for that layout or partial.
 - Fixed a bug when changing the `CleanMode` setting via the bootstrapper.
+- Improved compilation failure exception messages for Razor layouts and partials.
 
 # 1.0.0-beta.43
 

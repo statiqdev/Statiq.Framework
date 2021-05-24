@@ -70,7 +70,7 @@ namespace Statiq.Razor
         }
 
         // We need to initialize lazily since restoring from the cache won't have the actual namespaces, only a cache code
-        public void EnsurePhases(CompilationParameters parameters, string[] namespaces) => EnsurePhases(_projectEngine, parameters, namespaces);
+        public void EnsurePhases(CompilationParameters parameters, string[] namespaces) => EnsurePhases(_projectEngine, namespaces, parameters);
 
         public async Task RenderPageAsync(RenderRequest request)
         {
@@ -206,7 +206,7 @@ namespace Statiq.Razor
                 RazorCSharpDocument cSharpDocument = codeDocument.GetCSharpDocument();
                 if (cSharpDocument.Diagnostics.Count > 0)
                 {
-                    throw StatiqViewCompiler.CreateCompilationFailedException(codeDocument, cSharpDocument.Diagnostics);
+                    throw StatiqViewCompiler.CreateCompilationFailedExceptionFromRazor(codeDocument, cSharpDocument.Diagnostics);
                 }
 
                 // Use the RazorViewCompiler to finish compiling the view for consistency with layouts

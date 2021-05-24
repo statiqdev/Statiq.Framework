@@ -13,14 +13,22 @@ namespace Statiq.Razor
         private static string _urlResolutionTagHelperTypeName = typeof(UrlResolutionTagHelper).FullName;
 
         private readonly string _baseType;  // null indicates the default StatiqRazorPage<>
-        private readonly string[] _namespaces;
         private readonly bool _isDocumentModel;
+        private readonly string[] _namespaces;
 
-        public StatiqDocumentClassifierPhase(string baseType, string[] namespaces, bool isDocumentModel, RazorEngine engine)
+        // Views
+        public StatiqDocumentClassifierPhase(string baseType, bool isDocumentModel, string[] namespaces, RazorEngine engine)
         {
             _baseType = baseType;
-            _namespaces = namespaces ?? throw new ArgumentNullException(nameof(namespaces));
             _isDocumentModel = isDocumentModel;
+            _namespaces = namespaces ?? throw new ArgumentNullException(nameof(namespaces));
+            Engine = engine;
+        }
+
+        // Layouts and partials
+        public StatiqDocumentClassifierPhase(string[] namespaces, RazorEngine engine)
+        {
+            _namespaces = namespaces ?? throw new ArgumentNullException(nameof(namespaces));
             Engine = engine;
         }
 
@@ -62,7 +70,7 @@ namespace Statiq.Razor
                     return "Statiq.Razor.StatiqRazorPage<Statiq.Common.IDocument>";
                 }
 
-                return $"Statiq.Razor.StatiqRazorPage<{modelType}>";
+                return $"Statiq.Razor.StatiqRazorPage<TModel>";
             }
 
             // An explicit base page type was specified, so just replace the model generic type if there is one
