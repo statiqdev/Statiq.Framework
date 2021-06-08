@@ -39,6 +39,124 @@ namespace Statiq.Html.Tests
             }
 
             [Test]
+            public async Task ReplacesScriptResourceForDifferentHost()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings.Add(Keys.Host, "www.foo.com");
+                TestDocument document = new TestDocument(
+                    @"<html>
+                      <head>
+                        <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js""></script>
+                      </head>
+                      <body>
+                      </body>
+                    </html>");
+                MirrorResources module = new MirrorResources();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<html><head>
+                        <script src=""/mirror/cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js""></script>
+                      </head>
+                      <body>
+                      
+                    </body></html>", StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ReplacesScriptResourceForDifferentDocumentHost()
+            {
+                // Given
+                TestDocument document = new TestDocument(
+                    @"<html>
+                      <head>
+                        <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js""></script>
+                      </head>
+                      <body>
+                      </body>
+                    </html>");
+                document.Add(Keys.Host, "www.foo.com");
+                MirrorResources module = new MirrorResources();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<html><head>
+                        <script src=""/mirror/cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js""></script>
+                      </head>
+                      <body>
+                      
+                    </body></html>", StringCompareShould.IgnoreLineEndings);
+            }
+
+            [TestCase("cdn.jsdelivr.net")]
+            [TestCase("CDN.JsDeliVR.net")]
+            public async Task DoesNotReplaceScriptResourceForSameHost(string host)
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings.Add(Keys.Host, host);
+                TestDocument document = new TestDocument(
+                    @"<html>
+                      <head>
+                        <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js""></script>
+                      </head>
+                      <body>
+                      </body>
+                    </html>");
+                MirrorResources module = new MirrorResources();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, module).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<html>
+                      <head>
+                        <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js""></script>
+                      </head>
+                      <body>
+                      </body>
+                    </html>", StringCompareShould.IgnoreLineEndings);
+            }
+
+            [TestCase("cdn.jsdelivr.net")]
+            [TestCase("CDN.JsDeliVR.net")]
+            public async Task DoesNotReplaceScriptResourceForSameDocumentHost(string host)
+            {
+                // Given
+                TestDocument document = new TestDocument(
+                    @"<html>
+                      <head>
+                        <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js""></script>
+                      </head>
+                      <body>
+                      </body>
+                    </html>");
+                document.Add(Keys.Host, host);
+                MirrorResources module = new MirrorResources();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<html>
+                      <head>
+                        <script src=""https://cdn.jsdelivr.net/npm/es6-promise/dist/es6-promise.auto.min.js""></script>
+                      </head>
+                      <body>
+                      </body>
+                    </html>", StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
             public async Task KeepsIndexFileName()
             {
                 // Given
@@ -92,6 +210,89 @@ namespace Statiq.Html.Tests
                       <body>
                       
                     </body></html>", StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task DoesNotReplaceCanonicalLinkResource()
+            {
+                // Given
+                TestDocument document = new TestDocument(
+                    @"<html>
+                      <head>
+                        <link rel=""canonical"" href=""https://cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"" />
+                      </head>
+                      <body>
+                      </body>
+                    </html>");
+                MirrorResources module = new MirrorResources();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<html>
+                      <head>
+                        <link rel=""canonical"" href=""https://cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"" />
+                      </head>
+                      <body>
+                      </body>
+                    </html>", StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ReplacesLinkResourceWithMultipleRel()
+            {
+                // Given
+                TestDocument document = new TestDocument(
+                    @"<html>
+                      <head>
+                        <link rel=""prefetch stylesheet"" href=""https://cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"" />
+                      </head>
+                      <body>
+                      </body>
+                    </html>");
+                MirrorResources module = new MirrorResources();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<html><head>
+                        <link rel=""prefetch stylesheet"" href=""/mirror/cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"">
+                      </head>
+                      <body>
+                      
+                    </body></html>", StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task DoesNotReplaceLinkResourceWithMultipleRel()
+            {
+                // Given
+                TestDocument document = new TestDocument(
+                    @"<html>
+                      <head>
+                        <link rel=""prefetch help"" href=""https://cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"" />
+                      </head>
+                      <body>
+                      </body>
+                    </html>");
+                MirrorResources module = new MirrorResources();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(
+                    @"<html>
+                      <head>
+                        <link rel=""prefetch help"" href=""https://cdn.jsdelivr.net/npm/@@progress/kendo-theme-bootstrap@3.2.0/dist/all.min.css"" />
+                      </head>
+                      <body>
+                      </body>
+                    </html>", StringCompareShould.IgnoreLineEndings);
             }
 
             [Test]

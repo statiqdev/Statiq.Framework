@@ -35,6 +35,20 @@ namespace Statiq.Html
     /// <category>Input/Output</category>
     public class MirrorResources : Module
     {
+        /// <summary>
+        /// The valid values for a "rel" attribute in a link, anything else should be ignored.
+        /// </summary>
+        private static readonly HashSet<string> MirroredLinkRelValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "dns-prefetch",
+            "preconnect",
+            "prefetch",
+            "preload",
+            "prerender",
+            "stylesheet",
+            "icon"
+        };
+
         private readonly Func<Uri, NormalizedPath> _pathFunc;
 
         /// <summary>
@@ -79,11 +93,12 @@ namespace Statiq.Html
                     bool modifiedDocument = false;
 
                     // Link element
-                    foreach (IElement element in htmlDocument
-                            .GetElementsByTagName("link")
-                            .Where(x => x.HasAttribute("href") && !x.HasAttribute("data-no-mirror")))
+                    foreach (IElement element in htmlDocument.GetElementsByTagName("link")
+                        .Where(x => x.HasAttribute("href")
+                            && !x.HasAttribute("data-no-mirror")
+                            && (!x.HasAttribute("rel") || x.GetAttribute("rel").Split(' ', StringSplitOptions.RemoveEmptyEntries).All(y => MirroredLinkRelValues.Contains(y)))))
                     {
-                        string replacement = await DownloadAndReplaceAsync(element.GetAttribute("href"), mirrorCache, context);
+                        string replacement = await DownloadAndReplaceAsync(element.GetAttribute("href"), mirrorCache, input, context);
                         if (replacement is object)
                         {
                             element.Attributes["href"].Value = replacement;
@@ -95,9 +110,10 @@ namespace Statiq.Html
 
                     // Scripts
                     foreach (IHtmlScriptElement element in htmlDocument.Scripts
-                            .Where(x => !string.IsNullOrEmpty(x.Source) && !x.HasAttribute("data-no-mirror")))
+                        .Where(x => !string.IsNullOrEmpty(x.Source)
+                            && !x.HasAttribute("data-no-mirror")))
                     {
-                        string replacement = await DownloadAndReplaceAsync(element.Source, mirrorCache, context);
+                        string replacement = await DownloadAndReplaceAsync(element.Source, mirrorCache, input, context);
                         if (replacement is object)
                         {
                             element.Source = replacement;
@@ -128,7 +144,7 @@ namespace Statiq.Html
             }
         }
 
-        private async Task<string> DownloadAndReplaceAsync(string source, Dictionary<string, string> mirrorCache, IExecutionContext context)
+        private async Task<string> DownloadAndReplaceAsync(string source, Dictionary<string, string> mirrorCache, Common.IDocument input, IExecutionContext context)
         {
             if (mirrorCache.TryGetValue(source, out string cachedValue))
             {
@@ -149,6 +165,15 @@ namespace Statiq.Html
                 return null;
             }
 
+            // Verify this isn't from the current host
+            // Use both the document and the context just in case host is set or overridden at the document level
+            if ((context.ContainsKey(Keys.Host) && uri.Host.Equals(context.GetString(Keys.Host), StringComparison.OrdinalIgnoreCase))
+                || (input.ContainsKey(Keys.Host) && uri.Host.Equals(input.GetString(Keys.Host), StringComparison.OrdinalIgnoreCase)))
+            {
+                return null;
+            }
+
+            // Get the path and link to the file in the mirror cache
             NormalizedPath path = _pathFunc(uri);
             if (path.IsNull)
             {
