@@ -18,15 +18,15 @@ namespace Statiq.Tables
     {
         protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)
         {
-            IEnumerable<IEnumerable<string>> records;
+            IReadOnlyList<IReadOnlyList<string>> table;
             using (Stream stream = input.GetContentStream())
             {
-                records = ExcelFile.GetAllRecords(stream);
+                table = ExcelHelper.GetTable(stream);
             }
 
             using (Stream contentStream = context.GetContentStream())
             {
-                CsvFile.WriteAllRecords(records, contentStream);
+                CsvHelper.WriteTable(table, contentStream);
                 return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Get(".csv"))).Yield();
             }
         }

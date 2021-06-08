@@ -5,9 +5,9 @@ using OfficeOpenXml;
 
 namespace Statiq.Tables
 {
-    internal static class ExcelFile
+    internal static class ExcelHelper
     {
-        public static IEnumerable<IEnumerable<string>> GetAllRecords(Stream stream, int sheetNumber = 0)
+        public static IReadOnlyList<IReadOnlyList<string>> GetTable(Stream stream, int sheetNumber = 0)
         {
             using (ExcelPackage excel = new ExcelPackage(stream))
             {
@@ -19,11 +19,11 @@ namespace Statiq.Tables
 
                 ExcelWorksheet sheet = excel.Workbook.Worksheets[sheetNumber];
 
-                return GetAllRecords(sheet);
+                return GetTable(sheet);
             }
         }
 
-        public static IEnumerable<IEnumerable<string>> GetAllRecords(ExcelWorksheet sheet)
+        public static IReadOnlyList<IReadOnlyList<string>> GetTable(ExcelWorksheet sheet)
         {
             ExcelAddressBase dimension = sheet.Dimension;
 
@@ -32,9 +32,9 @@ namespace Statiq.Tables
                 return null;
             }
 
-            List<List<string>> rowList = new List<List<string>>();
             int rowCount = dimension.Rows;
             int columnCount = dimension.Columns;
+            List<List<string>> table = new List<List<string>>(rowCount);
 
             for (int r = 1; r <= rowCount; r++)
             {
@@ -45,10 +45,10 @@ namespace Statiq.Tables
                     rowValues.Add(cell?.Value?.ToString());
                 }
 
-                rowList.Add(rowValues);
+                table.Add(rowValues);
             }
 
-            return rowList;
+            return table;
         }
     }
 }

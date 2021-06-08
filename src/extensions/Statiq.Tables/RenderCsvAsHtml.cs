@@ -35,7 +35,7 @@ namespace Statiq.Tables
             IEnumerable<IEnumerable<string>> records;
             using (Stream stream = input.GetContentStream())
             {
-                records = CsvFile.GetAllRecords(stream);
+                records = CsvHelper.GetTable(stream);
             }
 
             StringBuilder builder = new StringBuilder();

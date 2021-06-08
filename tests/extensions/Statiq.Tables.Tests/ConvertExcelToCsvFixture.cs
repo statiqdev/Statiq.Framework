@@ -15,6 +15,13 @@ namespace Statiq.Tables.Tests
             public async Task TestXlsx()
             {
                 // Given
+                TestDocument document = new TestDocument(GetTestFileStream("test.xlsx"));
+                ConvertExcelToCsv module = new ConvertExcelToCsv();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
+
+                // Then
                 string output = string.Empty
                     + "\"\",\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\"\r\n"
 + "\"1\",\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\"\r\n"
@@ -43,13 +50,6 @@ namespace Statiq.Tables.Tests
 + "\"24\",\"24\",\"48\",\"72\",\"96\",\"120\",\"144\",\"168\"\r\n"
 + "\"25\",\"25\",\"50\",\"75\",\"100\",\"125\",\"150\",\"175\"\r\n"
 + "\"26\",\"26\",\"52\",\"78\",\"104\",\"130\",\"156\",\"182\"\r\n";
-                TestDocument document = new TestDocument(GetTestFileStream("test.xlsx"));
-                ConvertExcelToCsv module = new ConvertExcelToCsv();
-
-                // When
-                TestDocument result = await ExecuteAsync(document, module).SingleAsync();
-
-                // Then
                 result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
         }

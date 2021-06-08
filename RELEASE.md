@@ -2,6 +2,8 @@
 
 - Fixed a bug in `MirrorResources` to prevent it from mirroring links with "rel" values that don't specify artifacts (#190).
 - Fixed a bug in `MirrorResources` to prevent it from mirroring resources from the current host when `Host` is specified (#190).
+- Added a `ReadExcel` module to Statiq.Tables that can read an Excel file into metadata as a `IReadOnlyList<IReadOnlyList<string>>`.
+- Added a `ReadCsv` module to Statiq.Tables that can read a CSV file into metadata as a `IReadOnlyList<IReadOnlyList<string>>`.
 
 # 1.0.0-beta.45
 

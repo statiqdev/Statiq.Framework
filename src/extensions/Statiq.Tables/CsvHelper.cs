@@ -5,20 +5,27 @@ using CsvHelper.Configuration;
 
 namespace Statiq.Tables
 {
-    internal static class CsvFile
+    internal static class CsvHelper
     {
-        public static IEnumerable<IEnumerable<string>> GetAllRecords(Stream stream, string delimiter = null)
+        public static IReadOnlyList<IReadOnlyList<string>> GetTable(Stream stream, string delimiter = null)
         {
             using (StreamReader reader = new StreamReader(stream))
             {
-                return GetAllRecords(reader, delimiter);
+                return GetTable(reader, delimiter);
             }
         }
 
-        public static IEnumerable<IEnumerable<string>> GetAllRecords(TextReader reader, string delimiter = null)
+        public static IReadOnlyList<IReadOnlyList<string>> GetTable(TextReader reader, string delimiter = null)
         {
-            List<IEnumerable<string>> records = new List<IEnumerable<string>>();
-            Configuration configuration = delimiter is null ? new Configuration { HasHeaderRecord = false } : new Configuration { HasHeaderRecord = false, Delimiter = delimiter };
+            List<IReadOnlyList<string>> records = new List<IReadOnlyList<string>>();
+            Configuration configuration = new Configuration
+            {
+                HasHeaderRecord = false
+            };
+            if (delimiter is object)
+            {
+                configuration.Delimiter = delimiter;
+            }
 
             using (CsvReader csv = new CsvReader(reader, configuration))
             {
@@ -32,14 +39,14 @@ namespace Statiq.Tables
             return records;
         }
 
-        public static void WriteAllRecords(IEnumerable<IEnumerable<string>> records, Stream stream)
+        public static void WriteTable(IEnumerable<IEnumerable<string>> records, Stream stream)
         {
             StreamWriter writer = new StreamWriter(stream, leaveOpen: true);
-            WriteAllRecords(records, writer);
+            WriteTable(records, writer);
             writer.Flush();
         }
 
-        public static void WriteAllRecords(IEnumerable<IEnumerable<string>> records, TextWriter writer)
+        public static void WriteTable(IEnumerable<IEnumerable<string>> records, TextWriter writer)
         {
             if (records is null)
             {
