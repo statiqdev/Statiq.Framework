@@ -169,7 +169,8 @@ namespace Statiq.App
                 engine.Namespaces.AddRange(
                     bootstrapper.ClassCatalog
                         .GetTypesAssignableTo<IModule>()
-                        .Select(x => x.Namespace));
+                        .Select(x => x.Namespace)
+                        .Where(x => !x.IsNullOrWhiteSpace()));
 
                 // Add all namespaces from the entry application
                 Assembly entryAssembly = Assembly.GetEntryAssembly();
@@ -179,6 +180,7 @@ namespace Statiq.App
                         bootstrapper.ClassCatalog
                             .GetTypesFromAssembly(entryAssembly, true)
                             .Select(x => x.Namespace)
+                            .Where(x => !x.IsNullOrWhiteSpace())
                             .Distinct());
                 }
 

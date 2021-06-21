@@ -1,5 +1,7 @@
 # 1.0.0-beta.47
 
+- Fixed a bug with the reflected namespace collection when dealing with objects in the global namespace (#191).
+
 # 1.0.0-beta.46
 
 - Fixed a bug in `MirrorResources` to prevent it from mirroring links with "rel" values that don't specify artifacts (#190).

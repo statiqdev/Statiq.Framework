@@ -27,14 +27,25 @@ namespace Statiq.Core
 
             // Add all public namespaces from Statiq.Common
             _namespaces.AddRange(typeof(IEngine).Assembly.GetTypes()
-                .Where(x => x.IsPublic)
+                .Where(x => x.IsPublic && !x.Namespace.IsNullOrWhiteSpace())
                 .Select(x => x.Namespace)
                 .Distinct());
         }
 
-        public bool Add(string ns) => _namespaces.Add(ns);
+        public bool Add(string ns)
+        {
+            ns.ThrowIfNullOrWhiteSpace(nameof(ns));
+            return _namespaces.Add(ns);
+        }
 
-        public void AddRange(IEnumerable<string> namespaces) => _namespaces.AddRange(namespaces);
+        public void AddRange(IEnumerable<string> namespaces)
+        {
+            // Iterate manually so we can throw for null or white space
+            foreach (string ns in namespaces)
+            {
+                Add(ns);
+            }
+        }
 
         public int Count => _namespaces.Count;
 
