@@ -1,6 +1,7 @@
-﻿using Statiq.Common;
+﻿using System.Threading.Tasks;
+using Statiq.Common;
 
-namespace Statiq.SearchIndex
+namespace Statiq.Lunr
 {
     /// <summary>
     /// Represents an item in the search index.
@@ -18,14 +19,14 @@ namespace Statiq.SearchIndex
         string Description { get; }
 
         /// <summary>
-        /// The content of the search item.
-        /// </summary>
-        string Content { get; }
-
-        /// <summary>
         /// Any tags for the search item.
         /// </summary>
         string Tags { get; }
+
+        /// <summary>
+        /// The content of the search item.
+        /// </summary>
+        Task<string> GetContentAsync();
 
         /// <summary>
         /// Gets a link to the search item result.

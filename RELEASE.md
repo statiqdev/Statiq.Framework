@@ -1,5 +1,10 @@
 # 1.0.0-beta.47
 
+- **Breaking change:** Renamed the erroneous `Statiq.SearchIndex` namespace in the `Statiq.Lunr` package to `Statiq.Lunr`.
+- **Breaking change:** Renamed `GenerateLunrIndexKeys` to `LunrKeys` in `Statiq.Lunr`.
+- **Breaking change:** Refactored the `ILunrIndexItem.Content` property to an async `ILunrIndexItem.GetContentAsync()` method for better compatibility with document content.
+- Added the option to create default search index items for documents in the `GenerateLunrIndex` module.
+- Added a `LunrKeys.HideFromSearchIndex` option to remove specific documents from the search index created by the `GenerateLunrIndex` module.
 - Fixed a bug with the reflected namespace collection when dealing with objects in the global namespace (#191).
 
 # 1.0.0-beta.46

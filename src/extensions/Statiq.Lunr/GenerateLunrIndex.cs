@@ -7,15 +7,13 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
-namespace Statiq.SearchIndex
+namespace Statiq.Lunr
 {
     /// <summary>
     /// Generates a JavaScript-based search index from the input documents.
     /// </summary>
     /// <remarks>
     /// This module generates a search index that can be imported into the JavaScript <a href="http://lunrjs.com/">Lunr.js</a> search engine.
-    /// Each input document should either specify the <c>SearchIndexItem</c> metadata key or a delegate that returns a <c>SearchIndexItem</c>
-    /// instance.
     /// </remarks>
     /// <example>
     /// The client-side JavaScript code for importing the search index should look something like this (assuming you have an HTML <c>input</c>
@@ -53,12 +51,12 @@ namespace Statiq.SearchIndex
     /// });
     /// </code>
     /// </example>
-    /// <metadata cref="GenerateLunrIndexKeys.LunrIndexItem" usage="Input" />
+    /// <metadata cref="LunrKeys.LunrIndexItem" usage="Input" />
     /// <category>Content</category>
     public class GenerateLunrIndex : Module
     {
         private static readonly Regex StripHtmlAndSpecialChars = new Regex(@"<[^>]+>|&[a-zA-Z]{2,};|&#\d+;|[^a-zA-Z-#]", RegexOptions.Compiled);
-        private readonly Config<ILunrIndexItem> _searchIndexItem;
+        private readonly Config<ILunrIndexItem> _getSearchIndexItem;
         private NormalizedPath _stopwordsPath;
         private bool _enableStemming;
         private NormalizedPath _destination = new NormalizedPath("searchIndex.js");
@@ -66,19 +64,21 @@ namespace Statiq.SearchIndex
         private Func<StringBuilder, IExecutionContext, string> _script = (builder, _) => builder.ToString();
 
         /// <summary>
-        /// Creates the search index by looking for a <c>SearchIndexItem</c> metadata key in each input document that
-        /// contains a <c>SearchIndexItem</c> instance.
+        /// Creates the search index by looking for a <see cref="LunrKeys.LunrIndexItem"/> metadata key in each input document.
+        /// If no <see cref="LunrKeys.LunrIndexItem"/> metadata key is present in the document, default values for the document
+        /// will be used to generate a search index item.
         /// </summary>
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
         public GenerateLunrIndex(in NormalizedPath stopwordsPath = default, bool enableStemming = false)
-            : this(Config.FromDocument(doc => doc.Get<ILunrIndexItem>(GenerateLunrIndexKeys.LunrIndexItem)), stopwordsPath, enableStemming)
+            : this(Config.FromDocument(doc => doc.Get<ILunrIndexItem>(LunrKeys.LunrIndexItem) ?? new LunrIndexDocItem(doc)), stopwordsPath, enableStemming)
         {
         }
 
         /// <summary>
-        /// Creates the search index by looking for a specified metadata key in each input document that
-        /// contains a <c>SearchIndexItem</c> instance.
+        /// Creates the search index by looking for a specified metadata key in each input document that contains a <see cref="ILunrIndexItem"/> instance.
+        /// If the corresponding metadata key is not available or does not contain a <see cref="ILunrIndexItem"/> instance, the document will be
+        /// omitted from the search index.
         /// </summary>
         /// <param name="searchIndexItemMetadataKey">The metadata key that contains the <c>SearchIndexItem</c> instance.</param>
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
@@ -89,14 +89,31 @@ namespace Statiq.SearchIndex
         }
 
         /// <summary>
-        /// Creates the search index by using a delegate that returns a <c>SearchIndexItem</c> instance for each input document.
+        /// Creates the search index by looking for a specified metadata key in each input document that contains a <see cref="ILunrIndexItem"/> instance.
+        /// If the corresponding metadata key is not available or does not contain a <see cref="ILunrIndexItem"/> instance, the document will be
+        /// omitted from the search index or default values will be used depending on the value of <paramref name="useDefaultValues"/>.
+        /// </summary>
+        /// <param name="searchIndexItemMetadataKey">The metadata key that contains the <c>SearchIndexItem</c> instance.</param>
+        /// <param name="useDefaultValues">
+        /// <c>true</c> to use default values if the specified key is not present in a document or does not contain a <see cref="ILunrIndexItem"/> instance,
+        /// <c>false</c> to omit the document if the specified key is not present in a document or does not contain a <see cref="ILunrIndexItem"/> instance.
+        /// </param>
+        /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
+        /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
+        public GenerateLunrIndex(string searchIndexItemMetadataKey, bool useDefaultValues, in NormalizedPath stopwordsPath = default, bool enableStemming = false)
+            : this(Config.FromDocument(doc => doc.Get<ILunrIndexItem>(searchIndexItemMetadataKey) ?? (useDefaultValues ? new LunrIndexDocItem(doc) : null)), stopwordsPath, enableStemming)
+        {
+        }
+
+        /// <summary>
+        /// Creates the search index by using a delegate that returns a <see cref="ILunrIndexItem"/> instance for each input document.
         /// </summary>
         /// <param name="searchIndexItem">A delegate that should return a <c>ISearchIndexItem</c>.</param>
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
         public GenerateLunrIndex(Config<ILunrIndexItem> searchIndexItem, in NormalizedPath stopwordsPath = default, bool enableStemming = false)
         {
-            _searchIndexItem = searchIndexItem.ThrowIfNull(nameof(searchIndexItem));
+            _getSearchIndexItem = searchIndexItem.ThrowIfNull(nameof(searchIndexItem));
             _stopwordsPath = stopwordsPath;
             _enableStemming = enableStemming;
         }
@@ -164,25 +181,20 @@ namespace Statiq.SearchIndex
         {
             ILunrIndexItem[] searchIndexItems =
                 await context.Inputs
+                    .Where(x => !x.GetBool(LunrKeys.HideFromSearchIndex))
                     .ToAsyncEnumerable()
-                    .SelectAwait(async x => await _searchIndexItem.GetValueAsync(x, context))
-                    .Where(x => !string.IsNullOrEmpty(x?.Title) && !string.IsNullOrEmpty(x.Content))
+                    .SelectAwait(async x => await _getSearchIndexItem.GetValueAsync(x, context))
+                    .Where(x => x is object && !(x?.Title).IsNullOrEmpty())
                     .ToArrayAsync();
 
-            if (searchIndexItems.Length == 0)
-            {
-                context.LogWarning("It's not possible to build the search index because no documents contain the necessary metadata.");
-                return Array.Empty<IDocument>();
-            }
-
             string[] stopwords = await GetStopwordsAsync(context);
-            StringBuilder scriptBuilder = BuildScript(searchIndexItems, stopwords, context);
+            StringBuilder scriptBuilder = await BuildScriptAsync(searchIndexItems, stopwords, context);
             string script = _script(scriptBuilder, context);
 
             return context.CreateDocument(_destination, context.GetContentProvider(script, MediaTypes.Get(".js"))).Yield();
         }
 
-        private StringBuilder BuildScript(IList<ILunrIndexItem> searchIndexItems, string[] stopwords, IExecutionContext context)
+        private async Task<StringBuilder> BuildScriptAsync(IList<ILunrIndexItem> searchIndexItems, string[] stopwords, IExecutionContext context)
         {
             StringBuilder scriptBuilder = new StringBuilder($@"
 var searchModule = function() {{
@@ -196,10 +208,10 @@ var searchModule = function() {{
 
             for (int i = 0; i < searchIndexItems.Count; ++i)
             {
-                ILunrIndexItem itm = searchIndexItems[i];
+                ILunrIndexItem indexItem = searchIndexItems[i];
 
                 // Get the URL and skip if not valid
-                string url = itm.GetLink(context, _includeHost);
+                string url = indexItem.GetLink(context, _includeHost);
                 if (string.IsNullOrEmpty(url))
                 {
                     continue;
@@ -209,15 +221,15 @@ var searchModule = function() {{
     a(
         {{
             id:{i},
-            title:{CleanString(itm.Title, stopwords)},
-            content:{CleanString(itm.Content, stopwords)},
-            description:{CleanString(itm.Description, stopwords)},
-            tags:'{itm.Tags}'
+            title:{CleanString(indexItem.Title, stopwords)},
+            content:{CleanString(await indexItem.GetContentAsync(), stopwords)},
+            description:{CleanString(indexItem.Description, stopwords)},
+            tags:'{indexItem.Tags}'
         }},
         {{
             url:'{url}',
-            title:{ToJsonString(itm.Title)},
-            description:{ToJsonString(itm.Description)}
+            title:{ToJsonString(indexItem.Title)},
+            description:{ToJsonString(indexItem.Description)}
         }}
     );");
             }
