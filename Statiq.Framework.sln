@@ -109,6 +109,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statiq.Scriban.Tests", "tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestConsoleApp", "tests\core\TestConsoleApp\TestConsoleApp.csproj", "{B27DDE2E-69B4-415A-9DB2-46506C7A5372}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statiq.Lunr.Tests", "tests\extensions\Statiq.Lunr.Tests\Statiq.Lunr.Tests.csproj", "{0878D57C-1C7E-48DF-85C0-CDA5F51763FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -287,6 +289,10 @@ Global
 		{B27DDE2E-69B4-415A-9DB2-46506C7A5372}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B27DDE2E-69B4-415A-9DB2-46506C7A5372}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B27DDE2E-69B4-415A-9DB2-46506C7A5372}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0878D57C-1C7E-48DF-85C0-CDA5F51763FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0878D57C-1C7E-48DF-85C0-CDA5F51763FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0878D57C-1C7E-48DF-85C0-CDA5F51763FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0878D57C-1C7E-48DF-85C0-CDA5F51763FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -339,6 +345,7 @@ Global
 		{42EAF916-B373-4257-92E5-4EFEF583285F} = {5A431149-2B88-40C3-9717-CA6CCF214317}
 		{31430424-368E-4CE5-A4C4-6C8372278725} = {2E5842F3-4797-4BB5-9A55-F3A005B434F8}
 		{B27DDE2E-69B4-415A-9DB2-46506C7A5372} = {12931CA5-E734-4CD9-883D-27D897512183}
+		{0878D57C-1C7E-48DF-85C0-CDA5F51763FB} = {2E5842F3-4797-4BB5-9A55-F3A005B434F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B0CD133C-B843-4178-8976-B04AE6B2021A}
