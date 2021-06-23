@@ -77,7 +77,7 @@ namespace Statiq.Lunr.Tests
                 TestDocument result = await ExecuteAsync(new[] { a, b }, module).SingleAsync();
 
                 // Then
-                result.Destination.ShouldBe("searchIndex.js");
+                result.Destination.ShouldBe("searchindex.js");
             }
 
             [Test]

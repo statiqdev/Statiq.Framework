@@ -52,14 +52,17 @@ namespace Statiq.Lunr
     /// </code>
     /// </example>
     /// <metadata cref="LunrKeys.LunrIndexItem" usage="Input" />
+    /// <metadata cref="LunrKeys.HideFromSearchIndex" usage="Input" />
     /// <category>Content</category>
     public class GenerateLunrIndex : Module
     {
+        public static readonly NormalizedPath DefaultDestinationPath = new NormalizedPath("searchindex.js");
+
         private static readonly Regex StripHtmlAndSpecialChars = new Regex(@"<[^>]+>|&[a-zA-Z]{2,};|&#\d+;|[^a-zA-Z-#]", RegexOptions.Compiled);
         private readonly Config<ILunrIndexItem> _getSearchIndexItem;
         private NormalizedPath _stopwordsPath;
         private bool _enableStemming;
-        private NormalizedPath _destination = new NormalizedPath("searchIndex.js");
+        private NormalizedPath _destination = DefaultDestinationPath;
         private bool _includeHost = false;
         private Func<StringBuilder, IExecutionContext, string> _script = (builder, _) => builder.ToString();
 
