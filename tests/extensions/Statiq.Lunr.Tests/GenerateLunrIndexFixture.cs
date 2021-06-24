@@ -26,7 +26,7 @@ namespace Statiq.Lunr.Tests
                 {
                     { Keys.Title, "Bar" }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndexOld module = new GenerateLunrIndexOld();
 
                 // When
                 TestDocument result = await ExecuteAsync(new[] { a, b }, module).SingleAsync();
@@ -49,7 +49,7 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Bar" },
                     { LunrKeys.HideFromSearchIndex, true }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndexOld module = new GenerateLunrIndexOld();
 
                 // When
                 TestDocument result = await ExecuteAsync(new[] { a, b }, module).SingleAsync();
@@ -71,7 +71,7 @@ namespace Statiq.Lunr.Tests
                 {
                     { Keys.Title, "Bar" }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndexOld module = new GenerateLunrIndexOld();
 
                 // When
                 TestDocument result = await ExecuteAsync(new[] { a, b }, module).SingleAsync();
@@ -92,7 +92,7 @@ namespace Statiq.Lunr.Tests
                 {
                     { Keys.Title, "Bar" }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex().WithDestination("search/index.js");
+                GenerateLunrIndexOld module = new GenerateLunrIndexOld().WithDestination("search/index.js");
 
                 // When
                 TestDocument result = await ExecuteAsync(new[] { a, b }, module).SingleAsync();
@@ -111,7 +111,7 @@ namespace Statiq.Lunr.Tests
                 };
                 TestExecutionContext context = new TestExecutionContext();
                 context.Settings.Add(Keys.Host, "bar.com");
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndexOld module = new GenerateLunrIndexOld();
 
                 // When
                 TestDocument result = await ExecuteAsync(a, context, module).SingleAsync();
@@ -130,7 +130,7 @@ namespace Statiq.Lunr.Tests
                 };
                 TestExecutionContext context = new TestExecutionContext();
                 context.Settings.Add(Keys.Host, "bar.com");
-                GenerateLunrIndex module = new GenerateLunrIndex().IncludeHost();
+                GenerateLunrIndexOld module = new GenerateLunrIndexOld().IncludeHost();
 
                 // When
                 TestDocument result = await ExecuteAsync(a, context, module).SingleAsync();
@@ -149,7 +149,7 @@ namespace Statiq.Lunr.Tests
                 };
                 TestExecutionContext context = new TestExecutionContext();
                 context.Settings.Add(Keys.Host, "bar.com");
-                GenerateLunrIndex module = new GenerateLunrIndex().WithScript((b, ctx) =>
+                GenerateLunrIndexOld module = new GenerateLunrIndexOld().WithScript((b, ctx) =>
                 {
                     b.Append("HI!");
                     return b.ToString();
@@ -178,7 +178,7 @@ namespace Statiq.Lunr.Tests
                         new LunrIndexItem("/c/c.html", "Baz", "Fizz")
                     }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndexOld module = new GenerateLunrIndexOld();
 
                 // When
                 TestDocument result = await ExecuteAsync(new[] { a, b }, module).SingleAsync();

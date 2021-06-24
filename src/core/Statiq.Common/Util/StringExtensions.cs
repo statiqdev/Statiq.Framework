@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Statiq.Common
@@ -23,6 +25,20 @@ namespace Statiq.Common
                 "([a-z])([A-Z])",
                 "$1-$2")
                 .ToLower();
+
+        public static string ToLowerCamelCase(this string str) => new string(ToLowerCamelCaseChars(str).ToArray());
+
+        private static IEnumerable<char> ToLowerCamelCaseChars(string str)
+        {
+            if (str.Length > 0)
+            {
+                yield return char.ToLowerInvariant(str[0]);
+                for (int c = 1; c < str.Length; c++)
+                {
+                    yield return str[c];
+                }
+            }
+        }
 
         /// <summary>
         /// Allocates a <see cref="Span{T}"/> and copies the characters of the string into it.

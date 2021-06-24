@@ -1,7 +1,7 @@
 ﻿namespace Statiq.Lunr
 {
     /// <summary>
-    /// Metadata keys for use by the <see cref="GenerateLunrIndex"/> module.
+    /// Metadata keys for use by the <see cref="GenerateLunrIndexOld"/> module.
     /// </summary>
     public static class LunrKeys
     {

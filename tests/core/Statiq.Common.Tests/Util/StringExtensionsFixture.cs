@@ -97,5 +97,23 @@ namespace Statiq.Common.Tests.Util
                 result.ShouldBe(expected);
             }
         }
+
+        public class ToLowerCamelCaseTests : StringExtensionsFixture
+        {
+            [TestCase("FooBar", "fooBar")]
+            [TestCase("fooBar", "fooBar")]
+            [TestCase("foobar", "foobar")]
+            [TestCase("", "")]
+            [TestCase("F", "f")]
+            [TestCase("f", "f")]
+            public void ToLowerCamelCaseCorrectlyConvertsString(string input, string expected)
+            {
+                // Given, When
+                string result = input.ToLowerCamelCase();
+
+                // Then
+                result.ShouldBe(expected);
+            }
+        }
     }
 }
