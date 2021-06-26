@@ -18,6 +18,7 @@ namespace Statiq.Common
         public static string Handlebars => Get(".hbs");
         public static string Html => Get(".html");
         public static string HtmlFragment => Get(".fhtml");
+        public static string JavaScript => Get(".js");
         public static string Jpg => Get(".jpg");
         public static string Json => Get(".json");
         public static string Less => Get(".less");
@@ -367,6 +368,7 @@ namespace Statiq.Common
                 { ".gv", "text/vnd.graphviz" },
                 { ".gxf", "application/gxf" },
                 { ".gxt", "application/vnd.geonext" },
+                { ".gz", "application/x-gzip" },
                 { ".h", "text/x-c" },
                 { ".h261", "video/h261" },
                 { ".h263", "video/h263" },

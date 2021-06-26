@@ -46,9 +46,9 @@ namespace Statiq.App.Tests.Commands
                 foreach (KeyValuePair<string, string> arg in args)
                 {
                     arg.Value.ShouldNotBeNull("Argument value should not be null.");
-                    arg.Key.ShouldNotStartWith(" ", "Arguments key should be trimmed.");
+                    arg.Key.ShouldNotStartWith(" ", Case.Insensitive, "Arguments key should be trimmed.");
                     arg.Key.ShouldNotEndWith(" ", "Arguments key should be trimmed.");
-                    arg.Value.ShouldNotStartWith(" ", "Arguments value should be trimmed.");
+                    arg.Value.ShouldNotStartWith(" ", Case.Insensitive, "Arguments value should be trimmed.");
                     arg.Value.ShouldNotEndWith(" ", "Arguments value should be trimmed.");
                 }
             }
