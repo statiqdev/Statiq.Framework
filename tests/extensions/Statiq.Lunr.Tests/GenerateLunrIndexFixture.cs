@@ -321,6 +321,29 @@ namespace Statiq.Lunr.Tests
                 TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath);
                 scriptDocument.Content.ShouldContain(@"documents: {""-1843551964"":{""link"":""/a/a.html"",""title"":""Foo""},""-53465798"":{""aaa"":""bbb"",""link"":""/b.html"",""title"":""Bar""}}");
             }
+
+            [Test]
+            public async Task OmitsFromSearch()
+            {
+                // Given
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                TestDocument b = new TestDocument((NormalizedPath)"b.html", "Buzz")
+                {
+                    { Keys.Title, "Bar" },
+                    { LunrKeys.OmitFromSearch, true }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex();
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
+
+                // Then
+                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath);
+                scriptDocument.Content.ShouldNotContain(@"""title"":""Bar""");
+            }
         }
     }
 }

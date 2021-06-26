@@ -52,7 +52,7 @@ namespace Statiq.Lunr
     /// </code>
     /// </example>
     /// <metadata cref="LunrKeys.LunrIndexItem" usage="Input" />
-    /// <metadata cref="LunrKeys.HideFromSearchIndex" usage="Input" />
+    /// <metadata cref="LunrKeys.OmitFromSearch" usage="Input" />
     /// <category>Content</category>
     public class GenerateLunrIndexOld : Module
     {
@@ -184,7 +184,7 @@ namespace Statiq.Lunr
         {
             ILunrIndexItem[] searchIndexItems =
                 await context.Inputs
-                    .Where(x => !x.GetBool(LunrKeys.HideFromSearchIndex))
+                    .Where(x => !x.GetBool(LunrKeys.OmitFromSearch))
                     .ToAsyncEnumerable()
                     .SelectAwait(async x => await _getSearchIndexItem.GetValueAsync(x, context))
                     .Where(x => x is object && !(x?.Title).IsNullOrEmpty())

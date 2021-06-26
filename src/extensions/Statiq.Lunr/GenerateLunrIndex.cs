@@ -150,76 +150,80 @@ namespace Statiq.Lunr
                 // TODO: Skip document if the hide from search flag is set
                 foreach (IDocument input in context.Inputs)
                 {
-                    // Get the search metadata for this input document
-                    IEnumerable<IMetadata> searchMetadataItems = _getSearchMetadata is object
-                        ? await _getSearchMetadata.GetValueAsync(input, context)
-                        : new IMetadata[]
-                        {
-                            // Clone the original input document by default so any additional metadata it contains can be added to the field keys without problems
-                            input.Clone(new MetadataItems
-                            {
-                                { _refKey, await input.GetCacheCodeAsync() },
-                                { "link", input.GetLink(_includeHostInLink) },
-                                { "title", input.GetTitle() },
-                                { "content", await input.GetContentStringAsync() }
-                            })
-                        };
-                    if (searchMetadataItems is object)
+                    // Omit documents that shouldn't be processed
+                    if (!input.GetBool(LunrKeys.OmitFromSearch))
                     {
-                        foreach (IMetadata searchMetadata in searchMetadataItems)
-                        {
-                            // Create the search document and data dictionaries
-                            global::Lunr.Document searchDocument = new global::Lunr.Document();
-                            Dictionary<string, object> eagerDictionary = new Dictionary<string, object>();
-                            Dictionary<string, object> lazyDictionary = new Dictionary<string, object>();
-
-                            // Get the reference value and only add a search item if we have one
-                            string refValue = searchMetadata.GetString(_refKey);
-                            if (!refValue.IsNullOrEmpty())
+                        // Get the search metadata for this input document
+                        IEnumerable<IMetadata> searchMetadataItems = _getSearchMetadata is object
+                            ? await _getSearchMetadata.GetValueAsync(input, context)
+                            : new IMetadata[]
                             {
-                                // Add the reference value
-                                // We only need to add it to the search document, the eager document object is keyed by reference value and the lazy file name is the reference value
-                                searchDocument.Add(camelCaseRefKey, refValue);
-
-                                // Iterate fields and populate the search document and data dictionaries
-                                bool hasEagerData = false;
-                                bool hasLazyData = false;
-                                foreach (KeyValuePair<string, FieldType> fieldKey in _fieldKeys.OrderBy(x => x.Key))
+                                // Clone the original input document by default so any additional metadata it contains can be added to the field keys without problems
+                                input.Clone(new MetadataItems
                                 {
-                                    object searchValue = searchMetadata.Get(fieldKey.Key);
-                                    if (searchValue is object)
-                                    {
-                                        // Add to the search document
-                                        if (fieldKey.Value.HasFlag(FieldType.Searchable))
-                                        {
-                                            // TODO: Test different types of search values from document metadata like int, bool, int[], string[], etc.
-                                            searchDocument.Add(fieldKey.Key, searchValue);
-                                        }
+                                    { _refKey, await input.GetCacheCodeAsync() },
+                                    { "link", input.GetLink(_includeHostInLink) },
+                                    { "title", input.GetTitle() },
+                                    { "content", await input.GetContentStringAsync() }
+                                })
+                            };
+                        if (searchMetadataItems is object)
+                        {
+                            foreach (IMetadata searchMetadata in searchMetadataItems)
+                            {
+                                // Create the search document and data dictionaries
+                                global::Lunr.Document searchDocument = new global::Lunr.Document();
+                                Dictionary<string, object> eagerDictionary = new Dictionary<string, object>();
+                                Dictionary<string, object> lazyDictionary = new Dictionary<string, object>();
 
-                                        // Add to the data dictionaries
-                                        // TODO: Test different types of search values and JSON deserialization
-                                        if (fieldKey.Value.HasFlag(FieldType.EagerLoad))
+                                // Get the reference value and only add a search item if we have one
+                                string refValue = searchMetadata.GetString(_refKey);
+                                if (!refValue.IsNullOrEmpty())
+                                {
+                                    // Add the reference value
+                                    // We only need to add it to the search document, the eager document object is keyed by reference value and the lazy file name is the reference value
+                                    searchDocument.Add(camelCaseRefKey, refValue);
+
+                                    // Iterate fields and populate the search document and data dictionaries
+                                    bool hasEagerData = false;
+                                    bool hasLazyData = false;
+                                    foreach (KeyValuePair<string, FieldType> fieldKey in _fieldKeys.OrderBy(x => x.Key))
+                                    {
+                                        object searchValue = searchMetadata.Get(fieldKey.Key);
+                                        if (searchValue is object)
                                         {
-                                            eagerDictionary.Add(fieldKey.Key, searchValue);
-                                            hasEagerData = true;
-                                        }
-                                        if (fieldKey.Value.HasFlag(FieldType.LazyLoad))
-                                        {
-                                            lazyDictionary.Add(fieldKey.Key, searchValue);
-                                            hasLazyData = true;
+                                            // Add to the search document
+                                            if (fieldKey.Value.HasFlag(FieldType.Searchable))
+                                            {
+                                                // TODO: Test different types of search values from document metadata like int, bool, int[], string[], etc.
+                                                searchDocument.Add(fieldKey.Key, searchValue);
+                                            }
+
+                                            // Add to the data dictionaries
+                                            // TODO: Test different types of search values and JSON deserialization
+                                            if (fieldKey.Value.HasFlag(FieldType.EagerLoad))
+                                            {
+                                                eagerDictionary.Add(fieldKey.Key, searchValue);
+                                                hasEagerData = true;
+                                            }
+                                            if (fieldKey.Value.HasFlag(FieldType.LazyLoad))
+                                            {
+                                                lazyDictionary.Add(fieldKey.Key, searchValue);
+                                                hasLazyData = true;
+                                            }
                                         }
                                     }
-                                }
 
-                                // Add the search document and data dictionaries
-                                await indexBuilder.Add(searchDocument, cancellationToken: context.CancellationToken);
-                                if (hasEagerData)
-                                {
-                                    eagerDictionaries.Add(refValue, eagerDictionary);
-                                }
-                                if (hasLazyData)
-                                {
-                                    lazyDictionaries.Add(refValue, lazyDictionary);
+                                    // Add the search document and data dictionaries
+                                    await indexBuilder.Add(searchDocument, cancellationToken: context.CancellationToken);
+                                    if (hasEagerData)
+                                    {
+                                        eagerDictionaries.Add(refValue, eagerDictionary);
+                                    }
+                                    if (hasLazyData)
+                                    {
+                                        lazyDictionaries.Add(refValue, lazyDictionary);
+                                    }
                                 }
                             }
                         }

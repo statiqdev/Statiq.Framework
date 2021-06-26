@@ -13,8 +13,8 @@
         public const string LunrIndexItem = nameof(LunrIndexItem);
 
         /// <summary>
-        /// Set to <c>true</c> in document metadata to hide a document from the search index.
+        /// Set to <c>true</c> in document metadata to omit a document from the search.
         /// </summary>
-        public const string HideFromSearchIndex = nameof(HideFromSearchIndex);
+        public const string OmitFromSearch = nameof(OmitFromSearch);
     }
 }
