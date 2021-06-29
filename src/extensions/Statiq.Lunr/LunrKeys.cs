@@ -6,11 +6,15 @@
     public static class LunrKeys
     {
         /// <summary>
-        /// Contains a <see cref="LunrIndexItem"/> that can be used to provide
-        /// specific search index information for a given document.
+        /// Contains search items for the given document. The value
+        /// should be either a <c>IEnumerable&lt;IReadOnlyDictionary&lt;string, object&gt;&gt;</c>
+        /// or a <c>IReadOnlyDictionary&lt;string, object&gt;</c>.
         /// </summary>
-        /// <type><see cref="LunrIndexItem"/></type>
-        public const string LunrIndexItem = nameof(LunrIndexItem);
+        /// <remarks>
+        /// Make sure to include a reference value for each explicit search item, otherwise the
+        /// search item won't be included in the search index.
+        /// </remarks>
+        public const string SearchItems = nameof(SearchItems);
 
         /// <summary>
         /// Set to <c>true</c> in document metadata to omit a document from the search.

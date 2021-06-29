@@ -51,7 +51,7 @@ namespace Statiq.Lunr
     /// });
     /// </code>
     /// </example>
-    /// <metadata cref="LunrKeys.LunrIndexItem" usage="Input" />
+    /// <metadata cref="LunrKeys.SearchItems" usage="Input" />
     /// <metadata cref="LunrKeys.OmitFromSearch" usage="Input" />
     /// <category>Content</category>
     public class GenerateLunrIndexOld : Module
@@ -67,14 +67,14 @@ namespace Statiq.Lunr
         private Func<StringBuilder, IExecutionContext, string> _script = (builder, _) => builder.ToString();
 
         /// <summary>
-        /// Creates the search index by looking for a <see cref="LunrKeys.LunrIndexItem"/> metadata key in each input document.
-        /// If no <see cref="LunrKeys.LunrIndexItem"/> metadata key is present in the document, default values for the document
+        /// Creates the search index by looking for a <see cref="LunrKeys.SearchItems"/> metadata key in each input document.
+        /// If no <see cref="LunrKeys.SearchItems"/> metadata key is present in the document, default values for the document
         /// will be used to generate a search index item.
         /// </summary>
         /// <param name="stopwordsPath">A file to use that contains a set of stopwords.</param>
         /// <param name="enableStemming">If set to <c>true</c>, stemming is enabled.</param>
         public GenerateLunrIndexOld(in NormalizedPath stopwordsPath = default, bool enableStemming = false)
-            : this(Config.FromDocument(doc => doc.Get<ILunrIndexItem>(LunrKeys.LunrIndexItem) ?? new LunrIndexDocItem(doc)), stopwordsPath, enableStemming)
+            : this(Config.FromDocument(doc => doc.Get<ILunrIndexItem>(LunrKeys.SearchItems) ?? new LunrIndexDocItem(doc)), stopwordsPath, enableStemming)
         {
         }
 
