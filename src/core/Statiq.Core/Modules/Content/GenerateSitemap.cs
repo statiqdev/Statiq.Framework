@@ -136,10 +136,33 @@ namespace Statiq.Core
                     && !location.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase)
                     && !location.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    location = context.GetLink(new NormalizedPath(location), true);
+                    location = context.GetLink(new NormalizedPath(GetLocationWithoutLinkRoot(location, context)), true);
                 }
             }
             return (location, sitemapItem);
+        }
+
+        private string GetLocationWithoutLinkRoot(string location, IExecutionContext context)
+        {
+            NormalizedPath root = context.Settings.GetPath(Keys.LinkRoot);
+            string rootLink = root.IsNull ? string.Empty : root.FullPath;
+            if (rootLink.EndsWith(NormalizedPath.Slash))
+            {
+                rootLink = rootLink.Substring(0, rootLink.Length - 1);
+            }
+            if (rootLink.Length > 0 && !rootLink.StartsWith(NormalizedPath.Slash))
+            {
+                rootLink = NormalizedPath.Slash + rootLink;
+            }
+
+            if (rootLink?.Length > 0 && location.StartsWith(rootLink))
+            {
+                return location.Substring(rootLink.Length);
+            }
+            else
+            {
+                return location;
+            }
         }
     }
 }
