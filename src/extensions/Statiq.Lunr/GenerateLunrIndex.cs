@@ -15,9 +15,6 @@ namespace Statiq.Lunr
         public static readonly string DefaultClientName = "search";
         public static readonly string DefaultReferenceKey = "ref"; // Can't use "id" because IDocument.Id will override it
 
-        // TODO: Allow position metadata flag
-        // TODO: Strip HTML from default content field only when media type is HTML
-
         // The keys in the search metadata objects to use for fields
         private readonly Dictionary<string, FieldType> _fieldKeys = new Dictionary<string, FieldType>()
         {
@@ -37,10 +34,14 @@ namespace Statiq.Lunr
 
         private NormalizedPath _scriptPath = DefaultScriptPath;
 
-        // The destination path of the index file, will be "[_scriptDestinationPath].gz" if null
+        private bool _zipIndexFile = true;
+
+        // The destination path of the index file, will be "[_scriptDestinationPath].index.gz" or "[_scriptDestinationPath].index.json" if null
         private NormalizedPath _indexPath = NormalizedPath.Null;
 
-        // The destination path of the results file, will be "[_scriptDestinationPath].json" if null
+        private bool _zipResultsFile = true;
+
+        // The destination path of the results file, will be "[_scriptDestinationPath].results.json" if null
         private NormalizedPath _resultsPath = NormalizedPath.Null;
 
         private Func<StringBuilder, IExecutionContext, string> _customizeScript;
@@ -48,6 +49,12 @@ namespace Statiq.Lunr
         private string _clientName = DefaultClientName;
 
         private string _searchItemsKey = LunrKeys.SearchItems;
+
+        private bool _allowPositionMetadata;
+
+        private Config<IEnumerable<string>> _getStopWords;
+
+        private bool _removeHtml = true;
 
         /// <summary>
         /// Defines a search field and whether to include it in results.
@@ -139,8 +146,10 @@ namespace Statiq.Lunr
         }
 
         /// <summary>
-        /// Controls the output path of the search index file (by default the
-        /// destination of the search index file is the same as the script file with a ".gz" extension).
+        /// Controls the output path of the search index file (by default the destination of the
+        /// search index file is the same as the script file with a ".index.gz" extension, or
+        /// ".index.json" extension if <see cref="ZipIndexFile(bool)"/> is <c>false</c>).
+        /// or ).
         /// </summary>
         /// <param name="indexPath">The search index path.</param>
         /// <returns>The current module instance.</returns>
@@ -151,7 +160,8 @@ namespace Statiq.Lunr
         }
 
         /// <summary>
-        /// Controls the output path of the results file that holds search field values (I.e. <see cref="FieldType.Result"/>).
+        /// Controls the output path of the results file that holds search field values as defined by <see cref="FieldType.Result"/>
+        /// (by default the destination of the search index file is the same as the script file with a ".results.json" extension).
         /// </summary>
         /// <param name="resultsPath">The results file path.</param>
         /// <returns>The current module instance.</returns>
@@ -196,124 +206,224 @@ namespace Statiq.Lunr
             return this;
         }
 
+        /// <summary>
+        /// Adds the "position" metadata to the metadata allowlist in the search index, which
+        /// enables position information for each search term in the search results at the expense of index size.
+        /// </summary>
+        /// <remarks>
+        /// See https://lunrjs.com/guides/core_concepts.html for more information.
+        /// </remarks>
+        /// <param name="allowPositionMetadata"><c>true</c> to add position metadata to the allowlist, <c>false</c> otherwise.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateLunrIndex AllowPositionMetadata(bool allowPositionMetadata = true)
+        {
+            _allowPositionMetadata = allowPositionMetadata;
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies stops words to use for the search index. By default a pre-defined set of English stop words are used.
+        /// </summary>
+        /// <param name="getStopWords">
+        /// A delegate that returns the stop words to use. Set to <c>null</c> to use the default English stop words.
+        /// </param>
+        /// <returns>The current module instance.</returns>
+        public GenerateLunrIndex WithStopWords(Config<IEnumerable<string>> getStopWords)
+        {
+            _getStopWords = getStopWords.EnsureNonDocumentIfNonNull(nameof(getStopWords));
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies an input file that contains stop words to use. The file should contain
+        /// one stop word per line.
+        /// </summary>
+        /// <param name="stopWordsFilePath">The path to an input file that contains stop words.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateLunrIndex WithStopWordsFromFile(NormalizedPath stopWordsFilePath)
+        {
+            stopWordsFilePath.ThrowIfNull(nameof(stopWordsFilePath));
+            _getStopWords = Config.FromContext<IEnumerable<string>>(async ctx =>
+            {
+                IFile stopWordsFile = ctx.FileSystem.GetInputFile(stopWordsFilePath);
+                if (stopWordsFile.Exists)
+                {
+                    return (await stopWordsFile.ReadAllTextAsync())
+                        .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(f => f.Trim().ToLowerInvariant())
+                        .Where(f => f.Length > 1)
+                        .ToArray();
+                }
+                return null;
+            });
+            return this;
+        }
+
+        /// <summary>
+        /// Indicates whether to gzip the index file (the default is <c>true</c>).
+        /// </summary>
+        /// <param name="zipIndexFile"><c>true</c> to gzip the index file, <c>false</c> otherwise.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateLunrIndex ZipIndexFile(bool zipIndexFile)
+        {
+            _zipIndexFile = zipIndexFile;
+            return this;
+        }
+
+        /// <summary>
+        /// Indicates whether to gzip the results file (the default is <c>true</c>).
+        /// </summary>
+        /// <param name="zipResultsFile"><c>true</c> to gzip the results file, <c>false</c> otherwise.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateLunrIndex ZipResultsFile(bool zipResultsFile)
+        {
+            _zipResultsFile = zipResultsFile;
+            return this;
+        }
+
+        /// <summary>
+        /// Indicates whether HTML should be removed from document content when the input document media
+        /// type indicates the content is HTML (the default is <c>true</c>).
+        /// </summary>
+        /// <param name="removeHtml"><c>true</c> to remove HTML from the input document content, <c>false</c> otherwise.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateLunrIndex RemoveHtml(bool removeHtml)
+        {
+            _removeHtml = removeHtml;
+            return this;
+        }
+
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             Dictionary<string, Dictionary<string, object>> resultDictionaries = new Dictionary<string, Dictionary<string, object>>();
             Dictionary<string, Dictionary<string, object>> lazyDictionaries = new Dictionary<string, Dictionary<string, object>>();
             string camelCaseRefKey = _referenceKey.ToLowerCamelCase();
             bool addedFields = false;
-            global::Lunr.Index searchIndex = await global::Lunr.Index.Build(async indexBuilder =>
+
+            // Get stop words
+            global::Lunr.StopWordFilterBase stopWordFilter = null;
+            if (_getStopWords is object)
             {
-                // Iterate the input documents
-                foreach (IDocument input in context.Inputs)
+                IEnumerable<string> stopWords = (await _getStopWords.GetValueAsync(null, context)) ?? Array.Empty<string>();
+                stopWordFilter = new StopWordFilter(stopWords);
+            }
+
+            // Build the index
+            global::Lunr.Index searchIndex = await global::Lunr.Index.Build(
+                async indexBuilder =>
                 {
-                    // Omit documents that shouldn't be processed
-                    if (!input.GetBool(LunrKeys.OmitFromSearch))
+                    // Iterate the input documents
+                    foreach (IDocument input in context.Inputs)
                     {
-                        IEnumerable<IEnumerable<KeyValuePair<string, object>>> searchItems = _getSearchItems is object
-                            ? await _getSearchItems.GetValueAsync(input, context)
-                            : await DefaultGetSearchItemsAsync(input);
-                        if (searchItems is object)
+                        // Omit documents that shouldn't be processed
+                        if (!input.GetBool(LunrKeys.OmitFromSearch))
                         {
-                            foreach (IEnumerable<KeyValuePair<string, object>> searchItem in searchItems)
+                            IEnumerable<IEnumerable<KeyValuePair<string, object>>> searchItems = _getSearchItems is object
+                                ? await _getSearchItems.GetValueAsync(input, context)
+                                : await DefaultGetSearchItemsAsync(input);
+                            if (searchItems is object)
                             {
-                                if (searchItem is object)
+                                foreach (IEnumerable<KeyValuePair<string, object>> searchItem in searchItems)
                                 {
-                                    // Clone the original input document so any additional metadata it contains can be added to the field keys without problems
-                                    IDocument searchDocument = input.Clone(searchItem);
-
-                                    // Create the search document and data dictionaries
-                                    global::Lunr.Document lunrDocument = new global::Lunr.Document();
-                                    Dictionary<string, object> resultDictionary = new Dictionary<string, object>();
-
-                                    // Get the reference value and only add a search item if we have one
-                                    string refValue = searchDocument.GetString(_referenceKey);
-                                    if (!refValue.IsNullOrEmpty())
+                                    if (searchItem is object)
                                     {
-                                        // Add the reference value
-                                        // We only need to add it to the search document, the eager document object is keyed by reference value and the lazy file name is the reference value
-                                        lunrDocument.Add(camelCaseRefKey, refValue);
+                                        // Clone the original input document so any additional metadata it contains can be added to the field keys without problems
+                                        IDocument searchDocument = input.Clone(searchItem);
 
-                                        // Iterate fields and populate the search document and data dictionaries
-                                        bool hasResultField = false;
-                                        foreach (KeyValuePair<string, FieldType> fieldKey in _fieldKeys.OrderBy(x => x.Key))
+                                        // Create the search document and data dictionaries
+                                        global::Lunr.Document lunrDocument = new global::Lunr.Document();
+                                        Dictionary<string, object> resultDictionary = new Dictionary<string, object>();
+
+                                        // Get the reference value and only add a search item if we have one
+                                        string refValue = searchDocument.GetString(_referenceKey);
+                                        if (!refValue.IsNullOrEmpty())
                                         {
-                                            // Convert to either an array of strings or a single string
-                                            object searchValue = searchDocument.Get(fieldKey.Key);
-                                            if (!(searchValue is IEnumerable<string>))
+                                            // Add the reference value
+                                            // We only need to add it to the search document, the eager document object is keyed by reference value and the lazy file name is the reference value
+                                            lunrDocument.Add(camelCaseRefKey, refValue);
+
+                                            // Iterate fields and populate the search document and data dictionaries
+                                            bool hasResultField = false;
+                                            foreach (KeyValuePair<string, FieldType> fieldKey in _fieldKeys.OrderBy(x => x.Key))
                                             {
-                                                searchValue = TypeHelper.Convert<string>(searchValue);
-                                            }
-                                            if (searchValue is object)
-                                            {
-                                                // Add to the search document
-                                                if (fieldKey.Value.HasFlag(FieldType.Searchable))
+                                                // Convert to either an array of strings or a single string
+                                                object searchValue = searchDocument.Get(fieldKey.Key);
+                                                if (!(searchValue is IEnumerable<string>))
                                                 {
-                                                    lunrDocument.Add(fieldKey.Key, searchValue);
+                                                    searchValue = TypeHelper.Convert<string>(searchValue);
+                                                }
+                                                if (searchValue is object)
+                                                {
+                                                    // Add to the search document
+                                                    if (fieldKey.Value.HasFlag(FieldType.Searchable))
+                                                    {
+                                                        lunrDocument.Add(fieldKey.Key, searchValue);
+                                                    }
+
+                                                    // Add to the results dictionaries
+                                                    if (fieldKey.Value.HasFlag(FieldType.Result))
+                                                    {
+                                                        resultDictionary.Add(fieldKey.Key, searchValue);
+                                                        hasResultField = true;
+                                                    }
+                                                }
+                                            }
+
+                                            // Add the fields if this is the first document (only add them when we know we have at least one document,
+                                            // otherwise the search index build throws for an empty document set)
+                                            if (!addedFields)
+                                            {
+                                                // Add the reference field
+                                                indexBuilder.ReferenceField = camelCaseRefKey;
+
+                                                // Enable position metadata
+                                                if (_allowPositionMetadata)
+                                                {
+                                                    indexBuilder.MetadataAllowList.Add("position");
                                                 }
 
-                                                // Add to the results dictionaries
-                                                if (fieldKey.Value.HasFlag(FieldType.Result))
+                                                // Add search fields
+                                                foreach (KeyValuePair<string, FieldType> fieldKey in _fieldKeys.Where(x => x.Value.HasFlag(FieldType.Searchable)))
                                                 {
-                                                    resultDictionary.Add(fieldKey.Key, searchValue);
-                                                    hasResultField = true;
+                                                    indexBuilder.AddField(fieldKey.Key);
                                                 }
+                                                addedFields = true;
                                             }
-                                        }
 
-                                        // Add the fields if this is the first document (only add them when we know we have at least one document,
-                                        // otherwise the search index build throws for an empty document set)
-                                        if (!addedFields)
-                                        {
-                                            // Add fields
-                                            indexBuilder.ReferenceField = camelCaseRefKey;
-                                            foreach (KeyValuePair<string, FieldType> fieldKey in _fieldKeys.Where(x => x.Value.HasFlag(FieldType.Searchable)))
+                                            // Add the search document and data dictionaries
+                                            await indexBuilder.Add(lunrDocument, cancellationToken: context.CancellationToken);
+                                            if (hasResultField)
                                             {
-                                                indexBuilder.AddField(fieldKey.Key);
+                                                resultDictionaries.Add(refValue, resultDictionary);
                                             }
-                                            addedFields = true;
-                                        }
-
-                                        // Add the search document and data dictionaries
-                                        await indexBuilder.Add(lunrDocument, cancellationToken: context.CancellationToken);
-                                        if (hasResultField)
-                                        {
-                                            resultDictionaries.Add(refValue, resultDictionary);
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                }
-            });
+                },
+                stopWordFilter: stopWordFilter);
 
             // Create output documents
             List<IDocument> outputs = new List<IDocument>();
 
-            // Zip the index in a separate document
-            byte[] indexBytes = Encoding.UTF8.GetBytes(searchIndex.ToJson());
-            NormalizedPath indexPath = _indexPath.IsNullOrEmpty ? _scriptPath.ChangeExtension(".gz") : _indexPath;
-            using (Stream indexStream = context.GetContentStream())
-            {
-                using (GZipStream zipStream = new GZipStream(indexStream, CompressionLevel.Optimal))
-                {
-                    await zipStream.WriteAsync(indexBytes, context.CancellationToken);
-                }
-                outputs.Add(context.CreateDocument(indexPath, context.GetContentProvider(indexStream, MediaTypes.Get(".gz"))));
-            }
+            // Output the index in a separate document
+            string indexJson = searchIndex.ToJson();
+            NormalizedPath indexPath = await AddJsonOutputAsync(outputs, _zipIndexFile, "index", _indexPath, indexJson, context);
 
             // Output a result file (if we have any results)
-            NormalizedPath resultsPath = _resultsPath.IsNullOrEmpty ? _scriptPath.ChangeExtension(".json") : _resultsPath;
+            NormalizedPath resultsPath = NormalizedPath.Null;
             if (resultDictionaries.Count > 0)
             {
-                outputs.Add(context.CreateDocument(resultsPath, context.GetContentProvider(System.Text.Json.JsonSerializer.Serialize(resultDictionaries), MediaTypes.Json)));
+                string resultsJson = System.Text.Json.JsonSerializer.Serialize(resultDictionaries);
+                resultsPath = await AddJsonOutputAsync(outputs, _zipResultsFile, "results", _resultsPath, resultsJson, context);
             }
 
             // Build the search JavaScript file, allowing for overriding the output
             StringBuilder scriptBuilder = new StringBuilder($@"const {_clientName} {{
     indexFile: '{context.GetLink(indexPath)}'");
-            if (resultDictionaries.Count > 0)
+            if (!resultsPath.IsNull)
             {
                 scriptBuilder.Append($@",
     resultsFile: '{context.GetLink(resultsPath)}'");
@@ -327,7 +437,39 @@ namespace Statiq.Lunr
                 outputs.Add(context.CreateDocument(_scriptPath, context.GetContentProvider(script, MediaTypes.JavaScript)));
             }
 
+            // TODO: Change the script output for loading the index and results files depending on if it's zipped or not
+
             return outputs;
+        }
+
+        private async Task<NormalizedPath> AddJsonOutputAsync(
+            List<IDocument> outputs,
+            bool zipFile,
+            string fileName,
+            NormalizedPath pathOverride,
+            string jsonContent,
+            IExecutionContext context)
+        {
+            if (zipFile)
+            {
+                // Zip the results file
+                NormalizedPath zipPath = pathOverride.IsNullOrEmpty ? _scriptPath.ChangeExtension($".{fileName}.gz") : pathOverride;
+                byte[] contentBytes = Encoding.UTF8.GetBytes(jsonContent);
+                using (Stream contentStream = context.GetContentStream())
+                {
+                    using (GZipStream zipStream = new GZipStream(contentStream, CompressionLevel.Optimal))
+                    {
+                        await zipStream.WriteAsync(contentBytes, context.CancellationToken);
+                    }
+                    outputs.Add(context.CreateDocument(zipPath, context.GetContentProvider(contentStream, MediaTypes.Get(".gz"))));
+                }
+                return zipPath;
+            }
+
+            // No zipping needed
+            NormalizedPath outputPath = pathOverride.IsNullOrEmpty ? _scriptPath.ChangeExtension($".{fileName}.json") : pathOverride;
+            outputs.Add(context.CreateDocument(outputPath, context.GetContentProvider(jsonContent, MediaTypes.Json)));
+            return outputPath;
         }
 
         private async Task<IEnumerable<IEnumerable<KeyValuePair<string, object>>>> DefaultGetSearchItemsAsync(IDocument input)
@@ -339,12 +481,19 @@ namespace Statiq.Lunr
                 return searchItems;
             }
 
+            // Get the content of this document and remove the HTML if requested
+            string content = await input.GetContentStringAsync();
+            if (_removeHtml && (input.MediaTypeEquals(MediaTypes.Html) || input.MediaTypeEquals(MediaTypes.HtmlFragment)))
+            {
+                content = content.RemoveHtmlAndSpecialChars();
+            }
+
             // Get the default search metadata for this input document
             Dictionary<string, object> searchItem = new Dictionary<string, object>
             {
                 { "link", input.GetLink(_includeHostInLink) },
                 { "title", input.GetTitle() },
-                { "content", await input.GetContentStringAsync() }
+                { "content", content }
             };
             if (input.GetString(_referenceKey) is null)
             {

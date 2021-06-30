@@ -7,6 +7,19 @@ namespace Statiq.Common
 {
     public static class StringExtensions
     {
+        private static readonly Regex RemoveHtmlAndSpecialCharsRegex = new Regex(@"<[^>]+>|&[a-zA-Z]{2,};|&#\d+;|[^a-zA-Z-# ]", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Removes HTML and special characters from a string and collapses adjacent spaces to a single space.
+        /// </summary>
+        /// <param name="str">The string to remove HTML and special characters from.</param>
+        /// <param name="replacement">An optional replacement string (a space by default).</param>
+        /// <returns>The string with HTML and special characters removed.</returns>
+        public static string RemoveHtmlAndSpecialChars(this string str, string replacement = " ") =>
+            str is object
+                ? string.Join(" ", RemoveHtmlAndSpecialCharsRegex.Replace(str, replacement ?? string.Empty).Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                : str;
+
         public static string RemoveStart(this string str, string value) =>
             str is object && value is object && str.StartsWith(value) ? str.Substring(value.Length) : str;
 

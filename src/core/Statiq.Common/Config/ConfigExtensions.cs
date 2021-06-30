@@ -110,8 +110,22 @@ namespace Statiq.Common
         /// <returns>The config if non-null and non-document.</returns>
         public static TConfig EnsureNonDocument<TConfig>(this TConfig config, string paramName = null)
             where TConfig : IConfig =>
-            config.EnsureNonNull().RequiresDocument
+            config.EnsureNonNull(paramName).RequiresDocument
                 ? throw new ArgumentException("Config must not require a document", paramName)
+                : config;
+
+        /// <summary>
+        /// Ensures that the config doesn't require a document, but only if not null and throws
+        /// <see cref="ArgumentException"/> if it does.
+        /// </summary>
+        /// <typeparam name="TConfig">The config type.</typeparam>
+        /// <param name="config">The config.</param>
+        /// <param name="paramName">The name of the config parameter.</param>
+        /// <returns>The config if non-document (or null if the config is null).</returns>
+        public static TConfig EnsureNonDocumentIfNonNull<TConfig>(this TConfig config, string paramName = null)
+            where TConfig : IConfig =>
+            config is object
+                ? config.EnsureNonDocument(paramName)
                 : config;
 
         public static Config<bool> IsFalse(this Config<bool> config) => config.Transform(x => !x);

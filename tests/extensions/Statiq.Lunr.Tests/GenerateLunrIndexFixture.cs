@@ -24,14 +24,15 @@ namespace Statiq.Lunr.Tests
                 {
                     { Keys.Title, "Foo" }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""-1843551964"":{""link"":""/a/a.html"",""title"":""Foo""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""-1843551964"":{""link"":""/a/a.html"",""title"":""Foo""}}");
             }
 
             [Test]
@@ -44,14 +45,15 @@ namespace Statiq.Lunr.Tests
                 {
                     { Keys.Title, "Foo" }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"""link"":""/a/a.html""");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"""link"":""/a/a.html""");
             }
 
             [Test]
@@ -65,14 +67,15 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .IncludeHostInLink();
+                    .IncludeHostInLink()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"""link"":""http://fizzbuzz.com/a/a.html""");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"""link"":""http://fizzbuzz.com/a/a.html""");
             }
 
             [Test]
@@ -90,7 +93,7 @@ namespace Statiq.Lunr.Tests
 
                 // Then
                 TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath);
-                scriptDocument.Content.ShouldContain($@"indexFile: '/{GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".gz")}'");
+                scriptDocument.Content.ShouldContain($@"indexFile: '/{GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.gz")}'");
             }
 
             [Test]
@@ -101,14 +104,15 @@ namespace Statiq.Lunr.Tests
                 {
                     { Keys.Title, "Foo" }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
                 TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath);
-                scriptDocument.Content.ShouldContain($@"resultsFile: '/{GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json")}'");
+                scriptDocument.Content.ShouldContain($@"resultsFile: '/{GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json")}'");
             }
 
             [Test]
@@ -148,7 +152,7 @@ namespace Statiq.Lunr.Tests
                     new NormalizedPath[]
                     {
                         GenerateLunrIndex.DefaultScriptPath,
-                        GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"),
+                        GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.gz"),
                         "bar.gz"
                     },
                     true);
@@ -169,7 +173,7 @@ namespace Statiq.Lunr.Tests
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                results.Select(x => x.Destination).ShouldBe(new NormalizedPath[] { "foo.js", "foo.json", "foo.gz" }, true);
+                results.Select(x => x.Destination).ShouldBe(new NormalizedPath[] { "foo.js", "foo.results.gz", "foo.index.gz" }, true);
             }
 
             [Test]
@@ -190,8 +194,8 @@ namespace Statiq.Lunr.Tests
                     new NormalizedPath[]
                     {
                         GenerateLunrIndex.DefaultScriptPath,
-                        GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".gz"),
-                        GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json")
+                        GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.gz"),
+                        GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.gz")
                     },
                     true);
             }
@@ -205,7 +209,7 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .WithResultsPath("bar.json");
+                    .WithResultsPath("bar.gz");
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
@@ -215,8 +219,58 @@ namespace Statiq.Lunr.Tests
                     new NormalizedPath[]
                     {
                         GenerateLunrIndex.DefaultScriptPath,
-                        GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".gz"),
-                        "bar.json"
+                        GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.gz"),
+                        "bar.gz"
+                    },
+                    true);
+            }
+
+            [Test]
+            public async Task DoesNotZipResultsFile()
+            {
+                // Given
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipResultsFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
+
+                // Then
+                results.Select(x => x.Destination).ShouldBe(
+                    new NormalizedPath[]
+                    {
+                        GenerateLunrIndex.DefaultScriptPath,
+                        GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.gz"),
+                        GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json")
+                    },
+                    true);
+            }
+
+            [Test]
+            public async Task DoesNotZipIndexFile()
+            {
+                // Given
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipIndexFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
+
+                // Then
+                results.Select(x => x.Destination).ShouldBe(
+                    new NormalizedPath[]
+                    {
+                        GenerateLunrIndex.DefaultScriptPath,
+                        GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"),
+                        GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.gz")
                     },
                     true);
             }
@@ -272,14 +326,15 @@ namespace Statiq.Lunr.Tests
                     { "AAA", "bbb" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .DefineField(fieldName, FieldType.Result);
+                    .DefineField(fieldName, FieldType.Result)
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain($@"""{expectedName}"":""bbb""");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain($@"""{expectedName}"":""bbb""");
             }
 
             [TestCase("Title")]
@@ -292,14 +347,15 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .RemoveField(fieldName);
+                    .RemoveField(fieldName)
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""-1843551964"":{""link"":""/a/a.html""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""-1843551964"":{""link"":""/a/a.html""}}");
             }
 
             [Test]
@@ -311,13 +367,14 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .ClearFields();
+                    .ClearFields()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                results.ShouldNotHaveDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
+                results.ShouldNotHaveDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
                 TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath);
                 scriptDocument.Content.ShouldNotContain("resultsFile");
             }
@@ -334,14 +391,15 @@ namespace Statiq.Lunr.Tests
                 {
                     { Keys.Title, "Bar" }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""-1843551964"":{""link"":""/a/a.html"",""title"":""Foo""},""-1722774156"":{""link"":""/b.html"",""title"":""Bar""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""-1843551964"":{""link"":""/a/a.html"",""title"":""Foo""},""-1722774156"":{""link"":""/b.html"",""title"":""Bar""}}");
             }
 
             [Test]
@@ -358,14 +416,15 @@ namespace Statiq.Lunr.Tests
                     { "AAA", "bbb" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .DefineField("aaa", FieldType.Result);
+                    .DefineField("aaa", FieldType.Result)
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""-1843551964"":{""link"":""/a/a.html"",""title"":""Foo""},""-53465798"":{""aaa"":""bbb"",""link"":""/b.html"",""title"":""Bar""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""-1843551964"":{""link"":""/a/a.html"",""title"":""Foo""},""-53465798"":{""aaa"":""bbb"",""link"":""/b.html"",""title"":""Bar""}}");
             }
 
             [Test]
@@ -381,14 +440,15 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Bar" },
                     { LunrKeys.OmitFromSearch, true }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldNotContain(@"""title"":""Bar""");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldNotContain(@"""title"":""Bar""");
             }
 
             [TestCase((int)123, "\"123\"")]
@@ -404,14 +464,15 @@ namespace Statiq.Lunr.Tests
                     { "AAA", value }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .DefineField("aaa", FieldType.Result);
+                    .DefineField("aaa", FieldType.Result)
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain($@"""aaa"":{expected}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain($@"""aaa"":{expected}");
             }
 
             [Test]
@@ -423,14 +484,15 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .DefineField("ref", FieldType.Result);
+                    .DefineField("ref", FieldType.Result)
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"""ref"":""-1843551964""");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"""ref"":""-1843551964""");
             }
 
             [Test]
@@ -442,14 +504,15 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" },
                     { "ref", "abcd" }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""abcd"":{");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""abcd"":{");
             }
 
             [Test]
@@ -462,14 +525,15 @@ namespace Statiq.Lunr.Tests
                     { "foo", "abcd" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .WithReferenceKey("foo");
+                    .WithReferenceKey("foo")
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""abcd"":{");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""abcd"":{");
             }
 
             // When using the default search metadata delegate, the document cache key will be used as
@@ -488,14 +552,15 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Bar" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .WithReferenceKey("fizz");
+                    .WithReferenceKey("fizz")
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""abcd"":{""link"":""/a/a.html"",""title"":""Foo""},""-1722774156"":{""link"":""/b.html"",""title"":""Bar""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""abcd"":{""link"":""/a/a.html"",""title"":""Foo""},""-1722774156"":{""link"":""/b.html"",""title"":""Bar""}}");
             }
 
             [Test]
@@ -523,14 +588,15 @@ namespace Statiq.Lunr.Tests
                             { "content", "g" },
                             { "ref", "h" }
                         }
-                    }));
+                    }))
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""Foo""},""h"":{""link"":""e"",""title"":""f""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""Foo""},""h"":{""link"":""e"",""title"":""f""}}");
             }
 
             [Test]
@@ -550,14 +616,15 @@ namespace Statiq.Lunr.Tests
                             { "content", "c" },
                             { "ref", "d" }
                         }
-                    }));
+                    }))
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""Foo""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""Foo""}}");
             }
 
             [Test]
@@ -582,14 +649,15 @@ namespace Statiq.Lunr.Tests
                             { "content", "c" },
                             { "ref", doc.GetTitle() }
                         }
-                    }));
+                    }))
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""Foo"":{""link"":""a"",""title"":""Foo""},""Bar"":{""link"":""a"",""title"":""Bar""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""Foo"":{""link"":""a"",""title"":""Foo""},""Bar"":{""link"":""a"",""title"":""Bar""}}");
             }
 
             [Test]
@@ -611,14 +679,15 @@ namespace Statiq.Lunr.Tests
                             { "ref", "d" }
                         },
                         null
-                    }));
+                    }))
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""Foo""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""Foo""}}");
             }
 
             [Test]
@@ -645,14 +714,15 @@ namespace Statiq.Lunr.Tests
                             { "title", "f" },
                             { "content", "g" }
                         }
-                    }));
+                    }))
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""Foo""}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""Foo""}");
             }
 
             [Test]
@@ -673,14 +743,15 @@ namespace Statiq.Lunr.Tests
                             { "CONTENT", "c" },
                             { "REF", "d" }
                         }
-                    }));
+                    }))
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""Foo""}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""Foo""}");
             }
 
             [Test]
@@ -711,14 +782,15 @@ namespace Statiq.Lunr.Tests
                         }
                     }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""b""},""h"":{""link"":""e"",""title"":""f""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""b""},""h"":{""link"":""e"",""title"":""f""}}");
             }
 
             [Test]
@@ -738,14 +810,15 @@ namespace Statiq.Lunr.Tests
                         }
                     }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""Foo""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""Foo""}}");
             }
 
             [Test]
@@ -770,14 +843,15 @@ namespace Statiq.Lunr.Tests
                         }
                     }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""-1843551964"":{""link"":""/a/a.html"",""title"":""Foo""},""d"":{""link"":""a"",""title"":""b""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""-1843551964"":{""link"":""/a/a.html"",""title"":""Foo""},""d"":{""link"":""a"",""title"":""b""}}");
             }
 
             [Test]
@@ -789,14 +863,15 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" },
                     { LunrKeys.SearchItems, null }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""184806200"":{""link"":""/a/a.html"",""title"":""Foo""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""184806200"":{""link"":""/a/a.html"",""title"":""Foo""}}");
             }
 
             // A ref value must be provided for custom search items
@@ -817,13 +892,14 @@ namespace Statiq.Lunr.Tests
                         }
                     }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                results.ShouldNotHaveDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
+                results.ShouldNotHaveDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.gz"));
                 TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath);
                 scriptDocument.Content.ShouldNotContain("resultsFile");
             }
@@ -846,14 +922,15 @@ namespace Statiq.Lunr.Tests
                         }
                     }
                 };
-                GenerateLunrIndex module = new GenerateLunrIndex();
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""b""}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""b""}");
             }
 
             [Test]
@@ -875,14 +952,15 @@ namespace Statiq.Lunr.Tests
                     }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .WithSearchItemsKey("Fizzbuzz");
+                    .WithSearchItemsKey("Fizzbuzz")
+                    .ZipResultsFile(false);
 
                 // When
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
 
                 // Then
-                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
-                scriptDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""b""}}");
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"{""d"":{""link"":""a"",""title"":""b""}}");
             }
 
             [Test]
@@ -895,9 +973,251 @@ namespace Statiq.Lunr.Tests
                 ImmutableArray<TestDocument> results = await ExecuteAsync(new TestDocument[] { }, module);
 
                 // Then
-                results.ShouldNotHaveDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".json"));
+                results.ShouldNotHaveDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.gz"));
                 TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath);
                 scriptDocument.Content.ShouldNotContain("resultsFile");
+            }
+
+            [Test]
+            public async Task UsesStopWords()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Bizz Fizz Buzz Bazz")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .WithStopWords(new[] { "fizz", "fuzz" })
+                    .ZipIndexFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
+
+                // Then
+                TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
+                indexDocument.Content.ShouldNotContain("fizz");
+                indexDocument.Content.ShouldContain("bizz");
+            }
+
+            [Test]
+            public async Task UsesEnglishStopWordsByDefault()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Bizz Fizz And Buzz Bazz")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipIndexFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
+
+                // Then
+                TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
+                indexDocument.Content.ShouldNotContain("and");
+                indexDocument.Content.ShouldContain("fizz");
+            }
+
+            [Test]
+            public async Task EmptyStopWordsUsesAllWords()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Bizz Fizz And Buzz Bazz")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .WithStopWords(Array.Empty<string>())
+                    .ZipIndexFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
+
+                // Then
+                TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
+                indexDocument.Content.ShouldContain("and");
+                indexDocument.Content.ShouldContain("fizz");
+            }
+
+            [Test]
+            public async Task DoesNotAllowPositionMetadataByDefault()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument a = new TestDocument(
+                    (NormalizedPath)"a/a.html")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipIndexFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
+
+                // Then
+                TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
+                indexDocument.Content.ShouldNotContain(@"""position"":[[0,3]]");
+            }
+
+            [Test]
+            public async Task AllowsPositionMetadata()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument a = new TestDocument(
+                    (NormalizedPath)"a/a.html")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .AllowPositionMetadata()
+                    .ZipIndexFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
+
+                // Then
+                TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
+                indexDocument.Content.ShouldContain(@"""position"":[[0,3]]");
+            }
+
+            [Test]
+            public async Task RemovesHtmlFromHtmlContentByDefault()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings.Add(Keys.Host, "fizzbuzz.com");
+                TestDocument a = new TestDocument(
+                    (NormalizedPath)"a/a.html",
+                    @"<html>
+    <head>
+        <title>Foo</title>
+    </head>
+    <body>
+        <h1>This is the header</h1>
+        <p>
+            Lorum ipsum
+        </p>
+    </body>
+</html>",
+                    MediaTypes.Html)
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .DefineField("content", FieldType.Result)
+                    .ZipResultsFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
+
+                // Then
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"""content"":""Foo This is the header Lorum ipsum""");
+            }
+
+            [Test]
+            public async Task RemovesHtmlFromHtmlFragmentContentByDefault()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings.Add(Keys.Host, "fizzbuzz.com");
+                TestDocument a = new TestDocument(
+                    (NormalizedPath)"a/a.html",
+                    @"<h1>This is the header</h1>
+<p>
+    Lorum ipsum
+</p>",
+                    MediaTypes.HtmlFragment)
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .DefineField("content", FieldType.Result)
+                    .ZipResultsFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
+
+                // Then
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"""content"":""This is the header Lorum ipsum""");
+            }
+
+            [Test]
+            public async Task DoesNotRemoveHtmlFromNonHtmlContent()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings.Add(Keys.Host, "fizzbuzz.com");
+                TestDocument a = new TestDocument(
+                    (NormalizedPath)"a/a.html",
+                    @"<html>
+    <head>
+        <title>Foo</title>
+    </head>
+    <body>
+        <h1>This is the header</h1>
+        <p>
+            Lorum ipsum
+        </p>
+    </body>
+</html>",
+                    MediaTypes.Xml)
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .DefineField("content", FieldType.Result)
+                    .ZipResultsFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
+
+                // Then
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"""content"":""\u003Chtml\u003E\r\n");
+            }
+
+            [Test]
+            public async Task DoesNotRemoveHtmlWhenFalse()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings.Add(Keys.Host, "fizzbuzz.com");
+                TestDocument a = new TestDocument(
+                    (NormalizedPath)"a/a.html",
+                    @"<html>
+    <head>
+        <title>Foo</title>
+    </head>
+    <body>
+        <h1>This is the header</h1>
+        <p>
+            Lorum ipsum
+        </p>
+    </body>
+</html>",
+                    MediaTypes.Html)
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .RemoveHtml(false)
+                    .DefineField("content", FieldType.Result)
+                    .ZipResultsFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
+
+                // Then
+                TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
+                resultsDocument.Content.ShouldContain(@"""content"":""\u003Chtml\u003E\r\n");
             }
         }
     }

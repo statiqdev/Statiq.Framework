@@ -183,12 +183,11 @@ namespace Statiq.Lunr
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             ILunrIndexItem[] searchIndexItems =
-                await context.Inputs
+                context.Inputs
                     .Where(x => !x.GetBool(LunrKeys.OmitFromSearch))
-                    .ToAsyncEnumerable()
-                    .SelectAwait(async x => await _getSearchIndexItem.GetValueAsync(x, context))
+                    .Select(x => _getSearchIndexItem.GetValueAsync(x, context).Result)
                     .Where(x => x is object && !(x?.Title).IsNullOrEmpty())
-                    .ToArrayAsync();
+                    .ToArray();
 
             string[] stopwords = await GetStopwordsAsync(context);
             StringBuilder scriptBuilder = await BuildScriptAsync(searchIndexItems, stopwords, context);
@@ -278,7 +277,7 @@ var searchModule = function() {{
             return clean;
         }
 
-        private static string ToJsonString(string s) => Newtonsoft.Json.JsonConvert.ToString(s);
+        private static string ToJsonString(string s) => s; // Newtonsoft.Json.JsonConvert.ToString(s);
 
         private async Task<string[]> GetStopwordsAsync(IExecutionContext context)
         {
