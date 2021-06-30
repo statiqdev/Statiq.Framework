@@ -137,6 +137,29 @@ namespace Statiq.Core.Tests.Modules.Contents
                 // Then
                 result.Content.ShouldBe(@"<?xml version=""1.0"" encoding=""UTF-8""?><urlset xmlns=""http://www.sitemaps.org/schemas/sitemap/0.9""><url><loc>http://www.example.org/sub/testfile</loc></url><url><loc>http://www.example.org/sub/testfile2</loc></url></urlset>");
             }
+
+            [Test]
+            public async Task LinkRootSettingsSiteMap()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.LinkHideExtensions] = "true";
+                context.Settings[Keys.Host] = "www.example.org";
+                context.Settings[Keys.LinkRoot] = "linkRoot";
+                TestDocument[] inputs =
+                {
+                    new TestDocument(new NormalizedPath("sub/testfile.html"), "Test"),
+                    new TestDocument(new NormalizedPath("sub/testfile2.html"), "Test2"),
+                    new TestDocument(new NormalizedPath("sub/testfile.html"), "Test")
+                };
+                GenerateSitemap sitemap = new GenerateSitemap();
+
+                // When
+                TestDocument result = await ExecuteAsync(inputs, context, sitemap).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(@"<?xml version=""1.0"" encoding=""UTF-8""?><urlset xmlns=""http://www.sitemaps.org/schemas/sitemap/0.9""><url><loc>http://www.example.org/linkRoot/sub/testfile</loc></url><url><loc>http://www.example.org/linkRoot/sub/testfile2</loc></url></urlset>");
+            }
         }
     }
 }
