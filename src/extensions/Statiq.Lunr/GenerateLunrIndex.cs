@@ -12,19 +12,23 @@ namespace Statiq.Lunr
     public class GenerateLunrIndex : Module
     {
         public static readonly NormalizedPath DefaultScriptPath = new NormalizedPath("search.js");
+
         public static readonly string DefaultClientName = "search";
+
         public static readonly string DefaultReferenceKey = "ref"; // Can't use "id" because IDocument.Id will override it
 
-        // The keys in the search metadata objects to use for fields
-        private readonly Dictionary<string, FieldType> _fieldKeys = new Dictionary<string, FieldType>()
+        public static readonly IReadOnlyDictionary<string, FieldType> DefaultFields = new Dictionary<string, FieldType>(StringComparer.OrdinalIgnoreCase)
         {
             { "link", FieldType.Result },
             { "title", FieldType.Searchable | FieldType.Result },
             { "content", FieldType.Searchable }
         };
 
+        // The keys in the search metadata objects to use for fields
+        private readonly Dictionary<string, FieldType> _fields = new Dictionary<string, FieldType>(DefaultFields, StringComparer.OrdinalIgnoreCase);
+
         // Includes the host in the default link field
-        private bool _includeHostInLink;
+        private bool _includeHostInLinks;
 
         // The key in the search metadata object to use for the ref
         private string _referenceKey = DefaultReferenceKey;
@@ -44,7 +48,7 @@ namespace Statiq.Lunr
         // The destination path of the results file, will be "[_scriptDestinationPath].results.json" if null
         private NormalizedPath _resultsPath = NormalizedPath.Null;
 
-        private Func<StringBuilder, IExecutionContext, string> _customizeScript;
+        private Func<string, IExecutionContext, string> _customizeScript;
 
         private string _clientName = DefaultClientName;
 
@@ -76,10 +80,30 @@ namespace Statiq.Lunr
         /// <param name="key">The key that holds the search value.</param>
         /// <param name="fieldType">The type of field.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateLunrIndex DefineField(string key, FieldType fieldType)
+        public GenerateLunrIndex WithField(string key, FieldType fieldType)
         {
             key.ThrowIfNullOrEmpty(nameof(key));
-            _fieldKeys[key.ToLowerCamelCase()] = fieldType;
+            _fields[key.ToLowerCamelCase()] = fieldType;
+            return this;
+        }
+
+        /// <summary>
+        /// Defines search fields and whether to include them in results.
+        /// </summary>
+        /// <remarks>
+        /// See <see cref="WithField(string, FieldType)"/> for more information.
+        /// </remarks>
+        /// <param name="fields">The fields to define.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateLunrIndex WithFields(IEnumerable<KeyValuePair<string, FieldType>> fields)
+        {
+            if (fields is object)
+            {
+                foreach (KeyValuePair<string, FieldType> field in fields)
+                {
+                    WithField(field.Key, field.Value);
+                }
+            }
             return this;
         }
 
@@ -88,10 +112,10 @@ namespace Statiq.Lunr
         /// </summary>
         /// <param name="key">The key to remove.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateLunrIndex RemoveField(string key)
+        public GenerateLunrIndex WithoutField(string key)
         {
             key.ThrowIfNullOrEmpty(nameof(key));
-            _fieldKeys.Remove(key.ToLowerCamelCase());
+            _fields.Remove(key.ToLowerCamelCase());
             return this;
         }
 
@@ -99,9 +123,9 @@ namespace Statiq.Lunr
         /// Clears all fields from the search index.
         /// </summary>
         /// <returns>The current module instance.</returns>
-        public GenerateLunrIndex ClearFields()
+        public GenerateLunrIndex WithoutAnyFields()
         {
-            _fieldKeys.Clear();
+            _fields.Clear();
             return this;
         }
 
@@ -109,11 +133,13 @@ namespace Statiq.Lunr
         /// Indicates whether the host should be automatically included
         /// in generated links (the default is <c>false</c>).
         /// </summary>
-        /// <param name="includeHostInLink"><c>true</c> to include the host.</param>
+        /// <param name="includeHostInLinks">
+        /// <c>true</c> to include the host in generate links, <c>false</c> to generate relative paths.
+        /// </param>
         /// <returns>The current module instance.</returns>
-        public GenerateLunrIndex IncludeHostInLink(bool includeHostInLink = true)
+        public GenerateLunrIndex IncludeHostInLinks(bool includeHostInLinks = true)
         {
-            _includeHostInLink = includeHostInLink;
+            _includeHostInLinks = includeHostInLinks;
             return this;
         }
 
@@ -127,7 +153,7 @@ namespace Statiq.Lunr
         /// the index file will be output).
         /// </param>
         /// <returns>The current module instance.</returns>
-        public GenerateLunrIndex CustomizeScript(Func<StringBuilder, IExecutionContext, string> customizeScript)
+        public GenerateLunrIndex CustomizeScript(Func<string, IExecutionContext, string> customizeScript)
         {
             _customizeScript = customizeScript;
             return this;
@@ -344,26 +370,36 @@ namespace Statiq.Lunr
 
                                             // Iterate fields and populate the search document and data dictionaries
                                             bool hasResultField = false;
-                                            foreach (KeyValuePair<string, FieldType> fieldKey in _fieldKeys.OrderBy(x => x.Key))
+                                            foreach (KeyValuePair<string, FieldType> field in _fields.OrderBy(x => x.Key))
                                             {
                                                 // Convert to either an array of strings or a single string
-                                                object searchValue = searchDocument.Get(fieldKey.Key);
-                                                if (!(searchValue is IEnumerable<string>))
+                                                object searchValue = searchDocument.Get(field.Key);
+                                                if (searchValue is IEnumerable<string> enumerableSearchValue)
+                                                {
+                                                    searchValue = enumerableSearchValue.ToArray();
+                                                }
+                                                else if (!(searchValue is string))
                                                 {
                                                     searchValue = TypeHelper.Convert<string>(searchValue);
                                                 }
+
+                                                // Add to the search document (even if the value is null, the index wants all fields in the Lunr document)
+                                                if (field.Value.HasFlag(FieldType.Searchable))
+                                                {
+                                                    // Value should always be a string, so join into a single string if it's a string[]
+                                                    lunrDocument.Add(
+                                                        field.Key,
+                                                        searchValue is string[] arraySearchValue
+                                                            ? string.Join(' ', arraySearchValue)
+                                                            : searchValue);
+                                                }
+
                                                 if (searchValue is object)
                                                 {
-                                                    // Add to the search document
-                                                    if (fieldKey.Value.HasFlag(FieldType.Searchable))
-                                                    {
-                                                        lunrDocument.Add(fieldKey.Key, searchValue);
-                                                    }
-
                                                     // Add to the results dictionaries
-                                                    if (fieldKey.Value.HasFlag(FieldType.Result))
+                                                    if (field.Value.HasFlag(FieldType.Result))
                                                     {
-                                                        resultDictionary.Add(fieldKey.Key, searchValue);
+                                                        resultDictionary.Add(field.Key, searchValue);
                                                         hasResultField = true;
                                                     }
                                                 }
@@ -383,9 +419,9 @@ namespace Statiq.Lunr
                                                 }
 
                                                 // Add search fields
-                                                foreach (KeyValuePair<string, FieldType> fieldKey in _fieldKeys.Where(x => x.Value.HasFlag(FieldType.Searchable)))
+                                                foreach (KeyValuePair<string, FieldType> field in _fields.Where(x => x.Value.HasFlag(FieldType.Searchable)))
                                                 {
-                                                    indexBuilder.AddField(fieldKey.Key);
+                                                    indexBuilder.AddField(field.Key);
                                                 }
                                                 addedFields = true;
                                             }
@@ -421,23 +457,85 @@ namespace Statiq.Lunr
             }
 
             // Build the search JavaScript file, allowing for overriding the output
-            StringBuilder scriptBuilder = new StringBuilder($@"const {_clientName} {{
-    indexFile: '{context.GetLink(indexPath)}'");
-            if (!resultsPath.IsNull)
+            string script = $@"const {_clientName} = {{
+    initialized: false,
+    indexFile: '{context.GetLink(indexPath)}',
+    index: null,
+    indexInitialized: false,
+    {(resultsPath.IsNull ? string.Empty : $@"resultsFile: '{context.GetLink(resultsPath)}',
+    results: null,
+    resultsInitialized: false,")}
+    initialize: function() {{
+        let self = this;
+        if (!self.initialized) {{
+            self.initialized = true;
+
+            // Get the index
+            var indexRequest = new XMLHttpRequest();
+            indexRequest.open('GET', self.indexFile, true);
+            {(_zipIndexFile ? $@"indexRequest.responseType = 'arraybuffer';
+            indexRequest.onload = function() {{
+                self.index = lunr.Index.load(JSON.parse(pako.inflate(new Uint8Array(this.response), {{ to: 'string' }})));
+                self.indexInitialized = true;
+            }};" : $@"indexRequest.onload = function() {{
+                self.index = lunr.Index.load(JSON.parse(this.response));
+                self.indexInitialized = true;
+            }};")}
+            indexRequest.onerror = function() {{
+                console.debug(this.statusText);
+                self.indexInitialized = true;
+            }}
+            indexRequest.send(null);
+            
+            {(resultsPath.IsNull ? string.Empty : $@"// Get the results
+            if (self.resultsFile) {{
+                var resultsRequest = new XMLHttpRequest();
+                resultsRequest.open('GET', self.resultsFile, true);
+                {(_zipResultsFile ? $@"resultsRequest.responseType = 'arraybuffer';
+                resultsRequest.onload = function() {{
+                    self.results = JSON.parse(pako.inflate(new Uint8Array(this.response), {{ to: 'string' }}));
+                    self.resultsInitialized = true;
+                }};" : $@"resultsRequest.onload = function() {{
+                    self.results = JSON.parse(this.response);
+                    self.resultsInitialized = true;
+                }};")}
+                resultsRequest.onerror = function() {{
+                    console.debug(this.statusText);
+                    self.resultsInitialized = true;
+                }}
+                resultsRequest.send(null);
+            }} else {{
+                self.results = {{}};
+                self.resultsInitialized = true;
+            }}")}
+        }}
+    }},
+    search: function(query, callback) {{
+        let self = this;
+        self.initialize();
+
+        // Wait for initialization
+        if (!self.indexInitialized{(resultsPath.IsNull ? string.Empty : $" || !self.resultsInitialized")}) {{
+            setTimeout(() => {{ret = self.search(query, callback)}}, 100);
+        }}
+
+        // Call callback with results
+        if (self.index && callback) {{
+            {(resultsPath.IsNull ? $@"callback(self.index.search(query))" : $@"callback(self.index.search(query).map(function(searchResult) {{
+                return Object.assign(self.results[searchResult.ref], searchResult);
+            }}));")}
+        }}
+    }}
+}};";
+            if (_customizeScript is object)
             {
-                scriptBuilder.Append($@",
-    resultsFile: '{context.GetLink(resultsPath)}'");
+                script = _customizeScript.Invoke(script, context);
             }
-            scriptBuilder.Append(@"
-}};");
-            string script = _customizeScript is object ? _customizeScript.Invoke(scriptBuilder, context) : scriptBuilder.ToString();
             if (!script.IsNullOrEmpty())
             {
                 // Only output the script if it wasn't overridden to null or empty
                 outputs.Add(context.CreateDocument(_scriptPath, context.GetContentProvider(script, MediaTypes.JavaScript)));
             }
-
-            // TODO: Change the script output for loading the index and results files depending on if it's zipped or not
 
             return outputs;
         }
@@ -491,7 +589,7 @@ namespace Statiq.Lunr
             // Get the default search metadata for this input document
             Dictionary<string, object> searchItem = new Dictionary<string, object>
             {
-                { "link", input.GetLink(_includeHostInLink) },
+                { "link", input.GetLink(_includeHostInLinks) },
                 { "title", input.GetTitle() },
                 { "content", content }
             };

@@ -1,12 +1,12 @@
 ﻿namespace Statiq.Lunr
 {
     /// <summary>
-    /// Metadata keys for use by the <see cref="GenerateLunrIndexOld"/> module.
+    /// Metadata keys for use by the <see cref="GenerateLunrIndex"/> module.
     /// </summary>
     public static class LunrKeys
     {
         /// <summary>
-        /// Contains search items for the given document. The value
+        /// A metadata key that contains search items for the given document. The value
         /// should be either a <c>IEnumerable&lt;IReadOnlyDictionary&lt;string, object&gt;&gt;</c>
         /// or a <c>IReadOnlyDictionary&lt;string, object&gt;</c>.
         /// </summary>

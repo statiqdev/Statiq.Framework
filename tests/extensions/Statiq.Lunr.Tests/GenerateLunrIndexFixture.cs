@@ -67,7 +67,7 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .IncludeHostInLink()
+                    .IncludeHostInLinks()
                     .ZipResultsFile(false);
 
                 // When
@@ -317,7 +317,7 @@ namespace Statiq.Lunr.Tests
             [TestCase("Aaa", "aaa")]
             [TestCase("aaa", "aaa")]
             [TestCase("aAA", "aAA")]
-            public async Task DefineAdditionalFieldAsCamelCase(string fieldName, string expectedName)
+            public async Task WithAdditionalFieldAsCamelCase(string fieldName, string expectedName)
             {
                 // Given
                 TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
@@ -326,7 +326,7 @@ namespace Statiq.Lunr.Tests
                     { "AAA", "bbb" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .DefineField(fieldName, FieldType.Result)
+                    .WithField(fieldName, FieldType.Result)
                     .ZipResultsFile(false);
 
                 // When
@@ -339,7 +339,7 @@ namespace Statiq.Lunr.Tests
 
             [TestCase("Title")]
             [TestCase("title")]
-            public async Task RemovesField(string fieldName)
+            public async Task WithoutField(string fieldName)
             {
                 // Given
                 TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
@@ -347,7 +347,7 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .RemoveField(fieldName)
+                    .WithoutField(fieldName)
                     .ZipResultsFile(false);
 
                 // When
@@ -359,7 +359,7 @@ namespace Statiq.Lunr.Tests
             }
 
             [Test]
-            public async Task ClearsFields()
+            public async Task WithoutAnyFields()
             {
                 // Given
                 TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
@@ -367,7 +367,7 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .ClearFields()
+                    .WithoutAnyFields()
                     .ZipResultsFile(false);
 
                 // When
@@ -416,7 +416,7 @@ namespace Statiq.Lunr.Tests
                     { "AAA", "bbb" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .DefineField("aaa", FieldType.Result)
+                    .WithField("aaa", FieldType.Result)
                     .ZipResultsFile(false);
 
                 // When
@@ -455,7 +455,7 @@ namespace Statiq.Lunr.Tests
             [TestCase(-123.45F, "\"-123.45\"")]
             [TestCase(true, "\"true\"")]
             [TestCase(new string[] { "123", "456" }, "[\"123\",\"456\"]")]
-            public async Task ConvertsField(object value, string expected)
+            public async Task ConvertsResultField(object value, string expected)
             {
                 // Given
                 TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
@@ -464,7 +464,7 @@ namespace Statiq.Lunr.Tests
                     { "AAA", value }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .DefineField("aaa", FieldType.Result)
+                    .WithField("aaa", FieldType.Result)
                     .ZipResultsFile(false);
 
                 // When
@@ -473,6 +473,77 @@ namespace Statiq.Lunr.Tests
                 // Then
                 TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
                 resultsDocument.Content.ShouldContain($@"""aaa"":{expected}");
+            }
+
+            [TestCase((int)123, "\"123\"")]
+            [TestCase(-123.45F, "\"123.45\"")] // The "-" gets removed in the index
+            [TestCase(true, "\"true\"")]
+            public async Task ConvertsSearchableField(object value, string expected)
+            {
+                // Given
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
+                {
+                    { Keys.Title, "Foo" },
+                    { "AAA", value }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .WithField("aaa", FieldType.Searchable)
+                    .ZipIndexFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
+
+                // Then
+                TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
+                indexDocument.Content.ShouldContain(expected);
+            }
+
+            [Test]
+            public async Task ConvertsSearchableArray()
+            {
+                // Given
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
+                {
+                    { Keys.Title, "Foo" },
+                    { "AAA", new string[] { "123", "456 789" } }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .WithField("aaa", FieldType.Searchable)
+                    .ZipIndexFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
+
+                // Then
+                TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
+                indexDocument.Content.ShouldContain("123");
+                indexDocument.Content.ShouldContain("456");
+                indexDocument.Content.ShouldContain("789");
+            }
+
+            [Test]
+            public async Task MissingSearchableField()
+            {
+                // Given
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                TestDocument b = new TestDocument((NormalizedPath)"b.html", "Buzz")
+                {
+                    { Keys.Title, "Bar" },
+                    { "AAA", "bbb" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .WithField("aaa", FieldType.Searchable)
+                    .ZipIndexFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
+
+                // Then
+                TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
+                indexDocument.Content.ShouldContain("bbb");
             }
 
             [Test]
@@ -484,7 +555,7 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .DefineField("ref", FieldType.Result)
+                    .WithField("ref", FieldType.Result)
                     .ZipResultsFile(false);
 
                 // When
@@ -1110,7 +1181,7 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .DefineField("content", FieldType.Result)
+                    .WithField("content", FieldType.Result)
                     .ZipResultsFile(false);
 
                 // When
@@ -1138,7 +1209,7 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .DefineField("content", FieldType.Result)
+                    .WithField("content", FieldType.Result)
                     .ZipResultsFile(false);
 
                 // When
@@ -1173,7 +1244,7 @@ namespace Statiq.Lunr.Tests
                     { Keys.Title, "Foo" }
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
-                    .DefineField("content", FieldType.Result)
+                    .WithField("content", FieldType.Result)
                     .ZipResultsFile(false);
 
                 // When
@@ -1209,7 +1280,7 @@ namespace Statiq.Lunr.Tests
                 };
                 GenerateLunrIndex module = new GenerateLunrIndex()
                     .RemoveHtml(false)
-                    .DefineField("content", FieldType.Result)
+                    .WithField("content", FieldType.Result)
                     .ZipResultsFile(false);
 
                 // When
