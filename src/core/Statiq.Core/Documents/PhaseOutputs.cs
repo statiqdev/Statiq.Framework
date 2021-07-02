@@ -37,7 +37,8 @@ namespace Statiq.Core
             ValidateArguments(pipelineName);
             ValidatePipeline(pipelineName);
 
-            return _cachedDependencyOutputs.Value[pipelineName];
+            return _cachedDependencyOutputs.Value.TryGetValue(pipelineName, out DocumentList<IDocument> outputs)
+                ? outputs : new DocumentList<IDocument>(Array.Empty<IDocument>());
         }
 
         public IReadOnlyDictionary<string, DocumentList<IDocument>> ByPipeline()
@@ -152,6 +153,12 @@ namespace Statiq.Core
         /// </summary>
         private void ValidatePipeline(string pipelineName)
         {
+            // Make sure it's a real pipeline
+            if (!_pipelines.ContainsKey(pipelineName))
+            {
+                throw new KeyNotFoundException($"The pipeline {pipelineName} could not be found");
+            }
+
             // Make sure the pipeline isn't isolated
             if (_pipelines[pipelineName].Isolated)
             {
@@ -168,12 +175,6 @@ namespace Statiq.Core
             if ((_currentPhase.Phase == Phase.Input || _currentPhase.Phase == Phase.Output) && _pipelines[pipelineName].Deployment)
             {
                 throw new InvalidOperationException($"Cannot access documents in the {_currentPhase} phase from another deployment pipeline {pipelineName}");
-            }
-
-            // Make sure the pipeline has results
-            if (!_phaseResults.ContainsKey(pipelineName))
-            {
-                throw new KeyNotFoundException($"The pipeline results for {pipelineName} could not be found");
             }
 
             // Make sure we're not accessing our own documents or documents from a non-dependency while in the process phase

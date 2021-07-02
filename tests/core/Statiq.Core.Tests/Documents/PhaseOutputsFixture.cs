@@ -285,6 +285,20 @@ namespace Statiq.Core.Tests.Documents
         public class FromPipelineTests : PhaseOutputsFixture
         {
             [Test]
+            public void ThrowsForInvalidPipeline()
+            {
+                // Given
+                ConcurrentDictionary<string, PhaseResult[]> phaseResults =
+                    new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                PipelinePhase phase = GetPipelineAndPhase("A", Phase.PostProcess, pipelines, phaseResults, Array.Empty<IDocument>());
+                PhaseOutputs documentCollection = new PhaseOutputs(phaseResults, phase, pipelines);
+
+                // When, Then
+                Should.Throw<KeyNotFoundException>(() => documentCollection.FromPipeline("B"));
+            }
+
+            [Test]
             public void ThrowsForNullPipeline()
             {
                 // Given
