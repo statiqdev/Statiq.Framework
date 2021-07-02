@@ -1252,7 +1252,7 @@ namespace Statiq.Lunr.Tests
 
                 // Then
                 TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
-                resultsDocument.Content.ShouldContain(@"""content"":""\u003Chtml\u003E\r\n");
+                resultsDocument.Content.ShouldContain(@"""content"":""\u003Chtml\u003E");
             }
 
             [Test]
@@ -1288,7 +1288,7 @@ namespace Statiq.Lunr.Tests
 
                 // Then
                 TestDocument resultsDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json"));
-                resultsDocument.Content.ShouldContain(@"""content"":""\u003Chtml\u003E\r\n");
+                resultsDocument.Content.ShouldContain(@"""content"":""\u003Chtml\u003E");
             }
         }
     }
