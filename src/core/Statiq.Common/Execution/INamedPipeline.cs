@@ -7,7 +7,7 @@
     /// Use this when creating pipeline classes and registering through the DI container
     /// to give the pipeline a name other than it's class name.
     /// </remarks>
-    public interface INamedPipeline
+    public interface INamedPipeline : IPipeline
     {
         /// <summary>
         /// The name of the pipeline.
