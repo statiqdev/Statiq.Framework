@@ -7,13 +7,38 @@ namespace Statiq.App
 {
     public static class BootstrapperPipelineExtensions
     {
+        /// <summary>
+        /// Adds a pipeline of type <typeparamref name="TPipeline"/>.
+        /// </summary>
         public static Bootstrapper AddPipeline<TPipeline>(this Bootstrapper bootstrapper)
             where TPipeline : IPipeline =>
             bootstrapper.ConfigureServices(x => x.AddSingleton(typeof(IPipeline), typeof(TPipeline)));
 
+        /// <summary>
+        /// Adds a pipeline of type <typeparamref name="TPipeline"/> with the specified name.
+        /// </summary>
+        public static Bootstrapper AddPipeline<TPipeline>(this Bootstrapper bootstrapper, string name)
+            where TPipeline : class, IPipeline
+        {
+            name.ThrowIfNullOrEmpty(nameof(name));
+            return bootstrapper.ConfigureServices(serviceCollection =>
+            {
+                serviceCollection.AddSingleton<TPipeline>();
+                serviceCollection.AddSingleton(
+                    typeof(IPipeline),
+                    s => new NamedPipelineWrapper(name, s.GetRequiredService<TPipeline>()));
+            });
+        }
+
+        /// <summary>
+        /// Adds all pipelines defined in <typeparamref name="TParent"/>.
+        /// </summary>
         public static Bootstrapper AddPipelines<TParent>(this Bootstrapper bootstrapper) =>
             bootstrapper.AddPipelines(typeof(TParent));
 
+        /// <summary>
+        /// Modifies an existing pipeline with name <paramref name="name"/>.
+        /// </summary>
         public static Bootstrapper ModifyPipeline(this Bootstrapper bootstrapper, string name, Action<IPipeline> action) =>
             bootstrapper.ConfigureEngine(x => action.ThrowIfNull(nameof(action))(x.Pipelines[name.ThrowIfNullOrEmpty(nameof(name))]));
 

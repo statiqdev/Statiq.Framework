@@ -8,14 +8,18 @@ namespace Statiq.Common
     public static class IPipelineCollectionExtensions
     {
         public static void Add(this IPipelineCollection pipelineCollection, IPipeline pipeline) =>
-            pipelineCollection.Add((pipeline as INamedPipeline)?.PipelineName ?? pipeline?.GetType().Name, pipeline);
+            pipelineCollection.Add(
+                (pipeline as INamedPipeline)?.PipelineName ?? pipeline?.GetType().Name,
+                (pipeline as INamedPipelineWrapper)?.Pipeline ?? pipeline);
 
         public static void AddIfNonExisting(this IPipelineCollection pipelineCollection, IPipeline pipeline)
         {
             string name = (pipeline as INamedPipeline)?.PipelineName ?? pipeline?.GetType().Name;
             if (!pipelineCollection.ContainsKey(name))
             {
-                pipelineCollection.Add(name, pipeline);
+                pipelineCollection.Add(
+                    name,
+                    (pipeline as INamedPipelineWrapper)?.Pipeline ?? pipeline);
             }
         }
     }
