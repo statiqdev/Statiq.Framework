@@ -20,7 +20,7 @@ namespace Statiq.App.Tests.Bootstrapper
         public class AddPipelineTests : BootstrapperPipelineExtensionsFixture
         {
             [Test]
-            public async Task AddsNamedPipelineByType()
+            public async Task AddsNamedPipelineByTypeWithGeneric()
             {
                 // Given
                 string[] args = new string[] { };
@@ -34,7 +34,27 @@ namespace Statiq.App.Tests.Bootstrapper
                 BootstrapperTestResult result = await bootstrapper.RunTestAsync();
 
                 // Then
+                result.Engine.Pipelines.Count.ShouldBe(3);
                 ((TestPipeline)result.Engine.Pipelines["TestPipeline"]).Value.ShouldBe("TestPipeline1234");
+                ((TestPipeline)result.Engine.Pipelines["Foo"]).Value.ShouldBe("Foo1234");
+                ((TestPipeline)result.Engine.Pipelines["Bar"]).Value.ShouldBe("Bar1234");
+            }
+
+            [Test]
+            public async Task AddsNamedPipelineByTypeWithoutGeneric()
+            {
+                // Given
+                string[] args = new string[] { };
+                App.Bootstrapper bootstrapper = App.Bootstrapper.Factory.CreateDefault(args);
+                bootstrapper.AddSetting("Value", 1234);
+                bootstrapper.AddPipeline<TestPipeline>("Foo");
+                bootstrapper.AddPipeline<TestPipeline>("Bar");
+
+                // When
+                BootstrapperTestResult result = await bootstrapper.RunTestAsync();
+
+                // Then
+                result.Engine.Pipelines.Count.ShouldBe(2);
                 ((TestPipeline)result.Engine.Pipelines["Foo"]).Value.ShouldBe("Foo1234");
                 ((TestPipeline)result.Engine.Pipelines["Bar"]).Value.ShouldBe("Bar1234");
             }
