@@ -23,7 +23,7 @@ namespace Statiq.App
             name.ThrowIfNullOrEmpty(nameof(name));
             return bootstrapper.ConfigureServices(serviceCollection =>
             {
-                serviceCollection.AddSingleton<TPipeline>();
+                serviceCollection.AddTransient<TPipeline>();
                 serviceCollection.AddSingleton(
                     typeof(IPipeline),
                     s => new NamedPipelineWrapper(name, s.GetRequiredService<TPipeline>()));
