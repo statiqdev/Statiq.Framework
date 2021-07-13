@@ -116,6 +116,25 @@ namespace Statiq.Lunr.Tests
             }
 
             [Test]
+            public async Task CanChangeClientObjectName()
+            {
+                // Given
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .WithClientName("foobar");
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
+
+                // Then
+                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath);
+                scriptDocument.Content.ShouldContain("const foobar = {");
+            }
+
+            [Test]
             public async Task ChangeScriptPath()
             {
                 // Given

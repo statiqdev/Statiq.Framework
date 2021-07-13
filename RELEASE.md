@@ -1,5 +1,7 @@
 # 1.0.0-beta.48
 
+- Added `GenerateLunrIndex.WithClientName` method to allow setting the name of the client object in the generated JavaScript file.
+
 # 1.0.0-beta.47
 
 - **Breaking change:** Renamed the erroneous `Statiq.SearchIndex` namespace in the `Statiq.Lunr` package to `Statiq.Lunr`.

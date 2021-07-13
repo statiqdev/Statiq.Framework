@@ -319,6 +319,17 @@ namespace Statiq.Lunr
             return this;
         }
 
+        /// <summary>
+        /// Changes the name of the client object in the generated JavaScript file.
+        /// </summary>
+        /// <param name="clientName">The name of the client object.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateLunrIndex WithClientName(string clientName)
+        {
+            _clientName = clientName;
+            return this;
+        }
+
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             Dictionary<string, Dictionary<string, object>> resultDictionaries = new Dictionary<string, Dictionary<string, object>>();
