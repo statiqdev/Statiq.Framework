@@ -1,3 +1,5 @@
+# 1.0.0-beta.48
+
 # 1.0.0-beta.47
 
 - **Breaking change:** Renamed the erroneous `Statiq.SearchIndex` namespace in the `Statiq.Lunr` package to `Statiq.Lunr`.
