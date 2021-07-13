@@ -335,7 +335,6 @@ namespace Statiq.Lunr
             Dictionary<string, Dictionary<string, object>> resultDictionaries = new Dictionary<string, Dictionary<string, object>>();
             Dictionary<string, Dictionary<string, object>> lazyDictionaries = new Dictionary<string, Dictionary<string, object>>();
             string camelCaseRefKey = _referenceKey.ToLowerCamelCase();
-            bool addedFields = false;
 
             // Get stop words
             global::Lunr.StopWordFilterBase stopWordFilter = null;
@@ -349,6 +348,10 @@ namespace Statiq.Lunr
             global::Lunr.Index searchIndex = await global::Lunr.Index.Build(
                 async indexBuilder =>
                 {
+                    // Collect the Lunr documents (we'll add them at the end)
+                    List<global::Lunr.Document> lunrDocuments = new List<global::Lunr.Document>();
+                    HashSet<string> availableSearchFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
                     // Iterate the input documents
                     foreach (IDocument input in context.Inputs)
                     {
@@ -407,6 +410,9 @@ namespace Statiq.Lunr
 
                                                 if (searchValue is object)
                                                 {
+                                                    // Track which fields are available for search
+                                                    availableSearchFields.Add(field.Key);
+
                                                     // Add to the results dictionaries
                                                     if (field.Value.HasFlag(FieldType.Result))
                                                     {
@@ -416,29 +422,9 @@ namespace Statiq.Lunr
                                                 }
                                             }
 
-                                            // Add the fields if this is the first document (only add them when we know we have at least one document,
-                                            // otherwise the search index build throws for an empty document set)
-                                            if (!addedFields)
-                                            {
-                                                // Add the reference field
-                                                indexBuilder.ReferenceField = camelCaseRefKey;
+                                            lunrDocuments.Add(lunrDocument);
 
-                                                // Enable position metadata
-                                                if (_allowPositionMetadata)
-                                                {
-                                                    indexBuilder.MetadataAllowList.Add("position");
-                                                }
-
-                                                // Add search fields
-                                                foreach (KeyValuePair<string, FieldType> field in _fields.Where(x => x.Value.HasFlag(FieldType.Searchable)))
-                                                {
-                                                    indexBuilder.AddField(field.Key);
-                                                }
-                                                addedFields = true;
-                                            }
-
-                                            // Add the search document and data dictionaries
-                                            await indexBuilder.Add(lunrDocument, cancellationToken: context.CancellationToken);
+                                            // Add the results if there are any
                                             if (hasResultField)
                                             {
                                                 resultDictionaries.Add(refValue, resultDictionary);
@@ -448,6 +434,28 @@ namespace Statiq.Lunr
                                 }
                             }
                         }
+                    }
+
+                    // Add the fields after adding the documents to the index
+                    indexBuilder.ReferenceField = camelCaseRefKey;
+
+                    // Enable position metadata
+                    if (_allowPositionMetadata)
+                    {
+                        indexBuilder.MetadataAllowList.Add("position");
+                    }
+
+                    // Add search fields, but only if they are available in at least one of the documents
+                    foreach (KeyValuePair<string, FieldType> field in _fields
+                        .Where(x => x.Value.HasFlag(FieldType.Searchable) && availableSearchFields.Contains(x.Key)))
+                    {
+                        indexBuilder.AddField(field.Key);
+                    }
+
+                    // Add all the Lunr documents
+                    foreach (global::Lunr.Document lunrDocument in lunrDocuments)
+                    {
+                        await indexBuilder.Add(lunrDocument, cancellationToken: context.CancellationToken);
                     }
                 },
                 stopWordFilter: stopWordFilter);

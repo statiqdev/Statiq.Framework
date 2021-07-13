@@ -1,6 +1,7 @@
 # 1.0.0-beta.48
 
 - Added `GenerateLunrIndex.WithClientName` method to allow setting the name of the client object in the generated JavaScript file.
+- Fixed a bug in `GenerateLunrIndex` when no documents contain a given search field.
 
 # 1.0.0-beta.47
 

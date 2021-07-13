@@ -541,7 +541,7 @@ namespace Statiq.Lunr.Tests
             }
 
             [Test]
-            public async Task MissingSearchableField()
+            public async Task MissingSearchableFieldInOneDocument()
             {
                 // Given
                 TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
@@ -562,7 +562,33 @@ namespace Statiq.Lunr.Tests
 
                 // Then
                 TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
+                indexDocument.Content.ShouldContain("aaa");
                 indexDocument.Content.ShouldContain("bbb");
+            }
+
+            [Test]
+            public async Task MissingSearchableFieldInAllDocuments()
+            {
+                // Given
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                TestDocument b = new TestDocument((NormalizedPath)"b.html", "Buzz")
+                {
+                    { Keys.Title, "Bar" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .WithField("aaa", FieldType.Searchable)
+                    .ZipIndexFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
+
+                // Then
+                TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
+                indexDocument.Content.ShouldNotContain("aaa");
+                indexDocument.Content.ShouldNotContain("bbb");
             }
 
             [Test]
