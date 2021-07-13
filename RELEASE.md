@@ -5,6 +5,7 @@
 - Fixed a bug with the reflected namespace collection when dealing with objects in the global namespace (#191).
 - Fixed a bug when getting outputs from a valid pipeline that didn't produce any (it now returns an empty collection instead of throwing and exception) (#172).
 - Fixed a bug in the `GenerateSiteMap` module when using the `LinkRoot` setting that included the link root twice (#158, #193, thanks @kkato233).
+- Added support for named strongly-typed pipelines (#173).
 
 # 1.0.0-beta.46
 
