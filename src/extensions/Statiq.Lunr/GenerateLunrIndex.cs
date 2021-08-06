@@ -60,9 +60,9 @@ namespace Statiq.Lunr
 
         private bool _removeHtml = true;
 
-        private bool _stemming = true;
+        private bool _stemming;
 
-        private Func<string, string> _stem = null;
+        private Func<string, string> _stem;
 
         /// <summary>
         /// Defines a search field and whether to include it in results.
@@ -298,7 +298,7 @@ namespace Statiq.Lunr
         /// </summary>
         /// <param name="stemming"><c>true</c> to turn on stemming, <c>false</c> otherwise.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateLunrIndex WithStemming(bool stemming)
+        public GenerateLunrIndex WithStemming(bool stemming = true)
         {
             _stemming = stemming;
             return this;

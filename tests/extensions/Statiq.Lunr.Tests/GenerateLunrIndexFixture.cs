@@ -115,6 +115,33 @@ namespace Statiq.Lunr.Tests
                 scriptDocument.Content.ShouldContain($@"resultsFile: '/{GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".results.json")}'");
             }
 
+            [TestCase(false)]
+            [TestCase(true)]
+            public async Task ScriptDoesNotContainTypeaheadCodeWhenStemming(bool stemming)
+            {
+                // Given
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .WithStemming(stemming);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, module);
+
+                // Then
+                TestDocument scriptDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath);
+                if (stemming)
+                {
+                    scriptDocument.Content.ShouldNotContain("lunr.Query.wildcard.TRAILING");
+                }
+                else
+                {
+                    scriptDocument.Content.ShouldContain("lunr.Query.wildcard.TRAILING");
+                }
+            }
+
             [Test]
             public async Task CanChangeClientObjectName()
             {
@@ -1157,6 +1184,72 @@ namespace Statiq.Lunr.Tests
                 TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
                 indexDocument.Content.ShouldContain("and");
                 indexDocument.Content.ShouldContain("fizz");
+            }
+
+            [Test]
+            public async Task StemmingUsesEnglishStemmerByDefault()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz cry buzz")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .WithStemming(true)
+                    .ZipIndexFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
+
+                // Then
+                TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
+                indexDocument.Content.ShouldNotContain("\"cry\"");
+                indexDocument.Content.ShouldContain("\"cri\"");
+            }
+
+            [Test]
+            public async Task CustomStemmer()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz cry buzz")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .WithStemming(x => x == "cry" ? "abcd" : x)
+                    .ZipIndexFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
+
+                // Then
+                TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
+                indexDocument.Content.ShouldNotContain("\"cry\"");
+                indexDocument.Content.ShouldNotContain("\"cri\"");
+                indexDocument.Content.ShouldContain("\"abcd\"");
+            }
+
+            [Test]
+            public async Task DoesNotStemByDefault()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument a = new TestDocument((NormalizedPath)"a/a.html", "Fizz cry buzz")
+                {
+                    { Keys.Title, "Foo" }
+                };
+                GenerateLunrIndex module = new GenerateLunrIndex()
+                    .ZipIndexFile(false);
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { a }, context, module);
+
+                // Then
+                TestDocument indexDocument = results.ShouldHaveSingleWithDestination(GenerateLunrIndex.DefaultScriptPath.ChangeExtension(".index.json"));
+                indexDocument.Content.ShouldContain("\"cry\"");
+                indexDocument.Content.ShouldNotContain("\"cri\"");
             }
 
             [Test]
