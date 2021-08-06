@@ -60,6 +60,10 @@ namespace Statiq.Lunr
 
         private bool _removeHtml = true;
 
+        private bool _stemming = true;
+
+        private Func<string, string> _stem = null;
+
         /// <summary>
         /// Defines a search field and whether to include it in results.
         /// </summary>
@@ -286,6 +290,36 @@ namespace Statiq.Lunr
         }
 
         /// <summary>
+        /// Turns on stemming, which reduces words to their base form, using a default
+        /// English stemmer. You can customize stemming and supply a stemming delegate
+        /// using <see cref="WithStemming(Func{string, string})"/>. Note that turning
+        /// on stemming reduces the effectiveness of wildcard searches and disables the
+        /// default client-side typeahead search behavior in the generated JavaScript file.
+        /// </summary>
+        /// <param name="stemming"><c>true</c> to turn on stemming, <c>false</c> otherwise.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateLunrIndex WithStemming(bool stemming)
+        {
+            _stemming = stemming;
+            return this;
+        }
+
+        /// <summary>
+        /// Turns on stemming, which reduces words to their base form,
+        /// using a custom stemming delegate. Note that turning
+        /// on stemming reduces the effectiveness of wildcard searches and disables the
+        /// default client-side typeahead search behavior in the generated JavaScript file.
+        /// </summary>
+        /// <param name="stem">A delegate that returns the stemmed version of each word (or the original word if it does not have a stem).</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateLunrIndex WithStemming(Func<string, string> stem)
+        {
+            _stemming = true;
+            _stem = stem;
+            return this;
+        }
+
+        /// <summary>
         /// Indicates whether to gzip the index file (the default is <c>true</c>).
         /// </summary>
         /// <param name="zipIndexFile"><c>true</c> to gzip the index file, <c>false</c> otherwise.</param>
@@ -342,6 +376,19 @@ namespace Statiq.Lunr
             {
                 IEnumerable<string> stopWords = (await _getStopWords.GetValueAsync(null, context)) ?? Array.Empty<string>();
                 stopWordFilter = new StopWordFilter(stopWords);
+            }
+
+            // Get the stemmer
+            global::Lunr.StemmerBase stemmer = null;
+            if (!_stemming)
+            {
+                // We need to supply a no-op stemmer to turn it off, otherwise the English stemmer is used when stemmer is null
+                stemmer = new NoStemmer();
+            }
+            else if (_stem is object)
+            {
+                // A custom delegate stemmer was applied
+                stemmer = new DelegateStemmer(_stem);
             }
 
             // Build the index
@@ -458,7 +505,8 @@ namespace Statiq.Lunr
                         await indexBuilder.Add(lunrDocument, cancellationToken: context.CancellationToken);
                     }
                 },
-                stopWordFilter: stopWordFilter);
+                stopWordFilter: stopWordFilter,
+                stemmer: stemmer);
 
             // Create output documents
             List<IDocument> outputs = new List<IDocument>();
@@ -476,6 +524,18 @@ namespace Statiq.Lunr
             }
 
             // Build the search JavaScript file, allowing for overriding the output
+            // See https://github.com/olivernn/lunr.js/issues/256#issuecomment-295407852 for how typeahead works
+            string typeahead = @"if (!noTypeahead) {
+                        query.clauses.forEach(clause => {
+                            if (clause.wildcard === lunr.Query.wildcard.NONE && clause.usePipeline && clause.boost === 1 && clause.term.length > 2) {
+                                clause.boost = 10;
+                                query.term(clause.term, { usePipeline: false, wildcard: lunr.Query.wildcard.TRAILING });
+                            }
+                        });
+                    }";
+            string resultsMapping = @".map(function(searchResult) {
+                return Object.assign(self.results[searchResult.ref], searchResult);
+            })";
             string script = $@"const {_clientName} = {{
     initialized: false,
     indexFile: '{context.GetLink(indexPath)}',
@@ -529,20 +589,24 @@ namespace Statiq.Lunr
             }}")}
         }}
     }},
-    search: function(query, callback) {{
+    search: function(queryString, callback{(_stemming ? string.Empty : ", noTypeahead")}) {{
         let self = this;
         self.initialize();
 
         // Wait for initialization
         if (!self.indexInitialized{(resultsPath.IsNull ? string.Empty : $" || !self.resultsInitialized")}) {{
-            setTimeout(() => {{ret = self.search(query, callback)}}, 100);
+            setTimeout(() => {{ret = self.search(queryString, callback)}}, 100);
         }}
 
         // Call callback with results
         if (self.index && callback) {{
-            {(resultsPath.IsNull ? $@"callback(self.index.search(query))" : $@"callback(self.index.search(query).map(function(searchResult) {{
-                return Object.assign(self.results[searchResult.ref], searchResult);
-            }}));")}
+            callback(self.index
+                .query(query => {{
+                    var parser = new lunr.QueryParser(queryString, query);
+                    parser.parse();
+                    {(_stemming ? string.Empty : typeahead)}
+                }})
+                {(resultsPath.IsNull ? string.Empty : resultsMapping)});
         }}
     }}
 }};";

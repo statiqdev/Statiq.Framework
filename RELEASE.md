@@ -2,6 +2,8 @@
 
 - Added `GenerateLunrIndex.WithClientName` method to allow setting the name of the client object in the generated JavaScript file.
 - Fixed a bug in `GenerateLunrIndex` when no documents contain a given search field.
+- Added `GenerateLunrIndex.WithStemming` methods to control stemming behavior and changed default to no stemming.
+- Added support for typeahead style searching to the generated client JavaScript search file by default (I.e. automatically adds trailing wildcards).
 
 # 1.0.0-beta.47
 
