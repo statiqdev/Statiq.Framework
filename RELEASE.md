@@ -1,5 +1,7 @@
 # 1.0.0-beta.49
 
+- Added the `cache` directory to the excluded list in `Statiq.App.props`.
+
 # 1.0.0-beta.48
 
 - Added `GenerateLunrIndex.WithClientName` method to allow setting the name of the client object in the generated JavaScript file.

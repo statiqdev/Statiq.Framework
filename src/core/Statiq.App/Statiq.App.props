@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <RunWorkingDirectory>$(MSBuildProjectDirectory)</RunWorkingDirectory>
-    <DefaultItemExcludes>$(DefaultItemExcludes);output\**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);output\**;cache\**</DefaultItemExcludes>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="input\**" />
