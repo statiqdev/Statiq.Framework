@@ -1,6 +1,7 @@
 # 1.0.0-beta.49
 
 - Added the `cache` directory to the excluded list in `Statiq.App.props`.
+- Fixed a bug with `DocumentFileProvider` and documents with a null `Destination`.
 
 # 1.0.0-beta.48
 

@@ -37,7 +37,15 @@ namespace Statiq.Common
             {
                 foreach (IDocument document in flatten ? documents.Flatten(childrenKey) : documents)
                 {
-                    NormalizedPath path = source ? document.Source : NormalizedPath.AbsoluteRoot.Combine(document.Destination);
+                    // Ignore documents without a destination if using destination as the basis
+                    if (!source && document.Destination.IsNull)
+                    {
+                        continue;
+                    }
+
+                    NormalizedPath path = source
+                        ? document.Source
+                        : NormalizedPath.AbsoluteRoot.Combine(document.Destination);
                     if (!path.IsNull)
                     {
                         Files[path] = document;

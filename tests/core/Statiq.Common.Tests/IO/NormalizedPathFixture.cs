@@ -1159,6 +1159,23 @@ namespace Statiq.Common.Tests.IO
             }
 
             [Test]
+            public void ShouldCombineMultiplePaths()
+            {
+                // Given
+                NormalizedPath first = "a";
+                NormalizedPath second = "b";
+                NormalizedPath third = "c";
+                NormalizedPath fourth = "d";
+                NormalizedPath fifth = "e";
+
+                // When
+                NormalizedPath result = NormalizedPath.Combine(first, second, third, fourth, fifth);
+
+                // Then
+                result.FullPath.ShouldBe("a/b/c/d/e");
+            }
+
+            [Test]
             public void ShouldThrowIfPathIsNull()
             {
                 // Given
