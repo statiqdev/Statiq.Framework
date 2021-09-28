@@ -12,7 +12,7 @@ namespace Statiq.Core
     {
         // Cache analyzer overrides per document
         private static readonly ConcurrentCache<IDocument, IReadOnlyDictionary<string, LogLevel>> _overrideCache =
-            new ConcurrentCache<IDocument, IReadOnlyDictionary<string, LogLevel>>();
+            new ConcurrentCache<IDocument, IReadOnlyDictionary<string, LogLevel>>(true);
 
         private readonly string _analyzerName;
         private readonly LogLevel _logLevel;

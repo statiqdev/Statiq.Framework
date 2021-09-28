@@ -11,7 +11,7 @@ namespace Statiq.Common
     {
         // Cache values by key and source metadata
         private readonly ConcurrentCache<(string, IMetadata), object> _cache =
-            new ConcurrentCache<(string, IMetadata), object>();
+            new ConcurrentCache<(string, IMetadata), object>(false);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CachedDelegateMetadataValue"/> class.

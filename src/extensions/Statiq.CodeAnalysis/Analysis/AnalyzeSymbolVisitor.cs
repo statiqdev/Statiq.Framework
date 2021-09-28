@@ -21,11 +21,14 @@ namespace Statiq.CodeAnalysis.Analysis
     {
         private static readonly object XmlDocLock = new object();
 
-        private readonly ConcurrentCache<string, IDocument> _namespaceDisplayNameToDocument = new ConcurrentCache<string, IDocument>();
+        private readonly ConcurrentCache<string, IDocument> _namespaceDisplayNameToDocument =
+            new ConcurrentCache<string, IDocument>(false);
         private readonly ConcurrentCache<string, ConcurrentHashSet<INamespaceSymbol>> _namespaceDisplayNameToSymbols =
-            new ConcurrentCache<string, ConcurrentHashSet<INamespaceSymbol>>();
-        private readonly ConcurrentCache<ISymbol, IDocument> _symbolToDocument = new ConcurrentCache<ISymbol, IDocument>();
-        private readonly ConcurrentHashSet<IMethodSymbol> _extensionMethods = new ConcurrentHashSet<IMethodSymbol>();
+            new ConcurrentCache<string, ConcurrentHashSet<INamespaceSymbol>>(false);
+        private readonly ConcurrentCache<ISymbol, IDocument> _symbolToDocument =
+            new ConcurrentCache<ISymbol, IDocument>(false);
+        private readonly ConcurrentHashSet<IMethodSymbol> _extensionMethods =
+            new ConcurrentHashSet<IMethodSymbol>();
 
         private readonly Compilation _compilation;
         private readonly IExecutionContext _context;
@@ -424,7 +427,8 @@ namespace Statiq.CodeAnalysis.Analysis
             // Create the document and add it to caches
             return _symbolToDocument.GetOrAdd(
                 symbol,
-                _ => _context.CreateDocument(new NormalizedPath(symbol.ToDisplayString(), PathKind.Absolute), destination, items));
+                (key, args) => args._context.CreateDocument(new NormalizedPath(key.ToDisplayString(), PathKind.Absolute), args.destination, args.items),
+                (destination, items, _context));
         }
 
         private void AddXmlDocumentation(ISymbol symbol, MetadataItems metadata)

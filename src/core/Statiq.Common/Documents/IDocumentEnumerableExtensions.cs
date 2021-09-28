@@ -316,19 +316,21 @@ namespace Statiq.Common
             new DocumentMetadataTree<TDocument>(documents, childrenKey);
 
         // Cache the destination and source trees since creating them is a bit expensive
-        private static readonly ConcurrentCache<(int, Type), object> DestinationTrees = new ConcurrentCache<(int, Type), object>();
-        private static readonly ConcurrentCache<(int, Type), object> SourceTrees = new ConcurrentCache<(int, Type), object>();
+        private static readonly ConcurrentCache<(int, Type), object> DestinationTrees = new ConcurrentCache<(int, Type), object>(true);
+        private static readonly ConcurrentCache<(int, Type), object> SourceTrees = new ConcurrentCache<(int, Type), object>(true);
 
         public static DocumentPathTree<TDocument> AsDestinationTree<TDocument>(this IEnumerable<TDocument> documents)
             where TDocument : IDocument =>
             (DocumentPathTree<TDocument>)DestinationTrees.GetOrAdd(
                 (documents.GetHashCode(), typeof(TDocument)),
-                _ => new DocumentPathTree<TDocument>(documents, x => x.Destination));
+                (_, d) => new DocumentPathTree<TDocument>(d, x => x.Destination),
+                documents);
 
         public static DocumentPathTree<TDocument> AsSourceTree<TDocument>(this IEnumerable<TDocument> documents)
             where TDocument : IDocument =>
             (DocumentPathTree<TDocument>)SourceTrees.GetOrAdd(
                 (documents.GetHashCode(), typeof(TDocument)),
-                _ => new DocumentPathTree<TDocument>(documents, x => x.Source));
+                (_, d) => new DocumentPathTree<TDocument>(d, x => x.Source),
+                documents);
     }
 }

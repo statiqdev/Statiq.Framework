@@ -19,7 +19,8 @@ namespace Statiq.Common
         public const string PathEnvironmentVariable = "PATH";
         public const string PathExtEnvironmentVariable = "PATHEXT";
 
-        private readonly ConcurrentCache<int, StartedProcess> _runningProcesses = new ConcurrentCache<int, StartedProcess>();
+        private readonly ConcurrentCache<int, StartedProcess> _runningProcesses =
+            new ConcurrentCache<int, StartedProcess>(false);
         private readonly ManualResetEvent _allProcessesExited = new ManualResetEvent(true);
 
         /// <summary>

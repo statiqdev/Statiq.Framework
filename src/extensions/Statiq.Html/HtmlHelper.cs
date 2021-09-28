@@ -13,7 +13,8 @@ namespace Statiq.Html
         public static readonly HtmlParser DefaultHtmlParser = new HtmlParser();
 
         // Statically cache generated IHtmlDocument instances keyed to the content provider
-        private static readonly ConcurrentCache<IContentProvider, Task<IHtmlDocument>> _htmlDocumentCache = new ConcurrentCache<IContentProvider, Task<IHtmlDocument>>();
+        private static readonly ConcurrentCache<IContentProvider, Task<IHtmlDocument>> _htmlDocumentCache =
+            new ConcurrentCache<IContentProvider, Task<IHtmlDocument>>(true);
 
         internal static void ClearHtmlDocumentCache() => _htmlDocumentCache.Clear();
 
@@ -29,21 +30,22 @@ namespace Statiq.Html
         {
             IHtmlDocument htmlDocument = await _htmlDocumentCache.GetOrAdd(
                 document.ContentProvider,
-                async _ =>
+                async (_, doc) =>
                 {
                     try
                     {
-                        using (Stream stream = document.GetContentStream())
+                        using (Stream stream = doc.GetContentStream())
                         {
                             return await DefaultHtmlParser.ParseDocumentAsync(stream);
                         }
                     }
                     catch (Exception ex)
                     {
-                        document.LogWarning($"Exception while parsing HTML: {ex.Message}");
+                        doc.LogWarning($"Exception while parsing HTML: {ex.Message}");
                     }
                     return null;
-                });
+                },
+                document);
             if (clone)
             {
                 htmlDocument = (IHtmlDocument)htmlDocument.Clone();

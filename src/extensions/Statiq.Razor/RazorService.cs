@@ -18,7 +18,7 @@ namespace Statiq.Razor
         private const string CacheFileName = "razorcache.json";
 
         private readonly ConcurrentCache<CompilationParameters, RazorCompiler> _compilers
-            = new ConcurrentCache<CompilationParameters, RazorCompiler>();
+            = new ConcurrentCache<CompilationParameters, RazorCompiler>(false);
 
         private Dictionary<AssemblyCacheKey, string> _cachedAssemblies = new Dictionary<AssemblyCacheKey, string>();
 
@@ -87,7 +87,10 @@ namespace Statiq.Razor
                     {
                         CachingCompiler compiler = cacheGroup.Key.Equals(viewCompiler.CompilationParameters)
                             ? (CachingCompiler)viewCompiler
-                            : _compilers.GetOrAdd(cacheGroup.Key, parameters => GetRazorCompiler(parameters, args.Engine.Services));
+                            : _compilers.GetOrAdd(
+                                cacheGroup.Key,
+                                (parameters, engine) => GetRazorCompiler(parameters, engine.Services),
+                                args.Engine);
                         count += compiler.PopulateCache(cacheGroup.Select(x => new KeyValuePair<AssemblyCacheKey, string>(x.Key, args.Engine.FileSystem.GetCachePath(x.Value).FullPath)));
                     }
                     IExecutionContext.Current.LogInformation($"Restored Razor compilation cache from {cacheFile.Path.FullPath} with {count} assemblies");

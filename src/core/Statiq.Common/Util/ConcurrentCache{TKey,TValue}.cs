@@ -15,20 +15,90 @@ namespace Statiq.Common
     /// See http://reedcopsey.com/2011/01/16/concurrentdictionarytkeytvalue-used-with-lazyt/
     /// and https://andrewlock.net/making-getoradd-on-concurrentdictionary-thread-safe-using-lazy/.
     /// </remarks>
-    public class ConcurrentCache<TKey, TValue> : IReadOnlyDictionary<TKey, TValue>
+    public class ConcurrentCache<TKey, TValue> : IConcurrentCache, IReadOnlyDictionary<TKey, TValue>
     {
-        private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _dictionary = new ConcurrentDictionary<TKey, Lazy<TValue>>();
+        private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _dictionary;
+
+        /// <summary>
+        /// Creates a thread-safe concurrent cache.
+        /// </summary>
+        /// <param name="resettable">
+        /// Indicates if the cache should be reset by the <see cref="IEngine"/> before each execution.
+        /// </param>
+        public ConcurrentCache(bool resettable)
+            : this(resettable, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a thread-safe concurrent cache.
+        /// </summary>
+        /// <param name="resettable">
+        /// Indicates if the cache should be reset by the <see cref="IEngine"/> before each execution.
+        /// </param>
+        /// <param name="comparer">
+        /// The key comparer to use, or <c>null</c> to use the default comparer.
+        /// </param>
+        public ConcurrentCache(bool resettable, IEqualityComparer<TKey> comparer)
+        {
+            if (resettable)
+            {
+                IConcurrentCache.AddResettableCache(this);
+            }
+            _dictionary = new ConcurrentDictionary<TKey, Lazy<TValue>>(comparer);
+        }
 
         private static Lazy<TValue> GetValue(Func<TValue> valueFactory) =>
             new Lazy<TValue>(valueFactory, LazyThreadSafetyMode.ExecutionAndPublication);
 
+        private static Lazy<TValue> GetValue(TValue value) => new Lazy<TValue>(value);
+
         public TValue GetOrAdd(TKey key, Func<TKey, TValue> valueFactory) =>
-            _dictionary.GetOrAdd(key, k => GetValue(() => valueFactory(k))).Value;
+            _dictionary
+            .GetOrAdd(key, (k, args) => GetValue(() => args(k)), valueFactory)
+            .Value;
+
+        public TValue GetOrAdd<TArg>(TKey key, Func<TKey, TArg, TValue> valueFactory, TArg arg) =>
+            _dictionary
+                .GetOrAdd(key, (k, args) => GetValue(() => args.valueFactory(k, args.arg)), (valueFactory, arg))
+                .Value;
+
+        public TValue GetOrAdd(TKey key, TValue value) =>
+            _dictionary.GetOrAdd(key, GetValue(value)).Value;
 
         public TValue AddOrUpdate(TKey key, Func<TKey, TValue> addValueFactory, Func<TKey, TValue, TValue> updateValueFactory) =>
-            _dictionary.AddOrUpdate(key, k => GetValue(() => addValueFactory(k)), (k, v) => GetValue(() => updateValueFactory(k, v.Value))).Value;
+            _dictionary
+            .AddOrUpdate(
+                key,
+                (k, args) => GetValue(() => args.addValueFactory(k)),
+                (k, v, args) => GetValue(() => args.updateValueFactory(k, v.Value)),
+                (addValueFactory, updateValueFactory))
+            .Value;
+
+        public TValue AddOrUpdate<TArg>(
+            TKey key,
+            Func<TKey, TArg, TValue> addValueFactory,
+            Func<TKey, TValue, TArg, TValue> updateValueFactory,
+            TArg arg) =>
+            _dictionary
+                .AddOrUpdate(
+                    key,
+                    (k, args) => GetValue(() => args.addValueFactory(k, args.arg)),
+                    (k, v, args) => GetValue(() => args.updateValueFactory(k, v.Value, args.arg)),
+                    (addValueFactory, updateValueFactory, arg))
+                .Value;
+
+        public TValue AddOrUpdate(TKey key, TValue addValue, Func<TKey, TValue, TValue> updateValueFactory) =>
+            _dictionary
+                .AddOrUpdate(
+                    key,
+                    GetValue(addValue),
+                    (k, v) => GetValue(() => updateValueFactory(k, v.Value)))
+                .Value;
 
         public bool TryAdd(TKey key, Func<TValue> valueFactory) => _dictionary.TryAdd(key, GetValue(valueFactory));
+
+        public bool TryAdd(TKey key, TValue value) => _dictionary.TryAdd(key, GetValue(value));
 
         public bool TryRemove(TKey key, out TValue value)
         {

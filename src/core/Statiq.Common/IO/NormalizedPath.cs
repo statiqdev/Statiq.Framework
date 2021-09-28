@@ -33,7 +33,8 @@ namespace Statiq.Common
         private const string WhitespaceChars = "\r\n\t";
 
         // Cache string-based paths so we don't have to recalculate them
-        private static readonly ConcurrentCache<(string, PathKind), PathData> _cache = new ConcurrentCache<(string, PathKind), PathData>();
+        private static readonly ConcurrentCache<(string, PathKind), PathData> _cache =
+            new ConcurrentCache<(string, PathKind), PathData>(false);
 
         private static readonly char[] InvalidPathChars = Path.GetInvalidPathChars();
 

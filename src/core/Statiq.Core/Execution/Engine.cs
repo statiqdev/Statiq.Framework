@@ -405,6 +405,9 @@ namespace Statiq.Core
                 await FileCleaner.CleanBeforeExecutionAsync();
                 otherStopwatches.Peek().Item2.Stop();
 
+                // Reset caches
+                IConcurrentCache.ResetCaches();
+
                 // Raise before event and analyzer before method
                 otherStopwatches.Push(("Before Engine Execution Events", Stopwatch.StartNew()));
                 await Events.RaiseAsync(new BeforeEngineExecution(this, ExecutionId));

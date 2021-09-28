@@ -178,6 +178,10 @@
                 hideExtensions);
         }
 
+        // This is a frequently used hot path so cache the results
+        private static readonly ConcurrentCache<(NormalizedPath, bool), string> _links =
+            new ConcurrentCache<(NormalizedPath, bool), string>(true);
+
         /// <summary>
         /// Converts the specified path into a string appropriate for use as a link using default settings from the
         /// configuration. This version should be used inside modules to ensure
@@ -196,14 +200,18 @@
             this IExecutionState executionState,
             in NormalizedPath path,
             bool includeHost = false) =>
-            executionState.GetLink(
-                path,
-                includeHost ? executionState.Settings.GetString(Keys.Host) : null,
-                executionState.Settings.GetPath(Keys.LinkRoot),
-                executionState.Settings.GetBool(Keys.LinksUseHttps),
-                executionState.Settings.GetBool(Keys.LinkHideIndexPages),
-                executionState.Settings.GetBool(Keys.LinkHideExtensions),
-                executionState.Settings.GetBool(Keys.LinkLowercase));
+                _links.GetOrAdd(
+                    (path, includeHost),
+                    (key, es) =>
+                        es.GetLink(
+                            key.Item1,
+                            key.Item2 ? es.Settings.GetString(Keys.Host) : null,
+                            es.Settings.GetPath(Keys.LinkRoot),
+                            es.Settings.GetBool(Keys.LinksUseHttps),
+                            es.Settings.GetBool(Keys.LinkHideIndexPages),
+                            es.Settings.GetBool(Keys.LinkHideExtensions),
+                            es.Settings.GetBool(Keys.LinkLowercase)),
+                    executionState);
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more

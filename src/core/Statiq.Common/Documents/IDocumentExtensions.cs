@@ -90,12 +90,16 @@ namespace Statiq.Common
         public static bool IdEquals(this IDocument document, IDocument other) =>
             DocumentIdComparer.Instance.Equals(document, other);
 
+        // Title is a hot path, so cache the results
+        private static ConcurrentCache<IDocument, string> _titles = new ConcurrentCache<IDocument, string>(true);
+
         /// <summary>
         /// Gets a normalized title derived from the document source (or <see cref="Keys.Title"/> if defined).
         /// </summary>
         /// <param name="document">The document.</param>
         /// <returns>A normalized title or <c>null</c> if the source is null.</returns>
-        public static string GetTitle(this IDocument document) => document.GetString(Keys.Title) ?? document.Source.GetTitle();
+        public static string GetTitle(this IDocument document) =>
+            _titles.GetOrAdd(document, doc => doc.GetString(Keys.Title) ?? doc.Source.GetTitle());
 
         /// <summary>
         /// Presents the metadata of a document as a dynamic object. Cast the return object to <see cref="IDocument"/>

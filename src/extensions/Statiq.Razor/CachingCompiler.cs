@@ -13,7 +13,7 @@ namespace Statiq.Razor
     internal abstract class CachingCompiler
     {
         private readonly ConcurrentCache<CompilerCacheKey, CompilationResult> _compilationCache
-            = new ConcurrentCache<CompilerCacheKey, CompilationResult>();
+            = new ConcurrentCache<CompilerCacheKey, CompilationResult>(false);
 
         // Used to track compilation result requests on each execution so stale cache entries can be cleared
         private readonly ConcurrentHashSet<CompilerCacheKey> _requestedCompilationResults = new ConcurrentHashSet<CompilerCacheKey>();
@@ -56,13 +56,14 @@ namespace Statiq.Razor
                 try
                 {
                     Assembly assembly = Assembly.LoadFile(item.Value);
-                    CompilationResult compilationResult = new CompilationResult(
-                        Path.GetFileName(item.Value),
-                        null,
-                        null,
-                        assembly,
-                        StatiqViewCompiler.CompiledItemLoader.LoadItems(assembly).SingleOrDefault());
-                    _compilationCache.TryAdd(item.Key.CompilerCacheKey, () => compilationResult);
+                    _compilationCache.TryAdd(
+                        item.Key.CompilerCacheKey,
+                        new CompilationResult(
+                            Path.GetFileName(item.Value),
+                            null,
+                            null,
+                            assembly,
+                            StatiqViewCompiler.CompiledItemLoader.LoadItems(assembly).SingleOrDefault()));
                     count++;
                 }
                 catch (Exception ex)

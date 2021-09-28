@@ -24,7 +24,7 @@ namespace Statiq.Core
 
         // Keyed by script
         private static readonly ConcurrentCache<string, ScriptFactoryBase> _cachedScriptFactories =
-            new ConcurrentCache<string, ScriptFactoryBase>();
+            new ConcurrentCache<string, ScriptFactoryBase>(false);
 
         private readonly IExecutionState _executionState;
 
@@ -36,13 +36,16 @@ namespace Statiq.Core
         /// <inheritdoc/>
         public async Task<object> EvaluateAsync(string code, IMetadata metadata)
         {
-            ScriptFactoryBase scriptFactory = _cachedScriptFactories.GetOrAdd(code, _ =>
-            {
-                IExecutionContext.Current.LogDebug($"Script cache miss for script `{(code.Length > 20 ? (code.Substring(0, 19) + "...") : code)}`");
-                byte[] rawAssembly = Compile(code);
-                Type scriptFactoryType = LoadFactory(rawAssembly);
-                return (ScriptFactoryBase)Activator.CreateInstance(scriptFactoryType);
-            });
+            ScriptFactoryBase scriptFactory = _cachedScriptFactories.GetOrAdd(
+                code,
+                (key, t) =>
+                {
+                    IExecutionContext.Current.LogDebug($"Script cache miss for script `{(key.Length > 20 ? (key.Substring(0, 19) + "...") : key)}`");
+                    byte[] rawAssembly = t.Compile(key);
+                    Type scriptFactoryType = LoadFactory(rawAssembly);
+                    return (ScriptFactoryBase)Activator.CreateInstance(scriptFactoryType);
+                },
+                this);
             ScriptBase script = scriptFactory.GetScript(metadata, _executionState, IExecutionContext.Current);
             return await script.EvaluateAsync();
         }
