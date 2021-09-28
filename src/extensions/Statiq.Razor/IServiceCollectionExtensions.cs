@@ -56,8 +56,16 @@ namespace Statiq.Razor
             // (most default registration use .TryAdd...() so they skip already registered types)
             IMvcCoreBuilder builder = serviceCollection
                 .AddMvcCore()
-                .AddRazorViewEngine()
-                .AddRazorRuntimeCompilation();
+                .AddRazorViewEngine();
+
+            // Remove *any* existing IViewCompilerProvider registration before adding the one in AddRazorRuntimeCompilation (see #204)
+            ServiceDescriptor serviceDescriptor = builder.Services.FirstOrDefault((ServiceDescriptor f) => f.ServiceType == typeof(IViewCompilerProvider));
+            if (serviceDescriptor is object)
+            {
+                builder.Services.Remove(serviceDescriptor);
+            }
+
+            builder = builder.AddRazorRuntimeCompilation();
 
             // Make the project engine scoped because we have to replace the phases based on base page type and namespaces
             ServiceDescriptor razorProjectEngineDescriptor = serviceCollection.First(x => x.ServiceType == typeof(RazorProjectEngine));
@@ -68,6 +76,7 @@ namespace Statiq.Razor
 
             // Replace the runtime view compiler provider with our own
             // Create a short-lived service provider to get an instance we can inject
+            // This is expected to be a RuntimeViewCompilerProvider (see #204)
             ServiceDescriptor viewCompilerProviderDescriptor = serviceCollection.First((ServiceDescriptor f) => f.ServiceType == typeof(IViewCompilerProvider));
             serviceCollection.Replace(ServiceDescriptor.Describe(
                 typeof(IViewCompilerProvider),
