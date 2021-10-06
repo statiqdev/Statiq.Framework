@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Statiq.Common
 {
@@ -20,5 +21,28 @@ namespace Statiq.Common
         /// <returns>A new <see cref="StreamWriter"/> for the specified stream.</returns>
         public static StreamWriter GetWriter(this Stream stream, bool leaveOpen = true) =>
             new StreamWriter(stream, Encoding.Default, 1024, leaveOpen);
+
+        /// <summary>
+        /// Copies a <see cref="Stream"/> to a <see cref="TextWriter"/> using a buffer and leaves the stream
+        /// open after copying.
+        /// </summary>
+        /// <param name="stream">The stream to copy from.</param>
+        /// <param name="writer">The text writer to write stream content to.</param>
+        /// <param name="bufferLength">The length of the buffer to populate for each block.</param>
+        public static async Task CopyToAsync(this Stream stream, TextWriter writer, int bufferLength = 4096)
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+            using (StreamReader reader = new StreamReader(stream, leaveOpen: true))
+            {
+                char[] buffer = new char[bufferLength];
+                int read;
+                do
+                {
+                    read = await reader.ReadBlockAsync(buffer, 0, bufferLength);
+                    await writer.WriteAsync(buffer, 0, read);
+                }
+                while (read > 0);
+            }
+        }
     }
 }

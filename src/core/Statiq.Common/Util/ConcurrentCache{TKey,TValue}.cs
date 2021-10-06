@@ -19,6 +19,8 @@ namespace Statiq.Common
     {
         private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _dictionary;
 
+        private readonly bool _disposeValuesOnReset;
+
         /// <summary>
         /// Creates a thread-safe concurrent cache.
         /// </summary>
@@ -36,15 +38,49 @@ namespace Statiq.Common
         /// <param name="resettable">
         /// Indicates if the cache should be reset by the <see cref="IEngine"/> before each execution.
         /// </param>
+        /// <param name="disposeValuesOnReset">
+        /// If <c>true</c> (the default) values will be disposed when the cache is reset if they implement
+        /// <see cref="IDisposable"/> (only relevant if <paramref name="resettable"/> is <c>true</c>).
+        /// </param>
+        public ConcurrentCache(bool resettable, bool disposeValuesOnReset)
+            : this(resettable, disposeValuesOnReset, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a thread-safe concurrent cache.
+        /// </summary>
+        /// <param name="resettable">
+        /// Indicates if the cache should be reset by the <see cref="IEngine"/> before each execution.
+        /// </param>
         /// <param name="comparer">
         /// The key comparer to use, or <c>null</c> to use the default comparer.
         /// </param>
         public ConcurrentCache(bool resettable, IEqualityComparer<TKey> comparer)
+            : this(resettable, true, comparer)
+        {
+        }
+
+        /// <summary>
+        /// Creates a thread-safe concurrent cache.
+        /// </summary>
+        /// <param name="resettable">
+        /// Indicates if the cache should be reset by the <see cref="IEngine"/> before each execution.
+        /// </param>
+        /// <param name="disposeValuesOnReset">
+        /// If <c>true</c> (the default) values will be disposed when the cache is reset if they implement
+        /// <see cref="IDisposable"/> (only relevant if <paramref name="resettable"/> is <c>true</c>).
+        /// </param>
+        /// <param name="comparer">
+        /// The key comparer to use, or <c>null</c> to use the default comparer.
+        /// </param>
+        public ConcurrentCache(bool resettable, bool disposeValuesOnReset, IEqualityComparer<TKey> comparer)
         {
             if (resettable)
             {
                 IConcurrentCache.AddResettableCache(this);
             }
+            _disposeValuesOnReset = disposeValuesOnReset;
             _dictionary = new ConcurrentDictionary<TKey, Lazy<TValue>>(comparer);
         }
 
@@ -111,7 +147,23 @@ namespace Statiq.Common
             return false;
         }
 
-        public void Clear() => _dictionary.Clear();
+        /// <inheritdoc />
+        public void Reset()
+        {
+            // Dispose any values that need disposing
+            if (_disposeValuesOnReset)
+            {
+                foreach (KeyValuePair<TKey, Lazy<TValue>> item in _dictionary)
+                {
+                    if (item.Value.IsValueCreated && item.Value.Value is IDisposable disposableValue)
+                    {
+                        disposableValue.Dispose();
+                    }
+                }
+            }
+
+            _dictionary.Clear();
+        }
 
         public TValue this[TKey key]
         {

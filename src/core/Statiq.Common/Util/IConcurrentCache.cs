@@ -13,6 +13,7 @@ namespace Statiq.Common
             ResettableCaches.Add(new WeakReference<IConcurrentCache>(cache));
 
         // Called by the engine prior to execution
+        // Not thread safe and caches should not be used during this operation
         internal static void ResetCaches()
         {
             // Reset the caches
@@ -21,7 +22,7 @@ namespace Statiq.Common
                 WeakReference<IConcurrentCache> cacheReference = ResettableCaches[index];
                 if (cacheReference.TryGetTarget(out IConcurrentCache cache))
                 {
-                    cache.Clear();
+                    cache.Reset();
                 }
                 else
                 {
@@ -33,6 +34,12 @@ namespace Statiq.Common
             ResettableCaches.RemoveAll(x => x is null);
         }
 
-        void Clear();
+        /// <summary>
+        /// Resets the cache by clearing all entries and disposing any <see cref="IDisposable"/> values.
+        /// </summary>
+        /// <remarks>
+        /// This method is not thread-safe.
+        /// </remarks>
+        void Reset();
     }
 }

@@ -509,7 +509,7 @@ namespace Statiq.Common
                 startedProcess.Process.Exited -= ProcessExited;
                 startedProcess.CancellationTokenRegistration.Dispose();
             }
-            _runningProcesses.Clear();
+            _runningProcesses.Reset();
             _allProcessesExited.Set();
         }
 

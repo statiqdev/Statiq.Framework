@@ -16,7 +16,7 @@ namespace Statiq.Html
         private static readonly ConcurrentCache<IContentProvider, Task<IHtmlDocument>> _htmlDocumentCache =
             new ConcurrentCache<IContentProvider, Task<IHtmlDocument>>(true);
 
-        internal static void ClearHtmlDocumentCache() => _htmlDocumentCache.Clear();
+        internal static void ClearHtmlDocumentCache() => _htmlDocumentCache.Reset();
 
         /// <summary>
         /// Gets an <see cref="IHtmlDocument"/> by parsing the content of an <see cref="IDocument"/>.

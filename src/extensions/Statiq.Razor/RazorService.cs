@@ -18,7 +18,7 @@ namespace Statiq.Razor
         private const string CacheFileName = "razorcache.json";
 
         private readonly ConcurrentCache<CompilationParameters, RazorCompiler> _compilers
-            = new ConcurrentCache<CompilationParameters, RazorCompiler>(false);
+            = new ConcurrentCache<CompilationParameters, RazorCompiler>(false, true);
 
         private Dictionary<AssemblyCacheKey, string> _cachedAssemblies = new Dictionary<AssemblyCacheKey, string>();
 
@@ -209,13 +209,6 @@ namespace Statiq.Razor
             }
         }
 
-        public void Dispose()
-        {
-            foreach (RazorCompiler razorCompiler in _compilers.Values)
-            {
-                razorCompiler.Dispose();
-            }
-            _compilers.Clear();
-        }
+        public void Dispose() => _compilers.Reset();
     }
 }
