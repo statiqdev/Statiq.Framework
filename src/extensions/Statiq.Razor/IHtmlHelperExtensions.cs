@@ -1,19 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Mvc.Razor;
-using Microsoft.AspNetCore.Mvc.Razor.Compilation;
-using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Razor
@@ -314,6 +308,27 @@ namespace Statiq.Razor
             object cacheKey) =>
             RenderCachedPartialAsync(htmlHelper, partialViewName, model, cacheKey).GetAwaiter().GetResult();
 
+        public static async Task RenderCachedPartialAsync(
+            this IHtmlHelper htmlHelper,
+            string partialViewName) =>
+            await RenderCachedPartialAsync(htmlHelper, partialViewName, null, null);
+
+        public static async Task RenderCachedPartialAsync(
+            this IHtmlHelper htmlHelper,
+            string partialViewName,
+            object model) =>
+            await RenderCachedPartialAsync(htmlHelper, partialViewName, model, model);
+
+        public static async Task RenderCachedPartialAsync(
+            this IHtmlHelper htmlHelper,
+            string partialViewName,
+            object model,
+            object cacheKey)
+        {
+            CachedPartialContent content = await GetCachedPartialContentAsync(htmlHelper, partialViewName, model, cacheKey);
+            content.WriteTo(htmlHelper.ViewContext.Writer, null); // We know this call doesn't use the HtmlEncoder
+        }
+
         public static IHtmlContent CachedPartial(
             this IHtmlHelper htmlHelper,
             string partialViewName) =>
@@ -332,32 +347,6 @@ namespace Statiq.Razor
             object cacheKey) =>
             CachedPartialAsync(htmlHelper, partialViewName, model, cacheKey).GetAwaiter().GetResult();
 
-        public static async Task RenderCachedPartialAsync(
-            this IHtmlHelper htmlHelper,
-            string partialViewName) =>
-            await RenderCachedPartialAsync(htmlHelper, partialViewName, null, null);
-
-        public static async Task RenderCachedPartialAsync(
-            this IHtmlHelper htmlHelper,
-            string partialViewName,
-            object model) =>
-            await RenderCachedPartialAsync(htmlHelper, partialViewName, model, null);
-
-        public static async Task RenderCachedPartialAsync(
-            this IHtmlHelper htmlHelper,
-            string partialViewName,
-            object model,
-            object cacheKey)
-        {
-            LockingStreamWrapper contentStreamWrapper =
-                await GetCachedPartialMemoryStreamAsync(htmlHelper, partialViewName, model, cacheKey);
-            using (Stream contentStream = contentStreamWrapper.GetStream())
-            {
-                await contentStream.CopyToAsync(htmlHelper.ViewContext.Writer);
-                await htmlHelper.ViewContext.Writer.FlushAsync();
-            }
-        }
-
         public static async Task<IHtmlContent> CachedPartialAsync(
             this IHtmlHelper htmlHelper,
             string partialViewName) =>
@@ -373,24 +362,13 @@ namespace Statiq.Razor
             this IHtmlHelper htmlHelper,
             string partialViewName,
             object model,
-            object cacheKey)
-        {
-            LockingStreamWrapper contentStreamWrapper =
-                await GetCachedPartialMemoryStreamAsync(htmlHelper, partialViewName, model, cacheKey);
-            return new HelperResult(async writer =>
-            {
-                using (Stream contentStream = contentStreamWrapper.GetStream())
-                {
-                    await contentStream.CopyToAsync(writer);
-                    await writer.FlushAsync();
-                }
-            });
-        }
+            object cacheKey) =>
+            await GetCachedPartialContentAsync(htmlHelper, partialViewName, model, cacheKey);
 
-        private static readonly ConcurrentCache<(string, object), Task<LockingStreamWrapper>> _cachedPartialContent
-            = new ConcurrentCache<(string, object), Task<LockingStreamWrapper>>(true, true);
+        private static readonly ConcurrentCache<(string, object), Task<CachedPartialContent>> _cachedPartialContent
+            = new ConcurrentCache<(string, object), Task<CachedPartialContent>>(true, true);
 
-        private static async Task<LockingStreamWrapper> GetCachedPartialMemoryStreamAsync(
+        private static async Task<CachedPartialContent> GetCachedPartialContentAsync(
             this IHtmlHelper htmlHelper,
             string partialViewName,
             object model,
@@ -398,10 +376,8 @@ namespace Statiq.Razor
         {
             htmlHelper.ThrowIfNull(nameof(htmlHelper));
 
-            IExecutionContext context = (IExecutionContext)htmlHelper.ViewContext.ViewData[ViewDataKeys.StatiqExecutionContext];
             IServiceProvider serviceProvider = (IServiceProvider)htmlHelper.ViewContext.ViewData[ViewDataKeys.StatiqServiceProvider];
             ICompositeViewEngine viewEngine = serviceProvider.GetRequiredService<ICompositeViewEngine>();
-            HtmlEncoder htmlEncoder = serviceProvider.GetRequiredService<HtmlEncoder>();
 
             // Get the normalized path so that we can match up the partial regardless of where it's called from or the name
             // Copied from HtmlHelper.RenderPartialCoreAsync()
@@ -425,18 +401,33 @@ namespace Statiq.Razor
                 (viewEngineResult.View.Path, cacheKey),
                 async (key, args) =>
                 {
-                    MemoryStream contentStream = args.context.MemoryStreamFactory.GetStream();
-                    IHtmlContent content = args.model is object
-                        ? await args.htmlHelper.PartialAsync(args.partialViewName, args.model)
-                        : await args.htmlHelper.PartialAsync(args.partialViewName);
-                    using (TextWriter writer = contentStream.GetWriter())
+                    StringBuilder builder = new StringBuilder();
+                    using (StringWriter writer = new StringWriter(builder))
                     {
-                        content.WriteTo(writer, args.htmlEncoder);
-                        await writer.FlushAsync();
+                        // Temporarily replace the writer in the view context for rendering the partial
+                        TextWriter originalWriter = args.htmlHelper.ViewContext.Writer;
+                        args.htmlHelper.ViewContext.Writer = writer;
+                        await (args.model is object
+                            ? args.htmlHelper.RenderPartialAsync(args.partialViewName, args.model)
+                            : args.htmlHelper.RenderPartialAsync(args.partialViewName));
+                        args.htmlHelper.ViewContext.Writer = originalWriter;
                     }
-                    return new LockingStreamWrapper(contentStream, true);
+                    return new CachedPartialContent(builder);
                 },
-                (partialViewName, htmlHelper, model, context, htmlEncoder));
+                (partialViewName, htmlHelper, model));
+        }
+
+        private class CachedPartialContent : IHtmlContent
+        {
+            private readonly StringBuilder _builder;
+
+            // StringBuilder is not thread-safe, but since we're only reading it's okay to use as the buffer
+            public CachedPartialContent(StringBuilder builder)
+            {
+                _builder = builder;
+            }
+
+            public void WriteTo(TextWriter writer, HtmlEncoder encoder) => writer.Write(_builder);
         }
     }
 }

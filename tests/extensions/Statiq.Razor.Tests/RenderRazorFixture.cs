@@ -1103,27 +1103,28 @@ LAYOUT7
 <p>After</p>",
                     StringCompareShould.IgnoreLineEndings);
             }
-
-            private TestDocument GetDocument(string source, string content) => new TestDocument(new NormalizedPath(source), (NormalizedPath)null, content);
-
-            private TestExecutionContext GetExecutionContext()
-            {
-                TestExecutionContext context = new TestExecutionContext()
-                {
-                    FileSystem = GetFileSystem(),
-                };
-                context.Services.AddSingleton<IReadOnlyFileSystem>(context.FileSystem);
-                context.Services.AddSingleton<INamespacesCollection>(context.Namespaces);
-                context.Services.AddRazor();
-                new RazorEngineInitializer().Initialize(context.Engine);
-                return context;
-            }
-
-            private TestFileSystem GetFileSystem() => new TestFileSystem()
-            {
-                RootPath = NormalizedPath.AbsoluteRoot,
-                InputPaths = new PathCollection("input")
-            };
         }
+
+        public static TestDocument GetDocument(string source, string content) => new TestDocument(new NormalizedPath(source), (NormalizedPath)null, content);
+
+        public static TestExecutionContext GetExecutionContext()
+        {
+            TestExecutionContext context = new TestExecutionContext()
+            {
+                FileSystem = GetFileSystem(),
+            };
+            context.Services.AddSingleton<IReadOnlyFileSystem>(context.FileSystem);
+            context.Services.AddSingleton<INamespacesCollection>(context.Namespaces);
+            context.Services.AddRazor();
+            context.Namespaces.Add("Statiq.Razor");
+            new RazorEngineInitializer().Initialize(context.Engine);
+            return context;
+        }
+
+        public static TestFileSystem GetFileSystem() => new TestFileSystem()
+        {
+            RootPath = NormalizedPath.AbsoluteRoot,
+            InputPaths = new PathCollection("input")
+        };
     }
 }

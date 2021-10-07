@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
@@ -8,12 +9,9 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.Razor.TagHelpers;
-using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Common;
-using Statiq.Core;
 using Statiq.Testing;
 
 namespace Statiq.Razor.Tests
@@ -112,6 +110,152 @@ namespace Statiq.Razor.Tests
                 {
                     result.WriteTo(writer, HtmlEncoder.Default);
                     writer.ToString().ShouldBe(@"<a href=""/a/b/c?abc=123#xyz"">Foo</a>");
+                }
+            }
+        }
+
+        public class CachedPartialTests : IHtmlHelperExtensionsFixture
+        {
+            [TestCase(true)]
+            [TestCase(false)] // Sanity check
+            public async Task CachedPartialShouldRenderTheSameContent(bool cached)
+            {
+                // Given
+                TestExecutionContext context = RenderRazorFixture.GetExecutionContext();
+                context.FileSystem.FileProvider = new TestFileProvider
+                {
+                    {
+                        "/input/_Partial.cshtml",
+                        "<div>GUID: @Guid.NewGuid().ToString()</div>"
+                    },
+                };
+                TestDocument document1 = RenderRazorFixture.GetDocument(
+                    "/input/RootRelativePartial/Test1.cshtml",
+                    $@"<p>z1</p>
+@Html.{(cached ? "CachedPartial" : "Partial")}(""_Partial"")
+<p>After</p>");
+                TestDocument document2 = RenderRazorFixture.GetDocument(
+                    "/input/RootRelativePartial/Test2.cshtml",
+                    $@"<p>z2</p>
+@Html.{(cached ? "CachedPartial" : "Partial")}(""_Partial"")
+<p>After</p>");
+                RenderRazor razor = new RenderRazor();
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { document1, document2 }, context, razor);
+
+                // Then
+                string content1 = results.Single(x => x.Source.FileNameWithoutExtension == "Test1").Content.Replace("z1", string.Empty);
+                string content2 = results.Single(x => x.Source.FileNameWithoutExtension == "Test2").Content.Replace("z2", string.Empty);
+                if (cached)
+                {
+                    content1.ShouldBe(content2);
+                }
+                else
+                {
+                    content1.ShouldNotBe(content2);
+                }
+            }
+
+            // Note that the same string value will intern to the same object
+            [TestCase("Foo", "Foo", true)] // Same model
+            [TestCase("z1", "z2", false)] // Different model
+            public async Task CachedPartialWithModel(
+                string model1,
+                string model2,
+                bool shouldEqual)
+            {
+                // Given
+                TestExecutionContext context = RenderRazorFixture.GetExecutionContext();
+                context.Settings.Add("Foo", "Bar");
+                context.FileSystem.FileProvider = new TestFileProvider
+                {
+                    {
+                        "/input/_Partial.cshtml",
+                        @"@model string
+                        <div>@Model</div>
+                        <div>GUID: @Guid.NewGuid().ToString()</div>"
+                    },
+                };
+                TestDocument document1 = RenderRazorFixture.GetDocument(
+                    "/input/RootRelativePartial/Test1.cshtml",
+                    $@"<p>z1</p>
+@Html.CachedPartial(""_Partial"", ""{model1}"")
+<p>After</p>");
+                TestDocument document2 = RenderRazorFixture.GetDocument(
+                    "/input/RootRelativePartial/Test2.cshtml",
+                    $@"<p>z2</p>
+@Html.CachedPartial(""_Partial"", ""{model2}"")
+<p>After</p>");
+                RenderRazor razor = new RenderRazor();
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { document1, document2 }, context, razor);
+
+                // Then
+                string content1 = results.Single(x => x.Source.FileNameWithoutExtension == "Test1").Content.Replace("z1", string.Empty);
+                string content2 = results.Single(x => x.Source.FileNameWithoutExtension == "Test2").Content.Replace("z2", string.Empty);
+                if (shouldEqual)
+                {
+                    content1.ShouldBe(content2);
+                }
+                else
+                {
+                    content1.ShouldNotBe(content2);
+                }
+            }
+
+            // Note that the same string value will intern to the same object
+            [TestCase("Foo", "Bar", "Foo", "Bar", true)] // Same model, same cache key
+            [TestCase("Foo", "z1", "Foo", "z2", false)] // Same model, different cache key
+            [TestCase("z1", "Bar", "z2", "Bar", true)] // Different model, same cache key
+            [TestCase("z1", "z1", "z2", "z2", false)] // Different model, different cache key
+            [TestCase(null, "Bar", null, "Bar", true)] // No model, same cache key
+            [TestCase(null, "z1", null, "z2", false)] // No model, different cache key
+            public async Task CachedPartialWithModelAndCacheKey(
+                string model1,
+                string cacheKey1,
+                string model2,
+                string cacheKey2,
+                bool shouldEqual)
+            {
+                // Given
+                TestExecutionContext context = RenderRazorFixture.GetExecutionContext();
+                context.Settings.Add("Foo", "Bar");
+                context.FileSystem.FileProvider = new TestFileProvider
+                {
+                    {
+                        "/input/_Partial.cshtml",
+                        @"@model string
+                        <div>@Model</div>
+                        <div>GUID: @Guid.NewGuid().ToString()</div>"
+                    },
+                };
+                TestDocument document1 = RenderRazorFixture.GetDocument(
+                    "/input/RootRelativePartial/Test1.cshtml",
+                    $@"<p>z1</p>
+@Html.CachedPartial(""_Partial"", ""{model1}"", ""{cacheKey1}"")
+<p>After</p>");
+                TestDocument document2 = RenderRazorFixture.GetDocument(
+                    "/input/RootRelativePartial/Test2.cshtml",
+                    $@"<p>z2</p>
+@Html.CachedPartial(""_Partial"", ""{model2}"", ""{cacheKey2}"")
+<p>After</p>");
+                RenderRazor razor = new RenderRazor();
+
+                // When
+                ImmutableArray<TestDocument> results = await ExecuteAsync(new[] { document1, document2 }, context, razor);
+
+                // Then
+                string content1 = results.Single(x => x.Source.FileNameWithoutExtension == "Test1").Content.Replace("z1", string.Empty);
+                string content2 = results.Single(x => x.Source.FileNameWithoutExtension == "Test2").Content.Replace("z2", string.Empty);
+                if (shouldEqual)
+                {
+                    content1.ShouldBe(content2);
+                }
+                else
+                {
+                    content1.ShouldNotBe(content2);
                 }
             }
         }
