@@ -1,3 +1,5 @@
+# 1.0.0-beta.50
+
 # 1.0.0-beta.49
 
 - **Breaking change:** The `LinkGenerator` class is no longer static and now needs to be accessed through a new `IExecutionState.LinkGenerator` or `IExecutionContext.LinkGenerator` property.
