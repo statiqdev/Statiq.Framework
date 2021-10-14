@@ -132,6 +132,11 @@ namespace Statiq.Common
         IReadOnlyPipelineCollection ExecutingPipelines { get; }
 
         /// <summary>
+        /// Helps generate normalized links.
+        /// </summary>
+        ILinkGenerator LinkGenerator { get; }
+
+        /// <summary>
         /// Gets a <see cref="Stream"/> that can be used for document content. If <paramref name="content"/>
         /// is not null, the stream is initialized with the specified content. It is preferred to use
         /// this method to obtain a stream over creating your own if the source of the content does

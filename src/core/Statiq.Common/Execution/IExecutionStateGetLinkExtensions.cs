@@ -97,7 +97,9 @@
             {
                 // Return the actual URI if it's absolute
                 string path = metadata.GetString(key);
-                return path is null ? null : executionState.GetLink(LinkGenerator.AddQueryAndFragment(path, queryAndFragment), includeHost);
+                return path is null
+                    ? null
+                    : executionState.GetLink(executionState.LinkGenerator.AddQueryAndFragment(path, queryAndFragment), includeHost);
             }
             return null;
         }
@@ -122,7 +124,7 @@
             bool includeHost = false)
         {
             // Return the actual URI if it's absolute
-            if (path is object && LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
+            if (path is object && executionState.LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
             {
                 return absoluteUri;
             }
@@ -163,7 +165,7 @@
             bool hideExtensions)
         {
             // Return the actual URI if it's absolute
-            if (path is object && LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
+            if (path is object && executionState.LinkGenerator.TryGetAbsoluteHttpUri(path, out string absoluteUri))
             {
                 return absoluteUri;
             }
@@ -177,10 +179,6 @@
                 hideIndexPages,
                 hideExtensions);
         }
-
-        // This is a frequently used hot path so cache the results
-        private static readonly ConcurrentCache<(NormalizedPath, bool), string> _links =
-            new ConcurrentCache<(NormalizedPath, bool), string>(true);
 
         /// <summary>
         /// Converts the specified path into a string appropriate for use as a link using default settings from the
@@ -200,18 +198,14 @@
             this IExecutionState executionState,
             in NormalizedPath path,
             bool includeHost = false) =>
-                _links.GetOrAdd(
-                    (path, includeHost),
-                    (key, es) =>
-                        es.GetLink(
-                            key.Item1,
-                            key.Item2 ? es.Settings.GetString(Keys.Host) : null,
-                            es.Settings.GetPath(Keys.LinkRoot),
-                            es.Settings.GetBool(Keys.LinksUseHttps),
-                            es.Settings.GetBool(Keys.LinkHideIndexPages),
-                            es.Settings.GetBool(Keys.LinkHideExtensions),
-                            es.Settings.GetBool(Keys.LinkLowercase)),
-                    executionState);
+            executionState.GetLink(
+                path,
+                includeHost ? executionState.Settings.GetString(Keys.Host) : null,
+                executionState.Settings.GetPath(Keys.LinkRoot),
+                executionState.Settings.GetBool(Keys.LinksUseHttps),
+                executionState.Settings.GetBool(Keys.LinkHideIndexPages),
+                executionState.Settings.GetBool(Keys.LinkHideExtensions),
+                executionState.Settings.GetBool(Keys.LinkLowercase));
 
         /// <summary>
         /// Converts the path into a string appropriate for use as a link, overriding one or more
@@ -270,7 +264,7 @@
             bool hideIndexPages,
             bool hideExtensions,
             bool lowercase) =>
-            LinkGenerator.GetLink(
+            executionState.LinkGenerator.GetLink(
                 path,
                 host,
                 root,
@@ -312,7 +306,7 @@
             bool hideExtensions,
             bool lowercase,
             bool makeAbsolute) =>
-            LinkGenerator.GetLink(
+            executionState.LinkGenerator.GetLink(
                 path,
                 host,
                 root,

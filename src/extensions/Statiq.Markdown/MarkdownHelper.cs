@@ -18,6 +18,7 @@ namespace Statiq.Markdown
         public const string DefaultConfiguration = "common";
 
         public static MarkdownDocument RenderMarkdown(
+            IExecutionState executionState,
             IDocument document,
             string content,
             TextWriter writer,
@@ -53,7 +54,7 @@ namespace Statiq.Markdown
 
                     if (!RelativeUrl.IsRelative(link))
                     {
-                        return LinkGenerator.TryGetAbsoluteHttpUri(link, out string absoluteUri) ? absoluteUri : link;
+                        return executionState.LinkGenerator.TryGetAbsoluteHttpUri(link, out string absoluteUri) ? absoluteUri : link;
                     }
 
                     // TODO: Remove when RenderMarkdown.PrependLinkRoot goes away.

@@ -39,9 +39,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -88,9 +89,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -115,9 +117,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, null, null, null, new[] { "index.html" }, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, null, null, null, new[] { "index.html" }, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -158,9 +161,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, null, null, null, null, Array.Empty<string>(), false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, null, null, null, null, Array.Empty<string>(), false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -185,9 +189,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, null, null, null, null, new[] { "html", ".htm" }, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, null, null, null, null, new[] { "html", ".htm" }, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -212,9 +217,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath directoryPath = path is null ? null : new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(directoryPath, host, root is null ? null : new NormalizedPath(root), null, null, null, false);
+                string link = linkGenerator.GetLink(directoryPath, host, root is null ? null : new NormalizedPath(root), null, null, null, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -225,9 +231,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath directoryPath = new NormalizedPath("/foo/bar");
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(directoryPath, "www.google.com", null, "https", null, null, false);
+                string link = linkGenerator.GetLink(directoryPath, "www.google.com", null, "https", null, null, false);
 
                 // Then
                 link.ShouldBe("https://www.google.com/foo/bar");
@@ -238,9 +245,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath path = new NormalizedPath("/");
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(path, null, null, null, null, null, false);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false);
 
                 // Then
                 link.ShouldBe("/");
@@ -251,9 +259,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath path = new NormalizedPath("/");
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(path, null, "root", null, null, null, false);
+                string link = linkGenerator.GetLink(path, null, "root", null, null, null, false);
 
                 // Then
                 link.ShouldBe("/root/");
@@ -264,9 +273,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath path = new NormalizedPath("/");
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(path, null, null, null, new[] { "index" }, null, false);
+                string link = linkGenerator.GetLink(path, null, null, null, new[] { "index" }, null, false);
 
                 // Then
                 link.ShouldBe("/");
@@ -277,9 +287,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath path = new NormalizedPath("/");
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(path, null, null, null, null, new[] { "html" }, false);
+                string link = linkGenerator.GetLink(path, null, null, null, null, new[] { "html" }, false);
 
                 // Then
                 link.ShouldBe("/");
@@ -290,9 +301,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath directoryPath = new NormalizedPath("/Foo/Bar");
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, false);
+                string link = linkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, false);
 
                 // Then
                 link.ShouldBe("http://www.google.com/Foo/Bar");
@@ -303,9 +315,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath directoryPath = new NormalizedPath("/Foo/Bar");
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, true);
+                string link = linkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, true);
 
                 // Then
                 link.ShouldBe("http://www.google.com/foo/bar");
@@ -316,9 +329,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath directoryPath = new NormalizedPath("/a/b/c%d");
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, false, true);
+                string link = linkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, false, true);
 
                 // Then
                 link.ShouldBe("http://www.google.com/a/b/c%25d");
@@ -329,9 +343,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath directoryPath = new NormalizedPath("a/b/c%d");
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(directoryPath, null, null, null, null, null, false, false);
+                string link = linkGenerator.GetLink(directoryPath, null, null, null, null, null, false, false);
 
                 // Then
                 link.ShouldBe("a/b/c%25d");
@@ -342,9 +357,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath directoryPath = new NormalizedPath("/a/b/c\\d");
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, true);
+                string link = linkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, true);
 
                 // Then
                 link.ShouldBe("http://www.google.com/a/b/c/d");
@@ -377,9 +393,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -412,9 +429,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -461,9 +479,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -510,9 +529,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -545,9 +565,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -594,9 +615,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -629,9 +651,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -664,9 +687,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -713,9 +737,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -762,9 +787,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -775,9 +801,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = new NormalizedPath("/a/b/c?foo=bar#buzz");
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, "www.google.com", new NormalizedPath("x#y/z/"), null, null, null, false, true);
+                string link = linkGenerator.GetLink(filePath, "www.google.com", new NormalizedPath("x#y/z/"), null, null, null, false, true);
 
                 // Then
                 link.ShouldBe("http://www.google.com/x%23y/z/a/b/c?foo=bar#buzz");
@@ -788,9 +815,10 @@ namespace Statiq.Common.Tests.Util
             {
                 // Given
                 NormalizedPath filePath = new NormalizedPath("/a/b/c?foo=bar#buzz");
+                LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = LinkGenerator.GetLink(filePath, "www.google.com", new NormalizedPath("x?y/z/"), null, null, null, false, true);
+                string link = linkGenerator.GetLink(filePath, "www.google.com", new NormalizedPath("x?y/z/"), null, null, null, false, true);
 
                 // Then
                 link.ShouldBe("http://www.google.com/x%3Fy/z/a/b/c?foo=bar#buzz");

@@ -66,6 +66,8 @@ namespace Statiq.Common
 
         public IReadOnlyPipelineCollection ExecutingPipelines => ExecutionState.ExecutingPipelines;
 
+        public ILinkGenerator LinkGenerator => ExecutionState.LinkGenerator;
+
         public IDocument CreateDocument(NormalizedPath source, NormalizedPath destination, IEnumerable<KeyValuePair<string, object>> items, IContentProvider contentProvider = null) =>
             ExecutionState.CreateDocument(source, destination, items, contentProvider);
 

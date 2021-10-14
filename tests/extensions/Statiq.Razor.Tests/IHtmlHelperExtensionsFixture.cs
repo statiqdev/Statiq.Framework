@@ -17,6 +17,7 @@ using Statiq.Testing;
 namespace Statiq.Razor.Tests
 {
     [TestFixture]
+    [NonParallelizable]
     public class IHtmlHelperExtensionsFixture : BaseFixture
     {
         public class DocumentLinkTests : IHtmlHelperExtensionsFixture

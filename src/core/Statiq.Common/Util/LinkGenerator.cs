@@ -8,35 +8,117 @@ namespace Statiq.Common
     /// <summary>
     /// Helps generate normalized links.
     /// </summary>
-    public static class LinkGenerator
+    public class LinkGenerator : ILinkGenerator
     {
-        /// <summary>
-        /// Generates a normalized link given a path and other conditions.
-        /// </summary>
-        /// <param name="path">The path to get a link for.</param>
-        /// <param name="host">The host for the link (or <c>null</c> to omit the host).</param>
-        /// <param name="root">The root path for the link (or <c>null</c> for no root path).</param>
-        /// <param name="scheme">The scheme for the link (or <c>null</c> for "http").</param>
-        /// <param name="hidePages">An array of file names to hide (or <c>null</c> to not hide any files).</param>
-        /// <param name="hideExtensions">An array of file extensions to hide (or <c>null</c> to not hide extensions or an empty array to hide all file extensions).</param>
-        /// <param name="lowercase">Indicates that the link should be rendered in all lowercase.</param>
-        /// <param name="makeAbsolute">
-        /// If <paramref name="path"/> is relative, setting this to <c>true</c> (the default value) will assume the path relative from the root of the site
-        /// and make it absolute by prepending a slash and <paramref name="root"/> to the path. Otherwise, <c>false</c> will leave relative paths as relative
-        /// and won't prepend a slash (but <paramref name="host"/>, <paramref name="scheme"/>, and <paramref name="root"/> will have no effect).
-        /// If <paramref name="path"/> is absolute, this value has no effect and <paramref name="host"/>, <paramref name="scheme"/>, and <paramref name="root"/>
-        /// will be applied as appropriate.
-        /// </param>
-        /// <returns>A generated link.</returns>
-        public static string GetLink(
+        // Cache link generator results
+        private static readonly ConcurrentCache<GetLinkCacheKey, string> _links =
+            new ConcurrentCache<GetLinkCacheKey, string>(false);
+
+        private class GetLinkCacheKey : IEquatable<GetLinkCacheKey>
+        {
+            public NormalizedPath Path { get; set; }
+
+            public string Host { get; set; }
+
+            public NormalizedPath Root { get; set; }
+
+            public string Scheme { get; set; }
+
+            public string[] HidePages { get; set; }
+
+            public string[] HideExtensions { get; set; }
+
+            public bool Lowercase { get; set; }
+
+            public bool MakeAbsolute { get; set; }
+
+            public bool Equals(GetLinkCacheKey other)
+            {
+                if (ReferenceEquals(null, other))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(this, other))
+                {
+                    return true;
+                }
+
+                return Path.Equals(other.Path)
+                   && Host == other.Host
+                   && Root.Equals(other.Root)
+                   && Scheme == other.Scheme
+                   && Equals(HidePages, other.HidePages)
+                   && Equals(HideExtensions, other.HideExtensions)
+                   && Lowercase == other.Lowercase
+                   && MakeAbsolute == other.MakeAbsolute;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(this, obj))
+                {
+                    return true;
+                }
+
+                if (obj.GetType() != this.GetType())
+                {
+                    return false;
+                }
+
+                return Equals((GetLinkCacheKey)obj);
+            }
+
+            public override int GetHashCode() =>
+                HashCode.Combine(Path, Host, Root, Scheme, HidePages, HideExtensions, Lowercase, MakeAbsolute);
+        }
+
+        /// <inheritdoc />
+        public string GetLink(
             NormalizedPath path,
             string host,
             in NormalizedPath root,
             string scheme,
-            IReadOnlyList<string> hidePages,
-            IReadOnlyList<string> hideExtensions,
+            string[] hidePages,
+            string[] hideExtensions,
             bool lowercase,
-            bool makeAbsolute = true)
+            bool makeAbsolute = true) =>
+            _links.GetOrAdd(
+                new GetLinkCacheKey
+                {
+                    Path = path,
+                    Host = host,
+                    Root = root,
+                    Scheme = scheme,
+                    HidePages = hidePages,
+                    HideExtensions = hideExtensions,
+                    Lowercase = lowercase,
+                    MakeAbsolute = makeAbsolute
+                },
+                key => GetLinkImplementation(
+                    key.Path,
+                    key.Host,
+                    key.Root,
+                    key.Scheme,
+                    key.HidePages,
+                    key.HideExtensions,
+                    key.Lowercase,
+                    key.MakeAbsolute));
+
+        private static string GetLinkImplementation(
+            NormalizedPath path,
+            string host,
+            in NormalizedPath root,
+            string scheme,
+            string[] hidePages,
+            string[] hideExtensions,
+            bool lowercase,
+            bool makeAbsolute)
         {
             string link = string.Empty;
             if (!path.IsNull)
@@ -57,7 +139,11 @@ namespace Statiq.Common
 
                 // Hide extensions
                 if (hideExtensions is object
-                    && (hideExtensions.Count == 0 || hideExtensions.Where(x => x is object).Select(x => x.StartsWith(NormalizedPath.Dot) ? x : NormalizedPath.Dot + x).Contains(path.Extension)))
+                    && (hideExtensions.Length == 0
+                        || hideExtensions
+                            .Where(x => x is object)
+                            .Select(x => x.StartsWith(NormalizedPath.Dot) ? x : NormalizedPath.Dot + x)
+                            .Contains(path.Extension)))
                 {
                     path = path.ChangeExtension(null);
                 }
@@ -148,13 +234,8 @@ namespace Statiq.Common
             return lowercase ? renderedLink.ToLowerInvariant() : renderedLink;
         }
 
-        /// <summary>
-        /// Checks if a string contains an absolute URI with a "http" or "https" scheme and returns it if it does.
-        /// </summary>
-        /// <param name="str">The string to check.</param>
-        /// <param name="absoluteUri">The resulting absolute URI.</param>
-        /// <returns><c>true</c> if the string contains an absolute URI, <c>false</c> otherwise.</returns>
-        public static bool TryGetAbsoluteHttpUri(string str, out string absoluteUri)
+        /// <inheritdoc />
+        public bool TryGetAbsoluteHttpUri(string str, out string absoluteUri)
         {
             if (!string.IsNullOrWhiteSpace(str))
             {
@@ -171,16 +252,8 @@ namespace Statiq.Common
             return false;
         }
 
-        /// <summary>
-        /// Adds a query and/or fragment to a URL or path.
-        /// </summary>
-        /// <param name="path">The path or URL.</param>
-        /// <param name="queryAndFragment">
-        /// The query and/or fragment to add. If a value is provided for this parameter
-        /// and it does not start with "?" or "#" then it will be assumed a query and a "?" will be prefixed.
-        /// </param>
-        /// <returns>The path or URL with an appended query and/or fragment.</returns>
-        public static string AddQueryAndFragment(string path, string queryAndFragment)
+        /// <inheritdoc />
+        public string AddQueryAndFragment(string path, string queryAndFragment)
         {
             if (!string.IsNullOrEmpty(queryAndFragment))
             {
@@ -194,16 +267,8 @@ namespace Statiq.Common
             return path;
         }
 
-        /// <summary>
-        /// Adds a query and/or fragment to a path.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <param name="queryAndFragment">
-        /// The query and/or fragment to add. If a value is provided for this parameter
-        /// and it does not start with "?" or "#" then it will be assumed a query and a "?" will be prefixed.
-        /// </param>
-        /// <returns>The path with an appended query and/or fragment.</returns>
-        public static NormalizedPath AddQueryAndFragment(NormalizedPath path, string queryAndFragment)
+        /// <inheritdoc />
+        public NormalizedPath AddQueryAndFragment(NormalizedPath path, string queryAndFragment)
         {
             if (!string.IsNullOrEmpty(queryAndFragment))
             {

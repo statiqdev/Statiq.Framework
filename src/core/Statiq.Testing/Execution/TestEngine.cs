@@ -139,6 +139,9 @@ namespace Statiq.Testing
         public IFileCleaner FileCleaner { get; set; } = new TestFileCleaner();
 
         /// <inheritdoc />
+        public ILinkGenerator LinkGenerator { get; set; } = new LinkGenerator();
+
+        /// <inheritdoc />
         public FilteredDocumentList<IDocument> OutputPages =>
             new FilteredDocumentList<IDocument>(
                 Outputs

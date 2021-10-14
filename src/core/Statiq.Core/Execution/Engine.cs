@@ -154,6 +154,7 @@ namespace Statiq.Core
             serviceCollection.TryAddSingleton<INamespacesCollection>(Namespaces);
             serviceCollection.TryAddSingleton<IScriptHelper>(ScriptHelper);
             serviceCollection.TryAddSingleton<ClassCatalog>(ClassCatalog);
+            serviceCollection.TryAddSingleton<ILinkGenerator>(LinkGenerator);
 
             // Add the failure logger
             LogLevel failureLogLevel = Settings.Get<LogLevel>(Keys.FailureLogLevel, LogLevel.Error);
@@ -251,6 +252,9 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         public IPipelineOutputs Outputs { get; private set; }
+
+        /// <inheritdoc />
+        public ILinkGenerator LinkGenerator { get; } = new LinkGenerator();
 
         /// <inheritdoc />
         public IAnalyzerCollection Analyzers => AnalyzerCollection;

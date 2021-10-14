@@ -28,7 +28,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="settings">The settings.</param>
         /// <returns>The page file extensions.</returns>
-        public static IReadOnlyList<string> GetPageFileExtensions(this IReadOnlySettings settings)
+        public static string[] GetPageFileExtensions(this IReadOnlySettings settings)
         {
             settings.ThrowIfNull(nameof(settings));
             IReadOnlyList<string> pageFileExtensions = settings.GetList<string>(Keys.PageFileExtensions);

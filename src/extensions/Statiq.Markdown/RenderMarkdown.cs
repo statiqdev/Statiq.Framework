@@ -208,7 +208,7 @@ namespace Statiq.Markdown
             MarkdownDocument markdownDocument;
             using (StringWriter writer = new StringWriter())
             {
-                markdownDocument = MarkdownHelper.RenderMarkdown(input, content, writer, _prependLinkRoot, _configuration, _extensions);
+                markdownDocument = MarkdownHelper.RenderMarkdown(context, input, content, writer, _prependLinkRoot, _configuration, _extensions);
                 if (markdownDocument is null)
                 {
                     return input.Yield();

@@ -97,6 +97,13 @@ namespace Statiq.Testing
         /// <inheritdoc/>
         INamespacesCollection IExecutionState.Namespaces => Namespaces;
 
+        /// <inheritdoc/>
+        public ILinkGenerator LinkGenerator
+        {
+            get => Engine.LinkGenerator;
+            set => Engine.LinkGenerator = value;
+        }
+
         /// <inheritdoc />
         public TestEventCollection Events
         {

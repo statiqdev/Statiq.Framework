@@ -1,7 +1,11 @@
 # 1.0.0-beta.49
 
+- **Breaking change:** The `LinkGenerator` class is no longer static and now needs to be accessed through a new `IExecutionState.LinkGenerator` or `IExecutionContext.LinkGenerator` property.
 - Added the `cache` directory to the excluded list in `Statiq.App.props`.
 - Fixed a bug with `DocumentFileProvider` and documents with a null `Destination`.
+- Fixed a bug in the Razor engine when run under .NET 6 RC runtimes (#204, thanks @phil-scott-78).
+- Updated several dependencies (#199, #201, #202, thanks @devlead).
+- Added the ability to cache Razor partials using new `CachedPartial()` and `CachedPartialAsync()` HTML helpers. (#205)
 
 # 1.0.0-beta.48
 

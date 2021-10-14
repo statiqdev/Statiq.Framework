@@ -37,7 +37,7 @@ namespace Statiq.Markdown
             IMetadataDictionary dictionary = args.ToDictionary(Configuration, PrependLinkRoot);
             using (StringWriter writer = new StringWriter())
             {
-                MarkdownHelper.RenderMarkdown(document, content, writer, dictionary.GetBool(PrependLinkRoot), dictionary.GetString(Configuration, MarkdownHelper.DefaultConfiguration), null);
+                MarkdownHelper.RenderMarkdown(context, document, content, writer, dictionary.GetBool(PrependLinkRoot), dictionary.GetString(Configuration, MarkdownHelper.DefaultConfiguration), null);
                 return writer.ToString();
             }
         }

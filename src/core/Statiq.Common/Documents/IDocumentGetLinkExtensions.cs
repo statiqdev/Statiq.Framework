@@ -45,6 +45,6 @@ namespace Statiq.Common
         /// A string representation of the path suitable for a web link.
         /// </returns>
         public static string GetLink(this IDocument document, string queryAndFragment, bool includeHost = false) =>
-            IExecutionContext.Current.GetLink(LinkGenerator.AddQueryAndFragment(document.Destination, queryAndFragment), includeHost);
+            IExecutionContext.Current.GetLink(IExecutionContext.Current.LinkGenerator.AddQueryAndFragment(document.Destination, queryAndFragment), includeHost);
     }
 }
