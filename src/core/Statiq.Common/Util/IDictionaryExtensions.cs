@@ -21,7 +21,7 @@ namespace Statiq.Common
             }
         }
 
-        public static void AddRangeIfNonExisting<TKey, TValue>(
+        public static void TryAddRange<TKey, TValue>(
             this IDictionary<TKey, TValue> dictionary,
             IEnumerable<KeyValuePair<TKey, TValue>> items)
         {
@@ -31,20 +31,42 @@ namespace Statiq.Common
             {
                 foreach (KeyValuePair<TKey, TValue> item in items)
                 {
-                    dictionary.AddIfNonExisting(item.Key, item.Value);
+                    dictionary.TryAdd(item.Key, item.Value);
                 }
             }
         }
 
-        public static void AddIfNonExisting<TKey, TValue>(
+        public static bool TryAdd<TKey, TValue>(
             this IDictionary<TKey, TValue> dictionary,
             TKey key,
-            TValue value)
+            Func<TKey, TValue> getValue)
         {
+            dictionary.ThrowIfNull(nameof(dictionary));
+
             if (!dictionary.ContainsKey(key))
             {
-                dictionary.Add(key, value);
+                dictionary.Add(key, getValue(key));
+                return true;
             }
+
+            return false;
+        }
+
+        public static bool TryAdd<TKey, TArg, TValue>(
+            this IDictionary<TKey, TValue> dictionary,
+            TKey key,
+            TArg arg,
+            Func<TKey, TArg, TValue> getValue)
+        {
+            dictionary.ThrowIfNull(nameof(dictionary));
+
+            if (!dictionary.ContainsKey(key))
+            {
+                dictionary.Add(key, getValue(key, arg));
+                return true;
+            }
+
+            return false;
         }
     }
 }

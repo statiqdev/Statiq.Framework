@@ -425,9 +425,10 @@ namespace Statiq.CodeAnalysis.Analysis
             NormalizedPath destination = _finished ? null : _destination(symbol, _compilation);
 
             // Create the document and add it to caches
+            // Use a special ".symbol" extension for the source so we don't conflict with other known file types when consuming
             return _symbolToDocument.GetOrAdd(
                 symbol,
-                (key, args) => args._context.CreateDocument(new NormalizedPath(key.ToDisplayString(), PathKind.Absolute), args.destination, args.items),
+                (key, args) => args._context.CreateDocument(new NormalizedPath(key.ToDisplayString() + ".symbol", PathKind.Absolute), args.destination, args.items),
                 (destination, items, _context));
         }
 

@@ -90,8 +90,18 @@ namespace Statiq.Common
         public static bool IdEquals(this IDocument document, IDocument other) =>
             DocumentIdComparer.Instance.Equals(document, other);
 
+        /// <summary>
+        /// Determines if a document is equal by comparing their IDs.
+        /// </summary>
+        /// <param name="document">The first document.</param>
+        /// <param name="other">The second document.</param>
+        /// <returns><c>true</c> if the documents have the same ID (they come from the same initial document), <c>false</c> otherwise.</returns>
+        public static bool IdEquals<TDocument>(this TDocument document, TDocument other)
+            where TDocument : IDocument =>
+            DocumentIdComparer<TDocument>.Instance.Equals(document, other);
+
         // Title is a hot path, so cache the results
-        private static ConcurrentCache<IDocument, string> _titles = new ConcurrentCache<IDocument, string>(true);
+        private static readonly ConcurrentCache<IDocument, string> _titles = new ConcurrentCache<IDocument, string>(true);
 
         /// <summary>
         /// Gets a normalized title derived from the document source (or <see cref="Keys.Title"/> if defined).

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Statiq.Common
 {
@@ -8,9 +7,7 @@ namespace Statiq.Common
     /// </summary>
     public class DocumentIdComparer : IEqualityComparer<IDocument>
     {
-        private static readonly Lazy<DocumentIdComparer> _instance = new Lazy<DocumentIdComparer>(() => new DocumentIdComparer());
-
-        public static DocumentIdComparer Instance => _instance.Value;
+        public static DocumentIdComparer Instance { get; } = new DocumentIdComparer();
 
         public bool Equals(IDocument x, IDocument y) => x?.Id == y?.Id;
 

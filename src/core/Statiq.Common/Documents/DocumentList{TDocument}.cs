@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using NetFabric.Hyperlinq;
 
 namespace Statiq.Common
 {
@@ -31,7 +32,7 @@ namespace Statiq.Common
             else
             {
                 // Remove nulls
-                _documents = documents.Where(x => x is object).ToArray();
+                _documents = documents.AsValueEnumerable().Where(x => x is object).ToArray();
             }
         }
 

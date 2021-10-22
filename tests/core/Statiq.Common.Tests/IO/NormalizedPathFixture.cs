@@ -694,12 +694,14 @@ namespace Statiq.Common.Tests.IO
             [TestCase("temp/hello.txt", "txt", "temp/hello.txt")]
             [TestCase("temp/hello.txt", "", "temp/hello.")]
             [TestCase("temp/hello.txt", null, "temp/hello")]
+            [TestCase("temp/hello.txt", ".", "temp/hello.")]
             [TestCase("temp/hello.txt.foo", ".dat", "temp/hello.txt.dat")]
             [TestCase("temp/hello.txt.foo", "dat", "temp/hello.txt.dat")]
             [TestCase("temp/hello.txt.foo", ".txt", "temp/hello.txt.txt")]
             [TestCase("temp/hello.txt.foo", "txt", "temp/hello.txt.txt")]
             [TestCase("temp/hello.txt.foo", "", "temp/hello.txt.")]
             [TestCase("temp/hello.txt.foo", null, "temp/hello.txt")]
+            [TestCase("temp/hello.txt.foo", ".", "temp/hello.txt.")]
             public void ShouldChangeExtension(string path, string extension, string expected)
             {
                 // Given

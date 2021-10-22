@@ -162,7 +162,7 @@ namespace Statiq.App
             }
             else
             {
-                engine.Settings.AddIfNonExisting(Keys.CleanMode, CleanMode.Unwritten);
+                engine.Settings.TryAdd(Keys.CleanMode, CleanMode.Unwritten);
             }
 
             // Set no cache if requested

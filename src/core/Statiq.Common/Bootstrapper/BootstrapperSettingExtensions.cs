@@ -18,14 +18,14 @@ namespace Statiq.Common
 
         public static TBootstrapper AddSettingsIfNonExisting<TBootstrapper>(this TBootstrapper bootstrapper, IEnumerable<KeyValuePair<string, object>> settings)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureSettings(x => x.AddRangeIfNonExisting(settings));
+            bootstrapper.ConfigureSettings(x => x.TryAddRange(settings));
 
         public static TBootstrapper AddSettingIfNonExisting<TBootstrapper>(this TBootstrapper bootstrapper, KeyValuePair<string, object> setting)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureSettings(x => x.AddIfNonExisting(setting.Key, setting.Value));
+            bootstrapper.ConfigureSettings(x => x.TryAdd(setting.Key, setting.Value));
 
         public static TBootstrapper AddSettingIfNonExisting<TBootstrapper>(this TBootstrapper bootstrapper, string key, object value)
             where TBootstrapper : IBootstrapper =>
-            bootstrapper.ConfigureSettings(x => x.AddIfNonExisting(key, value));
+            bootstrapper.ConfigureSettings(x => x.TryAdd(key, value));
     }
 }

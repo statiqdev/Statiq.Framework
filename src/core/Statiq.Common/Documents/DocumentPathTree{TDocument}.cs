@@ -1,13 +1,32 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using NetFabric.Hyperlinq;
 
 namespace Statiq.Common
 {
     public class DocumentPathTree<TDocument> : IDocumentPathTree<TDocument>
         where TDocument : IDocument
     {
+        // Global cache
+        private static readonly ConcurrentCache<IEnumerable<TDocument>, ConcurrentDictionary<TDocument, CachedResults>> _resultsCache
+                = new ConcurrentCache<IEnumerable<TDocument>, ConcurrentDictionary<TDocument, CachedResults>>(true);
+
+        private class CachedResults
+        {
+            public DocumentList<TDocument> Children { get; set; }
+            public DocumentList<TDocument> Siblings { get; set; }
+            public DocumentList<TDocument> SiblingsAndSelf { get; set; }
+            public DocumentList<TDocument> Descendants { get; set; }
+            public DocumentList<TDocument> DescendantsAndSelf { get; set; }
+            public DocumentList<TDocument> Ancestors { get; set; }
+            public DocumentList<TDocument> AncestorsAndSelf { get; set; }
+        }
+
+        private readonly ConcurrentDictionary<TDocument, CachedResults> _cachedResults;
+
         // Cache the documents by their path for faster lookups
         private readonly Dictionary<NormalizedPath, TDocument> _documentsByPath = new Dictionary<NormalizedPath, TDocument>();
 
@@ -25,12 +44,17 @@ namespace Statiq.Common
             _pathFunc = pathFunc.ThrowIfNull(nameof(pathFunc));
             _indexFileName = indexFileName.ThrowIfNullOrEmpty(nameof(indexFileName));
 
+            _cachedResults = _resultsCache.GetOrAdd(
+                documents,
+                _ => new ConcurrentDictionary<TDocument, CachedResults>(DocumentIdComparer<TDocument>.Instance));
+
             // Add them by hand instead of using .Distinct() so we can guarantee ordering
             // and that earlier documents win (pipeline outputs are ordered with later phase results first)
             HashSet<Guid> documentIdHashes = new HashSet<Guid>();
             _documents = documents is null
                 ? Array.Empty<(NormalizedPath, TDocument)>()
                 : documents
+                    .AsValueEnumerable()
                     .Where(x => documentIdHashes.Add(x.Id))
                     .Select(x => (ResolvePath(x), x))
                     .Where(x =>
@@ -69,8 +93,18 @@ namespace Statiq.Common
             return path;
         }
 
-        public TDocument Get(NormalizedPath path) =>
-            _documents.Select(x => x.Item2).FirstOrDefault(x => _pathFunc(x).Equals(path));
+        public TDocument Get(NormalizedPath path)
+        {
+            foreach ((NormalizedPath, TDocument) item in _documents)
+            {
+                if (_pathFunc(item.Item2).Equals(path))
+                {
+                    return item.Item2;
+                }
+            }
+
+            return default;
+        }
 
         public TDocument GetParentOf(TDocument document)
         {
@@ -94,7 +128,14 @@ namespace Statiq.Common
                 return DocumentList<TDocument>.Empty;
             }
 
-            return _documents.Where(x => path.ContainsChild(x.Item1) && !x.Item2.IdEquals(document)).Select(x => x.Item2).ToDocumentList();
+            CachedResults results = _cachedResults.GetOrAdd(document, _ => new CachedResults());
+
+            return results.Children ?? (results.Children = _documents
+                .AsValueEnumerable()
+                .Where(x => path.ContainsChild(x.Item1) && !x.Item2.IdEquals(document))
+                .Select(x => x.Item2)
+                .ToArray()
+                .ToDocumentList());
         }
 
         public DocumentList<TDocument> GetSiblingsOf(TDocument document, bool includeSelf)
@@ -107,7 +148,22 @@ namespace Statiq.Common
                 return DocumentList<TDocument>.Empty;
             }
 
-            return _documents.Where(x => !x.Item1.IsNullOrEmpty && path.IsSiblingOrSelf(x.Item1) && (includeSelf || !x.Item2.IdEquals(document))).Select(x => x.Item2).ToDocumentList();
+            CachedResults results = _cachedResults.GetOrAdd(document, _ => new CachedResults());
+            if (includeSelf)
+            {
+                return results.SiblingsAndSelf ?? (results.SiblingsAndSelf = _documents
+                    .AsValueEnumerable()
+                    .Where(x => !x.Item1.IsNullOrEmpty && path.IsSiblingOrSelf(x.Item1))
+                    .Select(x => x.Item2)
+                    .ToArray()
+                    .ToDocumentList());
+            }
+            return results.Siblings ?? (results.Siblings = _documents
+                .AsValueEnumerable()
+                .Where(x => !x.Item1.IsNullOrEmpty && path.IsSiblingOrSelf(x.Item1) && !x.Item2.IdEquals(document))
+                .Select(x => x.Item2)
+                .ToArray()
+                .ToDocumentList());
         }
 
         public DocumentList<TDocument> GetDescendantsOf(TDocument document, bool includeSelf)
@@ -120,7 +176,23 @@ namespace Statiq.Common
                 return DocumentList<TDocument>.Empty;
             }
 
-            return _documents.Where(x => path.ContainsDescendantOrSelf(x.Item1) && (includeSelf || !x.Item2.IdEquals(document))).Select(x => x.Item2).ToDocumentList();
+            CachedResults results = _cachedResults.GetOrAdd(document, _ => new CachedResults());
+
+            if (includeSelf)
+            {
+                return results.DescendantsAndSelf ?? (results.DescendantsAndSelf = _documents
+                    .AsValueEnumerable()
+                    .Where(x => path.ContainsDescendantOrSelf(x.Item1))
+                    .Select(x => x.Item2)
+                    .ToArray()
+                    .ToDocumentList());
+            }
+            return results.Descendants ?? (results.Descendants = _documents
+                .AsValueEnumerable()
+                .Where(x => path.ContainsDescendantOrSelf(x.Item1) && !x.Item2.IdEquals(document))
+                .Select(x => x.Item2)
+                .ToArray()
+                .ToDocumentList());
         }
 
         public DocumentList<TDocument> GetAncestorsOf(TDocument document, bool includeSelf)
@@ -133,26 +205,36 @@ namespace Statiq.Common
                 return DocumentList<TDocument>.Empty;
             }
 
-            // We want to build the ancestors up from closest to furthest
-            List<TDocument> ancestors = new List<TDocument>();
+            CachedResults results = _cachedResults.GetOrAdd(document, _ => new CachedResults());
             if (includeSelf)
             {
-                ancestors.Add(document);
+                return results.AncestorsAndSelf ?? (results.AncestorsAndSelf = GetAncestorsOf());
             }
-            path = path.Parent;
-            while (!path.IsNull)
+            return results.Ancestors ?? (results.Ancestors = GetAncestorsOf());
+
+            DocumentList<TDocument> GetAncestorsOf()
             {
-                if (_documentsByPath.TryGetValue(path, out TDocument parent) && !parent.IdEquals(document))
+                // We want to build the ancestors up from closest to furthest
+                List<TDocument> ancestors = new List<TDocument>();
+                if (includeSelf)
                 {
-                    ancestors.Add(parent);
-                }
-                if (path.IsNullOrEmpty)
-                {
-                    break;
+                    ancestors.Add(document);
                 }
                 path = path.Parent;
+                while (!path.IsNull)
+                {
+                    if (_documentsByPath.TryGetValue(path, out TDocument parent) && !parent.IdEquals(document))
+                    {
+                        ancestors.Add(parent);
+                    }
+                    if (path.IsNullOrEmpty)
+                    {
+                        break;
+                    }
+                    path = path.Parent;
+                }
+                return ancestors.ToDocumentList();
             }
-            return ancestors.ToDocumentList();
         }
     }
 }

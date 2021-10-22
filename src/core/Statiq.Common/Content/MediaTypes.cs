@@ -12,6 +12,7 @@ namespace Statiq.Common
     {
         // Some common and relevant media types
         // Use lookups to make sure we reflect any changes to the mapping
+        public static string Statiq => Get(".statiq");
         public static string CSharp => Get(".cs");
         public static string Css => Get(".css");
         public static string Gif => Get(".gif");
@@ -38,6 +39,9 @@ namespace Statiq.Common
         public static IDictionary<string, string> ExtensionMappings { get; } =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
+                // Special .statiq media type
+                { ".statiq", "application/statiq" },
+
                 // Registered IANA media types, generated with the following LINQPad code:
                 /*
                     async Task Main()
