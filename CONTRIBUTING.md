@@ -20,7 +20,7 @@ If you would like to submit code to Statiq, please follow the guidelines below. 
 
 ### Making Changes
 
-[Fork](http://help.github.com/forking/) the Statiq repository on GitHub. The Statiq repository uses a single `master` branch and you can submit PRs against that.
+[Fork](http://help.github.com/forking/) the Statiq repository on GitHub. The Statiq repository uses a single `main` branch and you can submit PRs against that.
 
 ### Handling Updates from Upstream/Master
 
@@ -72,7 +72,7 @@ The tests in Statiq follow a very specific pattern, please attempt to follow the
 - Within the fixture class, tests for each method, property, or other symbol should be placed inside a nested class with the name `SymbolNameTests` where `SymbolName` is the name of the symbol (method, property, etc.) being tested. Tests for overloaded methods can all go in the same test class.
 - The nested symbol test class should inherit from the outer containing fixture class.
 - Test methods for the symbol should be placed in the nested symbol test class and should have explanatory names that follow standard naming conventions. The names of test methods don't have to follow any specific guideline as long as it's reasonably clear what the purpose of the test is.
-- Each test method should contain the comments `\\ Given`, `\\ When`, and `\\ Then` to separate the test code into three clear sections (though these can be combined for simple tests so you might have a comment like `\\ When, Then`).
+- Each test method should contain the comments `// Given`, `// When`, and `// Then` to separate the test code into three clear sections (though these can be combined for simple tests so you might have a comment like `// When, Then`).
 - Use [Shouldly](https://github.com/shouldly/shouldly) for assertions in new test code.
 
 If there are any questions about how to format test code please take a look at the existing test code or ask.
