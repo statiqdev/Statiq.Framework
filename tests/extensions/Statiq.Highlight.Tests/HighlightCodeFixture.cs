@@ -255,6 +255,47 @@ namespace Statiq.Highlight.Tests
                 // Then
                 results.ShouldNotBeEmpty();
             }
+
+            [Test]
+            public async Task SkipHighlightingUnspecifiedLanguageCodeBlocksWhenConfigured()
+            {
+                // Given
+                const string input = @"
+<html>
+<head>
+    <title>Foobar</title>
+</head>
+<body>
+    <h1>Title</h1>
+    <p>This is some Foobar text</p>
+    <pre><code>
+    <html>
+    <head>
+    <title>Hi Mom!</title>
+    </head>
+    <body>
+        <p>Hello, world! Pretty me up!
+    </body>
+    </html>
+    </code></pre>
+</body>
+</html>";
+
+                TestDocument document = new TestDocument(input);
+                TestExecutionContext context = new TestExecutionContext()
+                {
+                    JsEngineFunc = () => new TestJsEngine()
+                };
+
+                HighlightCode highlight = new HighlightCode()
+                    .WithAutoHighlightUnspecifiedLanguage(false);
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, highlight).SingleAsync();
+
+                // Then
+                result.Content.ShouldNotContain("hljs");
+            }
         }
     }
 }

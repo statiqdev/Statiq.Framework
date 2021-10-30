@@ -39,6 +39,7 @@ namespace Statiq.Highlight
         private string _codeQuerySelector = "pre code";
         private string _highlightJsFile;
         private bool _warnOnMissingLanguage = true;
+        private bool _autoHighlightUnspecifiedLanguage = true;
 
         /// <summary>
         /// Sets the query selector to use to find code blocks.
@@ -73,6 +74,17 @@ namespace Statiq.Highlight
             return this;
         }
 
+        /// <summary>
+        /// Sets whether auto highlighting is performed when there is no language specified on the code block.
+        /// </summary>
+        /// <param name="autoHighlight">if set to <c>true</c> [auto highlight unspecified language].</param>
+        /// <returns>The current instance.</returns>
+        public HighlightCode WithAutoHighlightUnspecifiedLanguage(bool autoHighlight)
+        {
+            _autoHighlightUnspecifiedLanguage = autoHighlight;
+            return this;
+        }
+
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
@@ -102,6 +114,12 @@ namespace Statiq.Highlight
                                 {
                                     // Don't highlight anything that potentially is already highlighted
                                     if (element.ClassList.Contains("hljs"))
+                                    {
+                                        continue;
+                                    }
+
+                                    // Skip highlighting if there is no language detected and auto highlight is disabled for unspecified languages
+                                    if (!element.ClassList.Any(c => c.StartsWith("language")) && !_autoHighlightUnspecifiedLanguage)
                                     {
                                         continue;
                                     }
