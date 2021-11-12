@@ -141,9 +141,9 @@ namespace Statiq.Core.Tests.Modules.Extensibility
                 ImmutableArray<TestDocument> results = await ExecuteAsync(context, startProcess);
 
                 // Then
-                results.Single().Content.ShouldStartWith(".NET");
-                results.Single().Content.ShouldContain(Environment.NewLine);
-                ((IDocument)results.Single()).GetString(StartProcess.ErrorData).ShouldStartWith("Unknown option");
+                // Note that the output from .NET 6 and previous versions is different:
+                // previous versions of the dotnet CLI will report there's no such option,
+                // .NET 6 will attempt to match the --foo to a command or file and fail
                 ((IDocument)results.Single()).GetInt(StartProcess.ExitCode).ShouldNotBe(0);
             }
         }

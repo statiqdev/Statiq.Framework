@@ -1,5 +1,7 @@
 # 1.0.0-beta.50
 
+- Added `WithAutoHighlightUnspecifiedLanguage()` to the `HighlightCode` module to avoid time-consuming generation-time code highlighting when the language is unknown (#210, thanks @Turnerj). 
+
 # 1.0.0-beta.49
 
 - **Breaking change:** The `LinkGenerator` class is no longer static and now needs to be accessed through a new `IExecutionState.LinkGenerator` or `IExecutionContext.LinkGenerator` property.

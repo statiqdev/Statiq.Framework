@@ -14,7 +14,14 @@ namespace Statiq.App.Tests
         public void FlatNamespace()
         {
             // Given, When
-            string[] namespaces = typeof(PipelineBuilder).Assembly.GetTypes().Select(x => x.Namespace).Distinct().Where(x => x is object).ToArray();
+            string[] namespaces = typeof(PipelineBuilder).Assembly.GetTypes()
+                .Where(x => x.IsPublic) // Eliminate compiler-generated attributes like Microsoft.CodeAnalysis.EmbeddedAttribute
+                .Select(x => x.Namespace)
+                .Distinct()
+                .Where(x => x is object)
+                .ToArray();
+            Type[] otherTypes = typeof(PipelineBuilder).Assembly.GetTypes().Where(x => x.Namespace != "Statiq.App")
+                .ToArray();
 
             // Then
             namespaces.ShouldBe(new[] { "Statiq.App" });
