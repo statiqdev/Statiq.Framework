@@ -5,7 +5,7 @@ using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
 
-namespace Statiq.Html.Tests
+namespace Statiq.Core.Tests.Modules.Metadata
 {
     [TestFixture]
     public class GatherHeadingsFixture : BaseFixture
@@ -32,7 +32,7 @@ namespace Statiq.Html.Tests
                 IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                result.GetDocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Bar" });
+                result.GetDocumentList(Keys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Bar" });
             }
 
             [Test]
@@ -55,7 +55,7 @@ namespace Statiq.Html.Tests
                 IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                result.GetDocumentList(HtmlKeys.Headings).Select(x => x.GetString("HContent")).ShouldBe(new[] { "Foo", "Bar" });
+                result.GetDocumentList(Keys.Headings).Select(x => x.GetString("HContent")).ShouldBe(new[] { "Foo", "Bar" });
             }
 
             [Test]
@@ -78,7 +78,7 @@ namespace Statiq.Html.Tests
                 IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                result.GetDocumentList(HtmlKeys.Headings).Select(x => x.GetString("HContent")).ShouldBe(new string[] { null, null });
+                result.GetDocumentList(Keys.Headings).Select(x => x.GetString("HContent")).ShouldBe(new string[] { null, null });
             }
 
             [Test]
@@ -102,7 +102,7 @@ namespace Statiq.Html.Tests
                 IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                result.GetDocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Bar" });
+                result.GetDocumentList(Keys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Bar" });
             }
 
             [Test]
@@ -126,7 +126,7 @@ namespace Statiq.Html.Tests
                 IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                result.GetDocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Baz", "Bar" });
+                result.GetDocumentList(Keys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Baz", "Bar" });
             }
 
             [Test]
@@ -152,9 +152,9 @@ namespace Statiq.Html.Tests
                 IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                result.GetDocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Bar" });
-                result.GetDocumentList(HtmlKeys.Headings)[0].GetDocumentList(Keys.Children).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Baz", "Boz" });
-                result.GetDocumentList(HtmlKeys.Headings)[1].GetDocumentList(Keys.Children).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Boo" });
+                result.GetDocumentList(Keys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Bar" });
+                result.GetDocumentList(Keys.Headings)[0].GetDocumentList(Keys.Children).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Baz", "Boz" });
+                result.GetDocumentList(Keys.Headings)[1].GetDocumentList(Keys.Children).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Boo" });
             }
 
             [Test]
@@ -180,9 +180,9 @@ namespace Statiq.Html.Tests
                 IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                result.GetDocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Baz", "Boz", "Bar", "Boo" });
-                result.GetDocumentList(HtmlKeys.Headings)[0].GetDocumentList(Keys.Children).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Baz", "Boz" });
-                result.GetDocumentList(HtmlKeys.Headings)[3].GetDocumentList(Keys.Children).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Boo" });
+                result.GetDocumentList(Keys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Baz", "Boz", "Bar", "Boo" });
+                result.GetDocumentList(Keys.Headings)[0].GetDocumentList(Keys.Children).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Baz", "Boz" });
+                result.GetDocumentList(Keys.Headings)[3].GetDocumentList(Keys.Children).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Boo" });
             }
 
             [Test]
@@ -205,7 +205,7 @@ namespace Statiq.Html.Tests
                 IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                result.GetDocumentList(HtmlKeys.Headings).Select(x => x.GetString(HtmlKeys.HeadingId)).ShouldBe(new[] { null, "bar" });
+                result.GetDocumentList(Keys.Headings).Select(x => x.GetString(Keys.HeadingId)).ShouldBe(new[] { null, "bar" });
             }
 
             [Test]
@@ -227,8 +227,8 @@ namespace Statiq.Html.Tests
                 IDocument result = await ExecuteAsync(document, headings).SingleAsync();
 
                 // Then
-                result.GetDocumentList(HtmlKeys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo Bar" });
-                result.GetDocumentList(HtmlKeys.Headings).Select(x => x.GetString("HContent")).ShouldBe(new[] { "Foo Bar" });
+                result.GetDocumentList(Keys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo Bar" });
+                result.GetDocumentList(Keys.Headings).Select(x => x.GetString("HContent")).ShouldBe(new[] { "Foo Bar" });
             }
         }
     }

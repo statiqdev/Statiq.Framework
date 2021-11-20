@@ -7,7 +7,7 @@ using NUnit.Framework;
 using Shouldly;
 using Statiq.Testing;
 
-namespace Statiq.Html.Tests
+namespace Statiq.Core.Tests.Modules.Contents
 {
     [TestFixture]
     public class ProcessHtmlFixture : BaseFixture

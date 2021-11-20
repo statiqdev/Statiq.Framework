@@ -88,7 +88,6 @@ namespace Statiq.Highlight
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
-            HtmlParser parser = new HtmlParser();
             IJavaScriptEnginePool enginePool = context.GetJavaScriptEnginePool(x =>
             {
                 if (string.IsNullOrWhiteSpace(_highlightJsFile))
@@ -106,52 +105,41 @@ namespace Statiq.Highlight
                 {
                     try
                     {
-                        using (Stream stream = input.GetContentStream())
+                        IHtmlDocument htmlDocument = await input.ParseHtmlAsync();
+                        bool highlighted = false;
+                        foreach (AngleSharp.Dom.IElement element in htmlDocument.QuerySelectorAll(_codeQuerySelector))
                         {
-                            using (IHtmlDocument htmlDocument = await parser.ParseDocumentAsync(stream))
+                            // Don't highlight anything that potentially is already highlighted
+                            if (element.ClassList.Contains("hljs"))
                             {
-                                foreach (AngleSharp.Dom.IElement element in htmlDocument.QuerySelectorAll(_codeQuerySelector))
+                                continue;
+                            }
+
+                            // Skip highlighting if there is no language detected and auto highlight is disabled for unspecified languages
+                            if (!element.ClassList.Any(c => c.StartsWith("language")) && !_autoHighlightUnspecifiedLanguage)
+                            {
+                                continue;
+                            }
+
+                            try
+                            {
+                                HighlightElement(enginePool, element);
+                                highlighted = true;
+                            }
+                            catch (Exception innerEx)
+                            {
+                                if (innerEx.Message.Contains("Unknown language: ") && _warnOnMissingLanguage)
                                 {
-                                    // Don't highlight anything that potentially is already highlighted
-                                    if (element.ClassList.Contains("hljs"))
-                                    {
-                                        continue;
-                                    }
-
-                                    // Skip highlighting if there is no language detected and auto highlight is disabled for unspecified languages
-                                    if (!element.ClassList.Any(c => c.StartsWith("language")) && !_autoHighlightUnspecifiedLanguage)
-                                    {
-                                        continue;
-                                    }
-
-                                    try
-                                    {
-                                        HighlightElement(enginePool, element);
-                                    }
-                                    catch (Exception innerEx)
-                                    {
-                                        if (innerEx.Message.Contains("Unknown language: ") && _warnOnMissingLanguage)
-                                        {
-                                            context.LogWarning($"Exception while highlighting source code: {innerEx.Message}");
-                                        }
-                                        else
-                                        {
-                                            context.LogInformation($"Exception while highlighting source code: {innerEx.Message}");
-                                        }
-                                    }
+                                    context.LogWarning($"Exception while highlighting source code: {innerEx.Message}");
                                 }
-
-                                using (Stream contentStream = context.GetContentStream())
+                                else
                                 {
-                                    using (StreamWriter writer = contentStream.GetWriter())
-                                    {
-                                        htmlDocument.ToHtml(writer, HtmlMarkupFormatter.Instance);
-                                        writer.Flush();
-                                        return input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
-                                    }
+                                    context.LogInformation($"Exception while highlighting source code: {innerEx.Message}");
                                 }
                             }
                         }
+
+                        return highlighted ? input.Clone(context.GetContentProvider(htmlDocument)) : input;
                     }
                     catch (Exception ex)
                     {

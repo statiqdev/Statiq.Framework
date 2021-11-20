@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using AngleSharp;
+using AngleSharp.Html.Dom;
 
 namespace Statiq.Common
 {
@@ -119,5 +121,36 @@ namespace Statiq.Common
             this IExecutionContext executionContext,
             string content,
             string mediaType) => content is null ? new NullContent() : (IContentProvider)new StringContent(content, mediaType);
+
+        /// <summary>
+        /// Gets a content provider for HTML content, sets the media type to <see cref="MediaTypes.Html"/>,
+        /// and updates the internal HTML document cache used by <see cref="IDocumentHtmlExtensions.ParseHtmlAsync"/>
+        /// if the <paramref name="markup"/> parameter is a <see cref="IHtmlDocument"/>.
+        /// </summary>
+        public static IContentProvider GetContentProvider(
+            this IExecutionContext executionContext,
+            IMarkupFormattable markup)
+        {
+            if (markup is null)
+            {
+                return new NullContent();
+            }
+
+            using (Stream contentStream = executionContext.GetContentStream())
+            {
+                using (StreamWriter writer = contentStream.GetWriter())
+                {
+                    markup.ToHtml(writer, StatiqMarkupFormatter.Instance);
+                    writer.Flush();
+                    IContentProvider contentProvider =
+                        executionContext.GetContentProvider(contentStream, MediaTypes.Html);
+                    if (markup is IHtmlDocument htmlDocument)
+                    {
+                        IDocumentHtmlExtensions.AddOrUpdateCache(contentProvider, htmlDocument);
+                    }
+                    return contentProvider;
+                }
+            }
+        }
     }
 }

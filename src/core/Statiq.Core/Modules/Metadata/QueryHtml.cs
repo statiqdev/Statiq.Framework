@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AngleSharp;
 using AngleSharp.Dom;
-using AngleSharp.Html;
 using AngleSharp.Html.Dom;
-using AngleSharp.Html.Parser;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
-namespace Statiq.Html
+namespace Statiq.Core
 {
     /// <summary>
     /// Queries HTML content of the input documents and creates new documents with content and metadata from the results.
@@ -27,9 +26,9 @@ namespace Statiq.Html
     /// only place this module after all other template processing has been performed.
     /// </para>
     /// </remarks>
-    /// <metadata cref="HtmlKeys.OuterHtml" usage="Output"/>
-    /// <metadata cref="HtmlKeys.InnerHtml" usage="Output"/>
-    /// <metadata cref="HtmlKeys.TextContent" usage="Output"/>
+    /// <metadata cref="Keys.OuterHtml" usage="Output"/>
+    /// <metadata cref="Keys.InnerHtml" usage="Output"/>
+    /// <metadata cref="Keys.TextContent" usage="Output"/>
     /// <category>Metadata</category>
     public class QueryHtml : ParallelModule
     {
@@ -83,7 +82,7 @@ namespace Statiq.Html
         /// </summary>
         /// <param name="metadataKey">The metadata key in which to place the outer HTML.</param>
         /// <returns>The current module instance.</returns>
-        public QueryHtml GetOuterHtml(string metadataKey = HtmlKeys.OuterHtml)
+        public QueryHtml GetOuterHtml(string metadataKey = Keys.OuterHtml)
         {
             if (!string.IsNullOrWhiteSpace(metadataKey))
             {
@@ -98,7 +97,7 @@ namespace Statiq.Html
         /// </summary>
         /// <param name="metadataKey">The metadata key in which to place the inner HTML.</param>
         /// <returns>The current module instance.</returns>
-        public QueryHtml GetInnerHtml(string metadataKey = HtmlKeys.InnerHtml)
+        public QueryHtml GetInnerHtml(string metadataKey = Keys.InnerHtml)
         {
             if (!string.IsNullOrWhiteSpace(metadataKey))
             {
@@ -113,7 +112,7 @@ namespace Statiq.Html
         /// </summary>
         /// <param name="metadataKey">The metadata key in which to place the text content.</param>
         /// <returns>The current module instance.</returns>
-        public QueryHtml GetTextContent(string metadataKey = HtmlKeys.TextContent)
+        public QueryHtml GetTextContent(string metadataKey = Keys.TextContent)
         {
             if (!string.IsNullOrWhiteSpace(metadataKey))
             {
@@ -182,7 +181,7 @@ namespace Statiq.Html
         protected override async Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context)
         {
             // Parse the HTML content
-            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input, false);
+            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(false);
             if (htmlDocument is null)
             {
                 return input.Yield();
@@ -211,25 +210,11 @@ namespace Statiq.Html
                             // Clone the document and optionally change content to the HTML element
                             if (_outerHtmlContent.HasValue)
                             {
-                                using (Stream contentStream = context.GetContentStream())
-                                {
-                                    using (StreamWriter writer = contentStream.GetWriter())
-                                    {
-                                        if (_outerHtmlContent.Value)
-                                        {
-                                            element.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                                        }
-                                        else
-                                        {
-                                            element.ChildNodes.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                                        }
-                                        writer.Flush();
-                                        documents.Add(
-                                            input.Clone(
-                                                metadata.Count == 0 ? null : metadata,
-                                                context.GetContentProvider(contentStream, MediaTypes.Html)));
-                                    }
-                                }
+                                documents.Add(
+                                    input.Clone(
+                                        metadata.Count == 0 ? null : metadata,
+                                        context.GetContentProvider(
+                                            _outerHtmlContent.Value ? (IMarkupFormattable)element : element.ChildNodes)));
                             }
                             else
                             {

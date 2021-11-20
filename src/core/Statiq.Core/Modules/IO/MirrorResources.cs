@@ -6,15 +6,11 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
-using AngleSharp.Html;
 using AngleSharp.Html.Dom;
-using AngleSharp.Html.Parser;
 using Microsoft.Extensions.Logging;
-using Polly;
-using Polly.Retry;
 using Statiq.Common;
 
-namespace Statiq.Html
+namespace Statiq.Core
 {
     /// <summary>
     /// Mirrors external <c>link</c> and <c>script</c> resources locally.
@@ -87,7 +83,7 @@ namespace Statiq.Html
 
             async Task<Common.IDocument> GetDocumentAsync(Common.IDocument input)
             {
-                IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
+                IHtmlDocument htmlDocument = await input.ParseHtmlAsync();
                 if (htmlDocument is object)
                 {
                     bool modifiedDocument = false;
@@ -126,17 +122,7 @@ namespace Statiq.Html
                     // Return a new document with the replacements if we performed any
                     if (modifiedDocument)
                     {
-                        using (Stream contentStream = context.GetContentStream())
-                        {
-                            using (StreamWriter writer = contentStream.GetWriter())
-                            {
-                                htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                                writer.Flush();
-                                Common.IDocument output = input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
-                                await HtmlHelper.AddOrUpdateCacheAsync(output, htmlDocument);
-                                return output;
-                            }
-                        }
+                        return input.Clone(context.GetContentProvider(htmlDocument));
                     }
                 }
 

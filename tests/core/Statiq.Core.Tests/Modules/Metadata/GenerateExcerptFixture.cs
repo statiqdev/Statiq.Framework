@@ -4,7 +4,7 @@ using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
 
-namespace Statiq.Html.Tests
+namespace Statiq.Core.Tests.Modules.Metadata
 {
     [TestFixture]
     public class GenerateExcerptFixture : BaseFixture
@@ -27,7 +27,7 @@ namespace Statiq.Html.Tests
                     </html>";
                 TestDocument document = new TestDocument(input)
                 {
-                    { HtmlKeys.Excerpt, "Foobar" }
+                    { Keys.Excerpt, "Foobar" }
                 };
                 GenerateExcerpt excerpt = new GenerateExcerpt();
 

@@ -5,7 +5,7 @@ using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
 
-namespace Statiq.Html.Tests
+namespace Statiq.Core.Tests.Modules.Contents
 {
     [TestFixture]
     public class InsertLinksFixture : BaseFixture
@@ -81,18 +81,49 @@ namespace Statiq.Html.Tests
                             <title>Foobar</title>
                         </head>
                         <body>
-                            <h1>Title</h1>
-                            <p>This A&lt;string, List&lt;B&gt;&gt; is some Foobar text</p>
+                            <h1>Title &lt; 2 < 3 &#64; 4 @ 5</h1>
+                            <p>This A&lt;string, List&lt;B&gt;&gt; is &#64; fizz @ fuzz < some Foobar text</p>
                         </body>
                     </html>";
                 const string output = @"<html><head>
                             <title>Foobar</title>
                         </head>
                         <body>
-                            <h1>Title</h1>
-                            <p>This A&lt;string, List&lt;B&gt;&gt; is some <a href=""http://www.google.com"">Foobar</a> text</p>
+                            <h1>Title &lt; 2 < 3 &#64; 4 @ 5</h1>
+                            <p>This A&lt;string, List&lt;B&gt;&gt; is &#64; fizz @ fuzz &lt; some <a href=""http://www.google.com"">Foobar</a> text</p>
                         
                     </body></html>";
+                TestDocument document = new TestDocument(input);
+                InsertLinks autoLink = new InsertLinks(new Dictionary<string, string>()
+                {
+                    { "Foobar", "http://www.google.com" }
+                });
+
+                // When
+                TestDocument result = await ExecuteAsync(document, autoLink).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [TestCase(
+                "<html><head></head><body><p>&#64; a Foobar b</p></body></html>",
+                @"<html><head></head><body><p>&#64; a <a href=""http://www.google.com"">Foobar</a> b</p></body></html>")]
+            [TestCase(
+                "<html><head></head><body><p>a &#64;Foobar b</p></body></html>",
+                @"<html><head></head><body><p>a &#64;<a href=""http://www.google.com"">Foobar</a> b</p></body></html>")]
+            [TestCase(
+                "<html><head></head><body><p>a Foobar&#64; b</p></body></html>",
+                @"<html><head></head><body><p>a <a href=""http://www.google.com"">Foobar</a>&#64; b</p></body></html>")]
+            [TestCase(
+                "<html><head></head><body><p>a Foobar b&#64;</p></body></html>",
+                @"<html><head></head><body><p>a <a href=""http://www.google.com"">Foobar</a> b&#64;</p></body></html>")]
+            [TestCase(
+                "<html><head></head><body><p>&#64;a &#64;Foobar&#64; b&#64;</p></body></html>",
+                @"<html><head></head><body><p>&#64;a &#64;<a href=""http://www.google.com"">Foobar</a>&#64; b&#64;</p></body></html>")]
+            public async Task PreservesCharacterEscapes(string input, string output)
+            {
+                // Given
                 TestDocument document = new TestDocument(input);
                 InsertLinks autoLink = new InsertLinks(new Dictionary<string, string>()
                 {

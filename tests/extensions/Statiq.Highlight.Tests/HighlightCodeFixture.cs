@@ -296,6 +296,69 @@ namespace Statiq.Highlight.Tests
                 // Then
                 result.Content.ShouldNotContain("hljs");
             }
+
+            [Test]
+            public async Task DoesNotUnescapeEscapedHtml()
+            {
+                // Given
+                // if we execute razor before this, the code block will be escaped.
+                const string input = @"
+<html>
+<head>
+    <title>Foobar</title>
+</head>
+<body>
+    <h1>Title</h1>
+    <p>Foo &#64;</p>
+    <pre><code class=""language-csharp"">Bar &#64;</code></pre>
+</body>
+</html>";
+
+                TestDocument document = new TestDocument(input);
+                TestExecutionContext context = new TestExecutionContext()
+                {
+                    JsEngineFunc = () => new TestJsEngine()
+                };
+
+                HighlightCode highlight = new HighlightCode();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, highlight).SingleAsync();
+
+                // Then
+                result.Content.ShouldNotContain("@");
+            }
+
+            [Test]
+            public async Task ReturnsSameDocumentIfNotHighlighting()
+            {
+                // Given
+                // if we execute razor before this, the code block will be escaped.
+                const string input = @"
+<html>
+<head>
+    <title>Foobar</title>
+</head>
+<body>
+    <h1>Title</h1>
+    <p>Foo</p>
+</body>
+</html>";
+
+                TestDocument document = new TestDocument(input);
+                TestExecutionContext context = new TestExecutionContext()
+                {
+                    JsEngineFunc = () => new TestJsEngine()
+                };
+
+                HighlightCode highlight = new HighlightCode();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, highlight).SingleAsync();
+
+                // Then
+                result.ShouldBe(document);
+            }
         }
     }
 }

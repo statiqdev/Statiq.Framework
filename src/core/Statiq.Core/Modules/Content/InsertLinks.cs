@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
-using AngleSharp.Html;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
-namespace Statiq.Html
+namespace Statiq.Core
 {
     /// <summary>
     /// Replaces occurrences of specified strings with HTML links.
@@ -139,7 +137,8 @@ namespace Statiq.Html
         {
             try
             {
-                // Get the links and HTML decode the keys (if they're encoded) since the text nodes are decoded
+                // Get the links and HTML decode the keys (if they're encoded) - we'll also decode HTML
+                // for checking and replacement to make sure everything matches, and then (re)encode it all
                 IDictionary<string, string> links = await _links.GetValueAsync(input, context, v => _extraLinks
                     .Concat(v.Where(l => !_extraLinks.ContainsKey(l.Key)))
                     .Where(x => !string.IsNullOrWhiteSpace(x.Value))
@@ -147,7 +146,7 @@ namespace Statiq.Html
 
                 // Enumerate all elements that match the query selector not already in a link element
                 List<KeyValuePair<IText, string>> replacements = new List<KeyValuePair<IText, string>>();
-                IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
+                IHtmlDocument htmlDocument = await input.ParseHtmlAsync();
                 foreach (IElement element in htmlDocument.QuerySelectorAll(_querySelector).Where(t => !t.Ancestors<IHtmlAnchorElement>().Any()))
                 {
                     // Enumerate all descendant text nodes not already in a link element
@@ -166,20 +165,9 @@ namespace Statiq.Html
                 {
                     foreach (KeyValuePair<IText, string> replacement in replacements)
                     {
-                        replacement.Key.Replace(HtmlParser.ParseFragment(replacement.Value, replacement.Key.ParentElement).ToArray());
+                        replacement.Key.Replace(HtmlHelper.DefaultHtmlParser.ParseFragment(replacement.Value, replacement.Key.ParentElement).ToArray());
                     }
-
-                    using (Stream contentStream = context.GetContentStream())
-                    {
-                        using (StreamWriter writer = contentStream.GetWriter())
-                        {
-                            htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                            writer.Flush();
-                            Common.IDocument output = input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
-                            await HtmlHelper.AddOrUpdateCacheAsync(output, htmlDocument);
-                            return output.Yield();
-                        }
-                    }
+                    return input.Clone(context.GetContentProvider(htmlDocument)).Yield();
                 }
             }
             catch (Exception ex)
@@ -192,8 +180,27 @@ namespace Statiq.Html
 
         private bool ReplaceStrings(IText textNode, IDictionary<string, string> map, out string newText)
         {
-            string text = textNode.Text;
-            SubstringSegment originalSegment = new SubstringSegment(0, text.Length);
+            // Track where character references occur
+            List<int> characterEncodingPositions = new List<int>();
+            int cr = textNode.Text.IndexOf("&#");
+            int extraChars = 0; // These will be replaced with a single char, so subtract the extra chars of the encoding
+            while (cr >= 0)
+            {
+                characterEncodingPositions.Add(cr - extraChars);
+                extraChars += textNode.Text.IndexOf(';', cr) - cr;
+                if (cr + 1 < textNode.Text.Length - 1)
+                {
+                    cr = textNode.Text.IndexOf("&#", cr + 1);
+                }
+                else
+                {
+                    cr = -1;
+                }
+            }
+
+            // Decode any encoded HTML so that it matched the search strings
+            string decodedText = WebUtility.HtmlDecode(textNode.Text);
+            SubstringSegment originalSegment = new SubstringSegment(0, decodedText.Length);
             List<Segment> segments = new List<Segment>()
             {
                 originalSegment
@@ -205,11 +212,11 @@ namespace Statiq.Html
                 int c = 0;
                 while (c < segments.Count)
                 {
-                    int index = segments[c].IndexOf(kvp.Key, 0, ref text);
+                    int index = segments[c].IndexOf(kvp.Key, 0, ref decodedText);
                     while (index >= 0)
                     {
                         if (CheckWordSeparators(
-                            ref text,
+                            ref decodedText,
                             segments[c].StartIndex,
                             segments[c].StartIndex + segments[c].Length - 1,
                             index,
@@ -242,12 +249,29 @@ namespace Statiq.Html
                                 }
                             }
 
+                            // Adjust character reference positions
+                            for (int r = 0; r < characterEncodingPositions.Count; r++)
+                            {
+                                if (characterEncodingPositions[r] > index - replacing.StartIndex
+                                    && characterEncodingPositions[r] <= index)
+                                {
+                                    // This one was inside the replaced area, so ignore it
+                                    characterEncodingPositions[r] = -1;
+                                }
+                                else if (characterEncodingPositions[r] > index)
+                                {
+                                    // This comes after the replacement, so adjust it's position
+                                    characterEncodingPositions[r] =
+                                        characterEncodingPositions[r] + (kvp.Value.Length - kvp.Key.Length);
+                                }
+                            }
+
                             // Go to the next segment
                             index = -1;
                         }
                         else
                         {
-                            index = segments[c].IndexOf(kvp.Key, index - segments[c].StartIndex + 1, ref text);
+                            index = segments[c].IndexOf(kvp.Key, index - segments[c].StartIndex + 1, ref decodedText);
                         }
                     }
                     c++;
@@ -257,7 +281,24 @@ namespace Statiq.Html
             // Join and escape non-replaced content
             if (segments.Count > 1 || (segments.Count == 1 && segments[0] != originalSegment))
             {
-                newText = string.Concat(segments.Select(x => x.GetText(ref text)));
+                newText = string.Concat(segments.Select(x => x.GetText(ref decodedText)));
+
+                // (Re)escape special character encodings
+                if (characterEncodingPositions.Count > 0)
+                {
+                    // Traverse from the back forward so adding extra characters doesn't mess up positions
+                    for (int r = characterEncodingPositions.Count - 1; r >= 0; r--)
+                    {
+                        if (characterEncodingPositions[r] >= 0)
+                        {
+                            string encoded = $"&#{(int)newText[characterEncodingPositions[r]]};";
+                            newText = newText.
+                                Remove(characterEncodingPositions[r], 1)
+                                .Insert(characterEncodingPositions[r], encoded);
+                        }
+                    }
+                }
+
                 return true;
             }
 
@@ -294,6 +335,10 @@ namespace Statiq.Html
             public override int IndexOf(string value, int startIndex, ref string search) =>
                 search.IndexOf(value, StartIndex + startIndex, Length - startIndex);
 
+            // This re-encodes the segment since encoding is always safe and we don't know if
+            // the segment was originally encoded or not since we explicitly decoded it earlier,
+            // but special characters don't get encoded here so those would end up as the decoded
+            // character unless we manually re-encode them as well (which we do above).
             public override string GetText(ref string text) =>
                 WebUtility.HtmlEncode(text.Substring(StartIndex, Length));
         }

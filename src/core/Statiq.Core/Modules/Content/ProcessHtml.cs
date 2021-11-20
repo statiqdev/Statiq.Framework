@@ -10,7 +10,7 @@ using AngleSharp.Html.Parser;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
-namespace Statiq.Html
+namespace Statiq.Core
 {
     /// <summary>
     /// Queries HTML content of the input documents and modifies the elements that
@@ -108,7 +108,7 @@ namespace Statiq.Html
             Action<Common.IDocument, IExecutionContext, IElement, Dictionary<string, object>> processElement)
         {
             // Parse the HTML content
-            IHtmlDocument originalHtmlDocument = await HtmlHelper.ParseHtmlAsync(input, false);
+            IHtmlDocument originalHtmlDocument = await input.ParseHtmlAsync(false);
             if (originalHtmlDocument is null)
             {
                 return input.Yield();
@@ -138,20 +138,11 @@ namespace Statiq.Html
                         }
 
                         // Elements were edited so get the new content
-                        using (Stream contentStream = context.GetContentStream())
-                        {
-                            using (StreamWriter writer = contentStream.GetWriter())
-                            {
-                                htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                                writer.Flush();
-                                IContentProvider contentProvider = context.GetContentProvider(contentStream, MediaTypes.Html);
-                                Common.IDocument output = metadata.Count == 0
-                                    ? input.Clone(contentProvider)
-                                    : input.Clone(metadata, contentProvider);
-                                await HtmlHelper.AddOrUpdateCacheAsync(output, htmlDocument);
-                                return output.Yield();
-                            }
-                        }
+                        IContentProvider contentProvider = context.GetContentProvider(htmlDocument);
+                        Common.IDocument output = metadata.Count == 0
+                            ? input.Clone(contentProvider)
+                            : input.Clone(metadata, contentProvider);
+                        return output.Yield();
                     }
                 }
                 return input.Yield();

@@ -9,7 +9,7 @@ using AngleSharp.Html.Parser;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
-namespace Statiq.Html
+namespace Statiq.Core
 {
     /// <summary>
     /// Queries HTML content of the input documents and inserts new content into the elements that

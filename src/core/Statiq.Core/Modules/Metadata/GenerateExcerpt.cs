@@ -4,10 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
-using AngleSharp.Html.Parser;
 using Statiq.Common;
 
-namespace Statiq.Html
+namespace Statiq.Core
 {
     /// <summary>
     /// Finds the first occurrence of a specified HTML comment or element and stores it's contents as metadata.
@@ -21,14 +20,14 @@ namespace Statiq.Html
     /// and will use the outer HTML content. In both cases, the excerpt is placed in metadata with a key of <c>Excerpt</c>.
     /// The content of the original input document is left unchanged.
     /// </remarks>
-    /// <metadata cref="HtmlKeys.Excerpt" usage="Output"/>
+    /// <metadata cref="Keys.Excerpt" usage="Output"/>
     /// <category>Metadata</category>
     public class GenerateExcerpt : ParallelModule
     {
         private bool _keepExisting = true;
         private string[] _separators = { "more", "excerpt" };
         private string _querySelector = "p";
-        private string _metadataKey = HtmlKeys.Excerpt;
+        private string _metadataKey = Keys.Excerpt;
         private bool _outerHtml = true;
 
         /// <summary>
@@ -123,7 +122,7 @@ namespace Statiq.Html
             }
 
             // Parse the HTML content
-            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input, false);
+            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(false);
             if (htmlDocument is null)
             {
                 return input.Yield();

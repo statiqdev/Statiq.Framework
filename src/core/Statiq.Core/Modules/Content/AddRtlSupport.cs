@@ -1,13 +1,10 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
-using AngleSharp.Html;
 using AngleSharp.Html.Dom;
-using AngleSharp.Html.Parser;
 using Statiq.Common;
 
-namespace Statiq.Html
+namespace Statiq.Core
 {
     public class AddRtlSupport : ParallelModule
     {
@@ -20,25 +17,13 @@ namespace Statiq.Html
 
         protected override async Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context)
         {
-            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input);
+            IHtmlDocument htmlDocument = await input.ParseHtmlAsync();
             if (htmlDocument is null)
             {
                 return input.Yield();
             }
-
             SetAttributes(htmlDocument);
-
-            using (Stream contentStream = context.GetContentStream())
-            {
-                using (StreamWriter writer = contentStream.GetWriter())
-                {
-                    htmlDocument.ToHtml(writer, ProcessingInstructionFormatter.Instance);
-                    writer.Flush();
-                    Common.IDocument output = input.Clone(context.GetContentProvider(contentStream, MediaTypes.Html));
-                    await HtmlHelper.AddOrUpdateCacheAsync(output, htmlDocument);
-                    return output.Yield();
-                }
-            }
+            return input.Clone(context.GetContentProvider(htmlDocument)).Yield();
         }
 
         private void SetAttributes(IHtmlDocument htmlDocument)

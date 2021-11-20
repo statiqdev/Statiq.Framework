@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Statiq.Common;
 
-namespace Statiq.Html
+namespace Statiq.Core
 {
     /// <summary>
     /// Automatically escapes HTML content.

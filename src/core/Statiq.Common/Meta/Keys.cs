@@ -283,5 +283,51 @@ namespace Statiq.Common
         /// when using the EnumerateValues module.
         /// </summary>
         public const string EnumerateWithInput = nameof(EnumerateWithInput);
+
+        // HTML (these are mirrored in an HtmlKeys class for backwards compatibility)
+
+        /// <summary>
+        /// Contains the content of the first result from the query
+        /// selector (unless an alternate metadata key is specified).
+        /// </summary>
+        /// <type><see cref="string"/></type>
+        public const string Excerpt = nameof(Excerpt);
+
+        /// <summary>
+        /// Contains the outer HTML of the query result (unless an alternate metadata key is specified).
+        /// </summary>
+        /// <type><see cref="string"/></type>
+        public const string OuterHtml = nameof(OuterHtml);
+
+        /// <summary>
+        /// Contains the inner HTML of the query result (unless an alternate metadata key is specified).
+        /// </summary>
+        /// <type><see cref="string"/></type>
+        public const string InnerHtml = nameof(InnerHtml);
+
+        /// <summary>
+        /// Contains the text content of the query result (unless an alternate metadata key is specified).
+        /// </summary>
+        /// <type><see cref="string"/></type>
+        public const string TextContent = nameof(TextContent);
+
+        /// <summary>
+        /// Documents that represent the headings in each input document.
+        /// </summary>
+        /// <type><c>IReadOnlyList&lt;IDocument&gt;</c></type>
+        public const string Headings = nameof(Headings);
+
+        /// <summary>
+        /// The value of the <c>id</c> attribute of the current heading document
+        /// if the heading contains one.
+        /// </summary>
+        /// <type><see cref="string"/></type>
+        public const string HeadingId = nameof(HeadingId);
+
+        /// <summary>
+        /// The level of the heading of the current heading document.
+        /// </summary>
+        /// <type><see cref="int"/></type>
+        public const string Level = nameof(Level);
     }
 }

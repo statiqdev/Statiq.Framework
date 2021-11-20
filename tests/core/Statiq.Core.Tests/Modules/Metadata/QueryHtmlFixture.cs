@@ -7,7 +7,7 @@ using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
 
-namespace Statiq.Html.Tests
+namespace Statiq.Core.Tests.Modules.Metadata
 {
     [TestFixture]
     public class QueryHtmlFixture : BaseFixture

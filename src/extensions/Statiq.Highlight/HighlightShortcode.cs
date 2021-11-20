@@ -48,7 +48,6 @@ namespace Statiq.Highlight
                 "Element",
                 "HighlightJsFile");
 
-            HtmlParser parser = new HtmlParser();
             using (IJavaScriptEnginePool enginePool = context.GetJavaScriptEnginePool(x =>
             {
                 if (dictionary.ContainsKey("HighlightJsFile"))
@@ -61,7 +60,7 @@ namespace Statiq.Highlight
                 }
             }))
             {
-                AngleSharp.Dom.IDocument htmlDocument = parser.ParseDocument(string.Empty);
+                AngleSharp.Dom.IDocument htmlDocument = HtmlHelper.DefaultHtmlParser.ParseDocument(string.Empty);
                 AngleSharp.Dom.IElement element = htmlDocument.CreateElement(dictionary.GetString("Element", "code"));
                 element.InnerHtml = content.Trim();
                 if (dictionary.ContainsKey("Language"))

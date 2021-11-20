@@ -4,17 +4,13 @@ using System.Threading.Tasks;
 using AngleSharp.Dom;
 using Statiq.Common;
 
-namespace Statiq.Html
+namespace Statiq.Core
 {
     /// <summary>
-    /// Converts all relative links to absolute using the "Host" and other settings values.
+    /// Converts all relative links to root-relative using the destination path of the containing document.
     /// </summary>
-    /// <remarks>
-    /// This module is particularly useful when presenting content for external consumption such
-    /// as with the <c>GenerateFeeds</c> module or for use in an API.
-    /// </remarks>
     /// <category>Content</category>
-    public class MakeLinksAbsolute : ParallelModule
+    public class MakeLinksRootRelative : ParallelModule
     {
         protected override Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context) =>
             ProcessHtml.ProcessElementsAsync(
@@ -24,18 +20,20 @@ namespace Statiq.Html
                 false,
                 (d, c, e, m) =>
                 {
-                    MakeLinkAbsolute(e, "href", d, context);
-                    MakeLinkAbsolute(e, "src", d, context);
+                    MakeLinkRootRelative(e, "href", d, context);
+                    MakeLinkRootRelative(e, "src", d, context);
                 });
 
-        private static void MakeLinkAbsolute(IElement element, string attribute, Common.IDocument document, IExecutionContext context)
+        private static void MakeLinkRootRelative(IElement element, string attribute, Common.IDocument document, IExecutionContext context)
         {
             string value = element.GetAttribute(attribute);
             if (!string.IsNullOrEmpty(value)
                 && Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out Uri uri)
-                && !uri.IsAbsoluteUri)
+                && !uri.IsAbsoluteUri
+                && !document.Destination.IsNullOrEmpty
+                && !document.Destination.Parent.IsNullOrEmpty)
             {
-                element.SetAttribute(attribute, context.GetLink(document.Destination.Parent.Combine(value), true));
+                element.SetAttribute(attribute, context.GetLink(document.Destination.Parent.Combine(value)));
             }
         }
     }

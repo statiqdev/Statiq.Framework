@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AngleSharp.Dom;
-using AngleSharp.Html;
 using AngleSharp.Html.Dom;
-using AngleSharp.Html.Parser;
 using Statiq.Common;
 
-namespace Statiq.Html
+namespace Statiq.Core
 {
     /// <summary>
     /// Queries HTML content of the input documents and adds a metadata value that contains it's headings.
@@ -22,9 +19,9 @@ namespace Statiq.Html
     /// is also set as the content of each document. The output of this module is the input documents with the additional
     /// metadata value containing the documents that present each heading.
     /// </remarks>
-    /// <metadata cref="HtmlKeys.Headings" usage="Output"/>
-    /// <metadata cref="HtmlKeys.Level" usage="Output"/>
-    /// <metadata cref="HtmlKeys.HeadingId" usage="Output"/>
+    /// <metadata cref="Keys.Headings" usage="Output"/>
+    /// <metadata cref="Keys.Level" usage="Output"/>
+    /// <metadata cref="Keys.HeadingId" usage="Output"/>
     /// <metadata cref="Keys.Children" usage="Output">
     /// The child heading documents of the current heading document.
     /// </metadata>
@@ -32,9 +29,9 @@ namespace Statiq.Html
     public class GatherHeadings : ParallelConfigModule<int>
     {
         private bool _nesting;
-        private string _metadataKey = HtmlKeys.Headings;
-        private string _levelKey = HtmlKeys.Level;
-        private string _idKey = HtmlKeys.HeadingId;
+        private string _metadataKey = Keys.Headings;
+        private string _levelKey = Keys.Level;
+        private string _idKey = Keys.HeadingId;
         private string _childrenKey = Keys.Children;
         private string _headingKey;
 
@@ -134,7 +131,7 @@ namespace Statiq.Html
             }
 
             // Parse the HTML content
-            IHtmlDocument htmlDocument = await HtmlHelper.ParseHtmlAsync(input, false);
+            IHtmlDocument htmlDocument = await input.ParseHtmlAsync(false);
             if (htmlDocument is null)
             {
                 return input.Yield();

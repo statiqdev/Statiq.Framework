@@ -5,7 +5,7 @@ using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
 
-namespace Statiq.Html.Tests
+namespace Statiq.Core.Tests.Modules.Contents
 {
     [TestFixture]
     public class MakeLinksAbsoluteFixture : BaseFixture
