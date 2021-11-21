@@ -1,6 +1,12 @@
 # 1.0.0-beta.50
 
-- Added `WithAutoHighlightUnspecifiedLanguage()` to the `HighlightCode` module to avoid time-consuming generation-time code highlighting when the language is unknown (#210, thanks @Turnerj). 
+- **Breaking change:** Removed `Statiq.Html` extension and moved all functionality into either `Statiq.Common` (helpers and utilities) or `Statiq.Core` (modules). All modules are still available through `Statiq.Core` and you should remove references to `Statiq.Html`.
+- Added a reference to `AngleSharp` in `Statiq.Common`.
+- Added all keys from `HtmlKeys` to `Keys` in `Statiq.Common` but kept `HtmlKeys` and marked it obsolete for backwards-compatibility.
+- Changed the behavior of HTML parsing and formatting (I.e. both reading and writing) to preserve any originally encoded character references (#213).
+- Added a new `IExecutionContext.GetContentProvider()` extension that accepts an AngleSharp `IMarkupFormattable` (such as `IHtmlDocument`).
+- Added `WithAutoHighlightUnspecifiedLanguage()` to the `HighlightCode` module to avoid time-consuming generation-time code highlighting when the language is unknown (#210, thanks @Turnerj).
+- Changed the `HighlightShortcode` module to add a `<pre>` element when there are new lines in the content or when specified using a new `AddPre` shortcode argument (#215).
 
 # 1.0.0-beta.49
 

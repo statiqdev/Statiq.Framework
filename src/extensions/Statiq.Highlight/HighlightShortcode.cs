@@ -37,22 +37,32 @@ namespace Statiq.Highlight
     /// </example>
     /// <parameter name="Language">The highlight.js language name to highlight as (for example, "csharp").</parameter>
     /// <parameter name="Element">An element to wrap the highlighted content in. If omitted, <c>&lt;code&gt;</c> will be used.</parameter>
-    /// <parameter name="HighlightJsFile">Sets the file path to a custom highlight.js file. If not set the embeded version will be used.</parameter>
+    /// <parameter name="HighlightJsFile">Sets the file path to a custom highlight.js file. If not set the embedded version will be used.</parameter>
+    /// <parameter name="AddPre">
+    /// Indicates whether a <c>&lt;pre&gt;</c> element should be added around the entire result. The default behavior is to add one
+    /// if the content contains new lines and not if it doesn't
+    /// </parameter>
     public class HighlightShortcode : SyncShortcode
     {
+        private const string Language = nameof(Language);
+        private const string Element = nameof(Element);
+        private const string HighlightJsFile = nameof(HighlightJsFile);
+        private const string AddPre = nameof(AddPre);
+
         /// <inheritdoc />
         public override ShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
             IMetadataDictionary dictionary = args.ToDictionary(
-                "Language",
-                "Element",
-                "HighlightJsFile");
+                Language,
+                Element,
+                HighlightJsFile,
+                AddPre);
 
             using (IJavaScriptEnginePool enginePool = context.GetJavaScriptEnginePool(x =>
             {
-                if (dictionary.ContainsKey("HighlightJsFile"))
+                if (dictionary.ContainsKey(HighlightJsFile))
                 {
-                    x.ExecuteFile(dictionary.GetString("HighlightJsFile"));
+                    x.ExecuteFile(dictionary.GetString(HighlightJsFile));
                 }
                 else
                 {
@@ -61,13 +71,17 @@ namespace Statiq.Highlight
             }))
             {
                 AngleSharp.Dom.IDocument htmlDocument = HtmlHelper.DefaultHtmlParser.ParseDocument(string.Empty);
-                AngleSharp.Dom.IElement element = htmlDocument.CreateElement(dictionary.GetString("Element", "code"));
+                AngleSharp.Dom.IElement element = htmlDocument.CreateElement(dictionary.GetString(Element, "code"));
                 element.InnerHtml = content.Trim();
-                if (dictionary.ContainsKey("Language"))
+                if (dictionary.ContainsKey(Language))
                 {
                     element.SetAttribute("class", $"language-{dictionary.GetString("Language")}");
                 }
                 HighlightCode.HighlightElement(enginePool, element);
+                if (dictionary.GetBool(AddPre) || (!dictionary.ContainsKey(AddPre) && content.Contains('\n')))
+                {
+                    return $"<pre>{element.OuterHtml}</pre>";
+                }
                 return element.OuterHtml;
             }
         }
