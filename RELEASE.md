@@ -1,3 +1,5 @@
+# 1.0.0-beta.52
+
 # 1.0.0-beta.51
 
 - Fixed a bug with backwards compatability of the `HtmlKeys` file not being in the original namespace (#973).
