@@ -1,6 +1,8 @@
 ﻿using System;
+using Statiq.Common;
 
-namespace Statiq.Common
+// Use the old Statiq.Html namespace for backwards-compatibility
+namespace Statiq.Html
 {
     /// <summary>
     /// Metadata keys for use with the various HTML processing modules. This class

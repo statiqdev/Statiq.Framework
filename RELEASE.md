@@ -1,5 +1,7 @@
 # 1.0.0-beta.51
 
+- Fixed a bug with backwards compatability of the `HtmlKeys` file not being in the original namespace (#973).
+
 # 1.0.0-beta.50
 
 - **Breaking change:** Removed `Statiq.Html` extension and moved all functionality into either `Statiq.Common` (helpers and utilities) or `Statiq.Core` (modules). All modules are still available through `Statiq.Core` and you should remove references to `Statiq.Html`.
