@@ -5,6 +5,9 @@ namespace Statiq.Common
 {
     public interface IDocumentFactory
     {
+        void SetDefaultDocumentType<TDocument>()
+            where TDocument : FactoryDocument, IDocument, new();
+
         IDocument CreateDocument(
             NormalizedPath source,
             NormalizedPath destination,

@@ -46,13 +46,13 @@ namespace Statiq.Testing
         public CancellationToken CancellationToken { get; set; }
 
         /// <inheritdoc />
-        public ApplicationState ApplicationState { get; set; }
+        public IApplicationState ApplicationState { get; set; }
 
         /// <inheritdoc />
         public ClassCatalog ClassCatalog { get; } = new ClassCatalog();  // Don't initially populate in case we don't actually need it
 
         /// <inheritdoc />
-        IReadOnlyApplicationState IExecutionState.ApplicationState => ApplicationState;
+        IApplicationState IExecutionState.ApplicationState => ApplicationState;
 
         /// <inheritdoc />
         public Settings Settings { get; set; } = new Settings();

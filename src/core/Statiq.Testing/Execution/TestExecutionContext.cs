@@ -144,14 +144,14 @@ namespace Statiq.Testing
                 (docs, patterns) => docs.FilterDestinations(patterns));
 
         /// <inheritdoc/>
-        public ApplicationState ApplicationState
+        public IApplicationState ApplicationState
         {
             get => Engine.ApplicationState;
             set => Engine.ApplicationState = value;
         }
 
         /// <inheritdoc/>
-        IReadOnlyApplicationState IExecutionState.ApplicationState => ApplicationState;
+        IApplicationState IExecutionState.ApplicationState => ApplicationState;
 
         /// <inheritdoc/>
         public ClassCatalog ClassCatalog => Engine.ClassCatalog;

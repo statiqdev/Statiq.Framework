@@ -6,7 +6,7 @@ namespace Statiq.Common
     /// <summary>
     /// Represents the state of the application when it was run.
     /// </summary>
-    public class ApplicationState : IReadOnlyApplicationState
+    public class ApplicationState : IApplicationState
     {
         public ApplicationState(string[] arguments, string commandName, string input)
         {

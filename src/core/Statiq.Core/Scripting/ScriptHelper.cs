@@ -16,7 +16,7 @@ using Statiq.Common;
 
 namespace Statiq.Core
 {
-    internal class ScriptHelper : IScriptHelper
+    public class ScriptHelper : IScriptHelper
     {
         public const string AssemblyName = "ScriptAssembly";
         public const string ScriptClassName = "Script";
@@ -34,7 +34,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
-        public async Task<object> EvaluateAsync(string code, IMetadata metadata)
+        public virtual async Task<object> EvaluateAsync(string code, IMetadata metadata)
         {
             ScriptFactoryBase scriptFactory = _cachedScriptFactories.GetOrAdd(
                 code,
@@ -58,7 +58,7 @@ namespace Statiq.Core
         /// </remarks>
         /// <param name="rawAssembly">The raw assembly bytes.</param>
         /// <returns>The script factory or <c>null</c> if a script factory was not found in the assembly.</returns>
-        internal static Type LoadFactory(byte[] rawAssembly)
+        private static Type LoadFactory(byte[] rawAssembly)
         {
             rawAssembly.ThrowIfNull(nameof(rawAssembly));
             Assembly assembly = Assembly.Load(rawAssembly);
@@ -70,7 +70,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="code">The code to compile.</param>
         /// <returns>Raw assembly bytes.</returns>
-        internal byte[] Compile(string code)
+        protected virtual byte[] Compile(string code)
         {
             code.ThrowIfNull(nameof(code));
 
@@ -152,7 +152,7 @@ namespace Statiq.Core
             }
         }
 
-        public IEnumerable<Assembly> GetScriptReferences()
+        public virtual IEnumerable<Assembly> GetScriptReferences()
         {
             CompilationReferences references = new CompilationReferences();
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -169,7 +169,7 @@ namespace Statiq.Core
             return references;
         }
 
-        public IEnumerable<string> GetScriptNamespaces() => GetScriptNamespaces(_executionState);
+        public virtual IEnumerable<string> GetScriptNamespaces() => GetScriptNamespaces(_executionState);
 
         private static IEnumerable<string> GetScriptNamespaces(IExecutionState executionState)
         {

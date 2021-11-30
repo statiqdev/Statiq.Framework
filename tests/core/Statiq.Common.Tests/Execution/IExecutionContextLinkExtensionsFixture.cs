@@ -18,8 +18,8 @@ namespace Statiq.Common.Tests.Execution
             [TestCase("foo/bar", true, "http://domain.com/foo/bar")]
             [TestCase("/foo/bar", false, "/foo/bar")]
             [TestCase("/foo/bar", true, "http://domain.com/foo/bar")]
-            [TestCase("//foo/bar", false, "/foo/bar")]
-            [TestCase("//foo/bar", true, "http://domain.com/foo/bar")]
+            [TestCase("//foo/bar", false, "//foo/bar")]
+            [TestCase("//foo/bar", true, "http://domain.com//foo/bar")]
             public void UsesAbsoluteLinkIfProvided(string value, bool includeHost, string expected)
             {
                 // Given

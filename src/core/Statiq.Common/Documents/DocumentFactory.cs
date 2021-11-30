@@ -8,7 +8,7 @@ using Statiq.Common;
 
 namespace Statiq.Common
 {
-    internal class DocumentFactory : IDocumentFactory
+    public class DocumentFactory : IDocumentFactory
     {
         private readonly IExecutionState _executionState;
         private readonly IReadOnlySettings _settings;
@@ -50,11 +50,11 @@ namespace Statiq.Common
                 new TDocument().Initialize(settings, source, destination, metadata, contentProvider);
         }
 
-        internal void SetDefaultDocumentType<TDocument>()
+        public virtual void SetDefaultDocumentType<TDocument>()
             where TDocument : FactoryDocument, IDocument, new() =>
             _defaultFactory = Factory<TDocument>.Instance;
 
-        public IDocument CreateDocument(
+        public virtual IDocument CreateDocument(
             NormalizedPath source,
             NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,
@@ -66,7 +66,7 @@ namespace Statiq.Common
                 new Metadata(_executionState, items),
                 contentProvider);
 
-        public TDocument CreateDocument<TDocument>(
+        public virtual TDocument CreateDocument<TDocument>(
             NormalizedPath source,
             NormalizedPath destination,
             IEnumerable<KeyValuePair<string, object>> items,

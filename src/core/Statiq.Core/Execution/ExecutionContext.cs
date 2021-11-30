@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -100,7 +99,7 @@ namespace Statiq.Core
         public IReadOnlyShortcodeCollection Shortcodes => _contextData.Engine.Shortcodes;
 
         /// <inheritdoc/>
-        public IReadOnlyApplicationState ApplicationState => _contextData.Engine.ApplicationState;
+        public IApplicationState ApplicationState => _contextData.Engine.ApplicationState;
 
         /// <inheritdoc/>
         public ClassCatalog ClassCatalog => _contextData.Engine.ClassCatalog;
@@ -169,6 +168,9 @@ namespace Statiq.Core
             _contextData.Engine.GetJavaScriptEnginePool(initializer, startEngines, maxEngines, maxUsagesPerEngine, engineTimeout);
 
         // IDocumentFactory
+
+        void IDocumentFactory.SetDefaultDocumentType<TDocument>() =>
+            throw new NotSupportedException("Cannot change default document type during execution");
 
         /// <inheritdoc />
         public IDocument CreateDocument(

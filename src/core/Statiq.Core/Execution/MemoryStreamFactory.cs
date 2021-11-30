@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// Forwards calls to an underlying <see cref="RecyclableMemoryStreamManager"/>
     /// so that Statiq.Common doesn't have to maintain a reference to it.
     /// </summary>
-    internal class MemoryStreamFactory : IMemoryStreamFactory
+    public class MemoryStreamFactory : IMemoryStreamFactory
     {
         private const int BlockSize = 16384;
 
@@ -22,17 +22,17 @@ namespace Statiq.Core
                 MaximumFreeSmallPoolBytes = BlockSize * 32768L * 2, // 1 GB
             };
 
-        public MemoryStream GetStream() => _manager.GetStream();
+        public virtual MemoryStream GetStream() => _manager.GetStream();
 
-        public MemoryStream GetStream(int requiredSize) => _manager.GetStream(null, requiredSize);
+        public virtual MemoryStream GetStream(int requiredSize) => _manager.GetStream(null, requiredSize);
 
-        public MemoryStream GetStream(int requiredSize, bool asContiguousBuffer) =>
+        public virtual MemoryStream GetStream(int requiredSize, bool asContiguousBuffer) =>
             _manager.GetStream(null, requiredSize, asContiguousBuffer);
 
-        public MemoryStream GetStream(byte[] buffer, int offset, int count) =>
+        public virtual MemoryStream GetStream(byte[] buffer, int offset, int count) =>
             _manager.GetStream(null, buffer, offset, count);
 
-        public MemoryStream GetStream(string content)
+        public virtual MemoryStream GetStream(string content)
         {
             if (string.IsNullOrEmpty(content))
             {

@@ -34,7 +34,7 @@ namespace Statiq.Common
 
         public CancellationToken CancellationToken => ExecutionState.CancellationToken;
 
-        public IReadOnlyApplicationState ApplicationState => ExecutionState.ApplicationState;
+        public IApplicationState ApplicationState => ExecutionState.ApplicationState;
 
         public ClassCatalog ClassCatalog => ExecutionState.ClassCatalog;
 
@@ -67,6 +67,10 @@ namespace Statiq.Common
         public IReadOnlyPipelineCollection ExecutingPipelines => ExecutionState.ExecutingPipelines;
 
         public ILinkGenerator LinkGenerator => ExecutionState.LinkGenerator;
+
+        public void SetDefaultDocumentType<TDocument>()
+            where TDocument : FactoryDocument, IDocument, new() =>
+            ExecutionState.SetDefaultDocumentType<TDocument>();
 
         public IDocument CreateDocument(NormalizedPath source, NormalizedPath destination, IEnumerable<KeyValuePair<string, object>> items, IContentProvider contentProvider = null) =>
             ExecutionState.CreateDocument(source, destination, items, contentProvider);

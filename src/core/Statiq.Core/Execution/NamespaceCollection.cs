@@ -7,7 +7,7 @@ using Statiq.Common;
 
 namespace Statiq.Core
 {
-    internal class NamespaceCollection : INamespacesCollection
+    public class NamespaceCollection : INamespacesCollection
     {
         private readonly ConcurrentHashSet<string> _namespaces = new ConcurrentHashSet<string>();
 
@@ -32,13 +32,13 @@ namespace Statiq.Core
                 .Distinct());
         }
 
-        public bool Add(string ns)
+        public virtual bool Add(string ns)
         {
             ns.ThrowIfNullOrWhiteSpace(nameof(ns));
             return _namespaces.Add(ns);
         }
 
-        public void AddRange(IEnumerable<string> namespaces)
+        public virtual void AddRange(IEnumerable<string> namespaces)
         {
             // Iterate manually so we can throw for null or white space
             foreach (string ns in namespaces)
@@ -47,13 +47,13 @@ namespace Statiq.Core
             }
         }
 
-        public int Count => _namespaces.Count;
+        public virtual int Count => _namespaces.Count;
 
-        public IEnumerator<string> GetEnumerator() => _namespaces.GetEnumerator();
+        public virtual IEnumerator<string> GetEnumerator() => _namespaces.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public Task<int> GetCacheCodeAsync()
+        public virtual Task<int> GetCacheCodeAsync()
         {
             if (_cacheCode == 0)
             {

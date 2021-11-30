@@ -1,5 +1,7 @@
 ﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using Statiq.Common;
 using Statiq.Testing;
 
 namespace Statiq.Core.Tests.Execution
@@ -13,10 +15,9 @@ namespace Statiq.Core.Tests.Execution
             public void ThrowsForDuplicateName()
             {
                 // Given
-                Engine engine = new Engine
-                {
-                    FileCleaner = new TestFileCleaner()
-                };
+                ServiceCollection services = new ServiceCollection();
+                services.AddSingleton<IFileCleaner>(new TestFileCleaner());
+                Engine engine = new Engine(services);
                 PipelineCollection pipelines = new PipelineCollection(engine);
                 pipelines.Add("Foo");
 
@@ -28,10 +29,9 @@ namespace Statiq.Core.Tests.Execution
             public void ThrowsForDuplicateNameWithDifferentCase()
             {
                 // Given
-                Engine engine = new Engine
-                {
-                    FileCleaner = new TestFileCleaner()
-                };
+                ServiceCollection services = new ServiceCollection();
+                services.AddSingleton<IFileCleaner>(new TestFileCleaner());
+                Engine engine = new Engine(services);
                 PipelineCollection pipelines = new PipelineCollection(engine);
                 pipelines.Add("Foo");
 
@@ -46,10 +46,9 @@ namespace Statiq.Core.Tests.Execution
             public void ReturnsTrueForDifferentCase()
             {
                 // Given
-                Engine engine = new Engine
-                {
-                    FileCleaner = new TestFileCleaner()
-                };
+                ServiceCollection services = new ServiceCollection();
+                services.AddSingleton<IFileCleaner>(new TestFileCleaner());
+                Engine engine = new Engine(services);
                 PipelineCollection pipelines = new PipelineCollection(engine);
                 pipelines.Add("Test");
 

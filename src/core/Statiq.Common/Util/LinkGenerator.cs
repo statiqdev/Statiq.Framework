@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Statiq.Common;
 
@@ -8,6 +9,9 @@ namespace Statiq.Common
     /// <summary>
     /// Helps generate normalized links.
     /// </summary>
+    /// <remarks>
+    /// Override this class and register your implementation to use alternate link generation logic.
+    /// </remarks>
     public class LinkGenerator : ILinkGenerator
     {
         // Cache link generator results
@@ -16,11 +20,11 @@ namespace Statiq.Common
 
         private class GetLinkCacheKey : IEquatable<GetLinkCacheKey>
         {
-            public NormalizedPath Path { get; set; }
+            public string Path { get; set; }
 
             public string Host { get; set; }
 
-            public NormalizedPath Root { get; set; }
+            public string Root { get; set; }
 
             public string Scheme { get; set; }
 
@@ -44,9 +48,9 @@ namespace Statiq.Common
                     return true;
                 }
 
-                return Path.Equals(other.Path)
+                return Path == other.Path
                    && Host == other.Host
-                   && Root.Equals(other.Root)
+                   && Root == other.Root
                    && Scheme == other.Scheme
                    && Equals(HidePages, other.HidePages)
                    && Equals(HideExtensions, other.HideExtensions)
@@ -79,10 +83,10 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public string GetLink(
-            NormalizedPath path,
+        public virtual string GetLink(
+            string path,
             string host,
-            in NormalizedPath root,
+            string root,
             string scheme,
             string[] hidePages,
             string[] hideExtensions,
@@ -111,100 +115,109 @@ namespace Statiq.Common
                     key.MakeAbsolute));
 
         private static string GetLinkImplementation(
-            NormalizedPath path,
+            string path,
             string host,
-            in NormalizedPath root,
+            string root,
             string scheme,
             string[] hidePages,
             string[] hideExtensions,
             bool lowercase,
             bool makeAbsolute)
         {
-            string link = string.Empty;
-            if (!path.IsNull)
+            if (path is object)
             {
+                string fileName = Path.GetFileName(path);
+
                 // Remove index pages
-                if (hidePages is object && path.FullPath != NormalizedPath.Slash
-                    && hidePages.Any(x => x is object && path.FileName.Equals(x)))
+                if (hidePages is object && path != "/" && path != "\\"
+                    && hidePages.Any(x => x is object && fileName.Equals(x)))
                 {
-                    path = path.Parent;
+                    path = Path.GetDirectoryName(path);
+
+                    // We don't need to worry about hiding extensions if we crawled up
+                    hideExtensions = null;
                 }
 
                 // Special case if this is relative and we removed the entire path
-                if (!makeAbsolute && path.IsNullOrEmpty)
+                if (!makeAbsolute && string.IsNullOrEmpty(path))
                 {
                     // The "." indicates to a browser to link to the current directory, which is what we want
                     return ".";
                 }
 
                 // Hide extensions
-                if (hideExtensions is object
-                    && (hideExtensions.Length == 0
+                if (hideExtensions is object)
+                {
+                    string extension = Path.GetExtension(path);
+                    if (!string.IsNullOrEmpty(extension)
+                        && (hideExtensions.Length == 0
                         || hideExtensions
                             .Where(x => x is object)
-                            .Select(x => x.StartsWith(NormalizedPath.Dot) ? x : NormalizedPath.Dot + x)
-                            .Contains(path.Extension)))
-                {
-                    path = path.ChangeExtension(null);
+                            .Select(x => x.StartsWith(".") ? x : "." + x)
+                            .Contains(extension)))
+                    {
+                        path = Path.ChangeExtension(path, null);
+                    }
                 }
-
-                // Collapse the link to a string
-                link = path.FullPath;
 
                 // Prepend a slash, but only if we want to make the path absolute
                 if (makeAbsolute)
                 {
-                    if (string.IsNullOrWhiteSpace(link) || link == NormalizedPath.Dot)
+                    if (string.IsNullOrWhiteSpace(path) || path == ".")
                     {
-                        link = NormalizedPath.Slash;
+                        path = "/";
                     }
-                    if (!link.StartsWith(NormalizedPath.Slash))
+                    if (!path.StartsWith("/") && !path.StartsWith("\\"))
                     {
-                        link = NormalizedPath.Slash + link;
+                        path = "/" + path;
                     }
                 }
             }
+            else
+            {
+                path = string.Empty;
+            }
 
             // Extract the fragment
-            int fragmentIndex = link.IndexOf('#');
+            int fragmentIndex = path.IndexOf('#');
             string fragment = null;
             if (fragmentIndex > -1)
             {
-                fragment = link.Substring(fragmentIndex);
-                link = link.Substring(0, fragmentIndex);
+                fragment = path.Substring(fragmentIndex);
+                path = path.Substring(0, fragmentIndex);
             }
 
             // Extract the query
-            int queryIndex = link.IndexOf('?');
+            int queryIndex = path.IndexOf('?');
             string query = null;
             if (queryIndex > -1)
             {
-                query = link.Substring(queryIndex);
-                link = link.Substring(0, queryIndex);
+                query = path.Substring(queryIndex);
+                path = path.Substring(0, queryIndex);
             }
 
             // If we're not making it absolute and it doesn't start with a slash, make sure to remove the slash when we're done,
             // otherwise collapse with the root path and combine them
             bool makeRelative = false;
-            if (!makeAbsolute && (link.Length == 0 || link[0] != NormalizedPath.Slash[0]))
+            if (!makeAbsolute && (path.Length == 0 || (path[0] != '/' && path[0] != '\\')))
             {
                 makeRelative = true;
             }
             else
             {
-                string rootLink = root.IsNull ? string.Empty : root.FullPath;
-                if (rootLink.EndsWith(NormalizedPath.Slash))
+                string rootLink = root ?? string.Empty;
+                if (rootLink.EndsWith("/") || rootLink.EndsWith("\\"))
                 {
                     rootLink = rootLink.Substring(0, rootLink.Length - 1);
                 }
-                link = rootLink + link;
+                path = rootLink + path;
             }
 
             // Add the host and convert to URI for escaping
             UriBuilder builder = new UriBuilder
             {
                 Scheme = scheme ?? "http",
-                Path = link,
+                Path = path,
                 Query = query,
                 Fragment = fragment
             };
@@ -225,7 +238,7 @@ namespace Statiq.Common
                 renderedLink = renderedLink.Substring(1);
 
                 // If the link started with a dot, add it back in
-                if (link.Length > 0 && link[0] == '.' && (renderedLink.Length == 0 || renderedLink[0] != '.'))
+                if (path.Length > 0 && path[0] == '.' && (renderedLink.Length == 0 || renderedLink[0] != '.'))
                 {
                     renderedLink = "." + renderedLink;
                 }
@@ -235,7 +248,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public bool TryGetAbsoluteHttpUri(string str, out string absoluteUri)
+        public virtual bool TryGetAbsoluteHttpUri(string str, out string absoluteUri)
         {
             if (!string.IsNullOrWhiteSpace(str))
             {
@@ -253,7 +266,7 @@ namespace Statiq.Common
         }
 
         /// <inheritdoc />
-        public string AddQueryAndFragment(string path, string queryAndFragment)
+        public virtual string AddQueryAndFragment(string path, string queryAndFragment)
         {
             if (!string.IsNullOrEmpty(queryAndFragment))
             {
@@ -263,21 +276,6 @@ namespace Statiq.Common
                     return path + queryAndFragment;
                 }
                 return path + "?" + queryAndFragment;
-            }
-            return path;
-        }
-
-        /// <inheritdoc />
-        public NormalizedPath AddQueryAndFragment(NormalizedPath path, string queryAndFragment)
-        {
-            if (!string.IsNullOrEmpty(queryAndFragment))
-            {
-                // If we have a query and fragment, make sure it starts with ? or #
-                if (queryAndFragment[0] == '?' || queryAndFragment[0] == '#')
-                {
-                    return new NormalizedPath(path.FullPath + queryAndFragment);
-                }
-                return new NormalizedPath(path.FullPath + "?" + queryAndFragment);
             }
             return path;
         }

@@ -38,11 +38,10 @@ namespace Statiq.Common.Tests.Util
             public void ShouldReturnLinkForFilePath(string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -88,11 +87,10 @@ namespace Statiq.Common.Tests.Util
             public void ShouldJoinHostAndRootForFilePath(string host, string root, string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -113,14 +111,15 @@ namespace Statiq.Common.Tests.Util
             [TestCase("index.html", false, ".")] // special case when we remove the index page of a peer relative path
             [TestCase("/foo/bar/baz.html", false, "/foo/bar/baz.html")]
             [TestCase("foo/bar/baz.html", false, "foo/bar/baz.html")]
+            [TestCase("/foo/bar.html/index.html", false, "/foo/bar.html")]
+            [TestCase("foo/bar.html/index.html", false, "foo/bar.html")]
             public void ShouldHideIndexPagesForFilePath(string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, null, null, null, new[] { "index.html" }, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, new[] { "index.html" }, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -160,11 +159,10 @@ namespace Statiq.Common.Tests.Util
             public void ShouldHideExtensionsForFilePath(string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, null, null, null, null, Array.Empty<string>(), false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, Array.Empty<string>(), false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -188,11 +186,10 @@ namespace Statiq.Common.Tests.Util
             public void ShouldHideSpecificExtensionsForFilePath(string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, null, null, null, null, new[] { "html", ".htm" }, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, new[] { "html", ".htm" }, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -216,11 +213,48 @@ namespace Statiq.Common.Tests.Util
             public void ShouldJoinHostAndRootForDirectoryPath(string host, string root, string path, string expected)
             {
                 // Given
-                NormalizedPath directoryPath = path is null ? null : new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(directoryPath, host, root is null ? null : new NormalizedPath(root), null, null, null, false);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false);
+
+                // Then
+                link.ShouldBe(expected);
+            }
+
+            [TestCase(null, "/", "foo/bar/", "/foo/bar/")]
+            [TestCase(null, "/", "/foo/bar/", "/foo/bar/")]
+            [TestCase(null, "/", "/foo/baz/../bar/", "/foo/bar/")]
+            [TestCase(null, null, "/foo/bar/", "/foo/bar/")]
+            [TestCase(null, "baz", "/foo/bar/", "/baz/foo/bar/")]
+            [TestCase(null, "/baz/", "/foo/bar/", "/baz/foo/bar/")]
+            [TestCase("www.google.com", null, "/foo/bar/", "http://www.google.com/foo/bar/")]
+            [TestCase("www.google.com", null, "/foo/bar/", "http://www.google.com/foo/bar/")]
+            [TestCase("www.google.com", "xyz", "/foo/bar/", "http://www.google.com/xyz/foo/bar/")]
+            [TestCase("www.google.com", "/xyz/", "/foo/bar/", "http://www.google.com/xyz/foo/bar/")]
+            [TestCase(null, "baz", "/foo/bar/#fizz", "/baz/foo/bar/#fizz")]
+            [TestCase("www.google.com", "xyz", "/foo/bar/#fizz", "http://www.google.com/xyz/foo/bar/#fizz")]
+            [TestCase(null, "baz", "/foo/bar/#", "/baz/foo/bar/#")]
+            [TestCase("www.google.com", "xyz", "/foo/bar/#", "http://www.google.com/xyz/foo/bar/#")]
+            [TestCase(null, "baz", "/foo/bar/?f=b", "/baz/foo/bar/?f=b")]
+            [TestCase("www.google.com", "xyz", "/foo/bar/?f=b", "http://www.google.com/xyz/foo/bar/?f=b")]
+            [TestCase(null, "baz", "/foo/bar/?f=b#fizz", "/baz/foo/bar/?f=b#fizz")]
+            [TestCase("www.google.com", "xyz", "/foo/bar/?f=b#fizz", "http://www.google.com/xyz/foo/bar/?f=b#fizz")]
+            [TestCase(null, "baz", "/foo/bar/?f=b#", "/baz/foo/bar/?f=b#")]
+            [TestCase("www.google.com", "xyz", "/foo/bar/?f=b#", "http://www.google.com/xyz/foo/bar/?f=b#")]
+            [TestCase(null, "baz", "/foo/bar/?f=b&qw=er", "/baz/foo/bar/?f=b&qw=er")]
+            [TestCase("www.google.com", "xyz", "/foo/bar/?f=b&qw=er", "http://www.google.com/xyz/foo/bar/?f=b&qw=er")]
+            [TestCase(null, "baz", "/foo/bar/?f=b&qw=er#fizz", "/baz/foo/bar/?f=b&qw=er#fizz")]
+            [TestCase("www.google.com", "xyz", "/foo/bar/?f=b&qw=er#fizz", "http://www.google.com/xyz/foo/bar/?f=b&qw=er#fizz")]
+            [TestCase(null, "baz", "/foo/bar/?f=b&qw=er#", "/baz/foo/bar/?f=b&qw=er#")]
+            [TestCase("www.google.com", "xyz", "/foo/bar/?f=b&qw=er#", "http://www.google.com/xyz/foo/bar/?f=b&qw=er#")]
+            public void ShouldPreserveTrailingSlash(string host, string root, string path, string expected)
+            {
+                // Given
+                LinkGenerator linkGenerator = new LinkGenerator();
+
+                // When
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -230,11 +264,11 @@ namespace Statiq.Common.Tests.Util
             public void ShouldUseSpecifiedScheme()
             {
                 // Given
-                NormalizedPath directoryPath = new NormalizedPath("/foo/bar");
+                string path = "/foo/bar";
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(directoryPath, "www.google.com", null, "https", null, null, false);
+                string link = linkGenerator.GetLink(path, "www.google.com", null, "https", null, null, false);
 
                 // Then
                 link.ShouldBe("https://www.google.com/foo/bar");
@@ -244,7 +278,7 @@ namespace Statiq.Common.Tests.Util
             public void SupportsSingleSlash()
             {
                 // Given
-                NormalizedPath path = new NormalizedPath("/");
+                string path = "/";
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
@@ -258,7 +292,7 @@ namespace Statiq.Common.Tests.Util
             public void SupportsSingleSlashWithRoot()
             {
                 // Given
-                NormalizedPath path = new NormalizedPath("/");
+                string path = "/";
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
@@ -272,7 +306,7 @@ namespace Statiq.Common.Tests.Util
             public void SupportsSingleSlashWithHidePages()
             {
                 // Given
-                NormalizedPath path = new NormalizedPath("/");
+                string path = "/";
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
@@ -286,7 +320,7 @@ namespace Statiq.Common.Tests.Util
             public void SupportsSingleSlashWithHideExtensions()
             {
                 // Given
-                NormalizedPath path = new NormalizedPath("/");
+                string path = "/";
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
@@ -300,11 +334,11 @@ namespace Statiq.Common.Tests.Util
             public void ShouldGenerateMixedCaseLinks()
             {
                 // Given
-                NormalizedPath directoryPath = new NormalizedPath("/Foo/Bar");
+                string path = "/Foo/Bar";
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, false);
+                string link = linkGenerator.GetLink(path, "www.google.com", null, "http", null, null, false);
 
                 // Then
                 link.ShouldBe("http://www.google.com/Foo/Bar");
@@ -314,11 +348,11 @@ namespace Statiq.Common.Tests.Util
             public void ShouldGenerateLowercaseLinks()
             {
                 // Given
-                NormalizedPath directoryPath = new NormalizedPath("/Foo/Bar");
+                string path = "/Foo/Bar";
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, true);
+                string link = linkGenerator.GetLink(path, "www.google.com", null, "http", null, null, true);
 
                 // Then
                 link.ShouldBe("http://www.google.com/foo/bar");
@@ -328,11 +362,11 @@ namespace Statiq.Common.Tests.Util
             public void EscapesSpecialCharacters()
             {
                 // Given
-                NormalizedPath directoryPath = new NormalizedPath("/a/b/c%d");
+                string path = "/a/b/c%d";
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, false, true);
+                string link = linkGenerator.GetLink(path, "www.google.com", null, "http", null, null, false, true);
 
                 // Then
                 link.ShouldBe("http://www.google.com/a/b/c%25d");
@@ -342,11 +376,11 @@ namespace Statiq.Common.Tests.Util
             public void EscapesSpecialCharactersForRealtivePath()
             {
                 // Given
-                NormalizedPath directoryPath = new NormalizedPath("a/b/c%d");
+                string path = "a/b/c%d";
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(directoryPath, null, null, null, null, null, false, false);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, false);
 
                 // Then
                 link.ShouldBe("a/b/c%25d");
@@ -356,11 +390,11 @@ namespace Statiq.Common.Tests.Util
             public void ConvertsSlashes()
             {
                 // Given
-                NormalizedPath directoryPath = new NormalizedPath("/a/b/c\\d");
+                string path = "/a/b/c\\d";
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(directoryPath, "www.google.com", null, "http", null, null, true);
+                string link = linkGenerator.GetLink(path, "www.google.com", null, "http", null, null, true);
 
                 // Then
                 link.ShouldBe("http://www.google.com/a/b/c/d");
@@ -392,11 +426,10 @@ namespace Statiq.Common.Tests.Util
             public void FragmentForFilePath(string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -428,11 +461,10 @@ namespace Statiq.Common.Tests.Util
             public void EmptyFragment(string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -478,11 +510,10 @@ namespace Statiq.Common.Tests.Util
             public void FragmentForFilePathWithHostAndRoot(string host, string root, string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -528,11 +559,10 @@ namespace Statiq.Common.Tests.Util
             public void EmptyFragmentForFilePathWithHostAndRoot(string host, string root, string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -564,11 +594,45 @@ namespace Statiq.Common.Tests.Util
             public void QueryForFilePath(string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
+
+                // Then
+                link.ShouldBe(expected);
+            }
+
+            // makeAbsolute = true
+            [TestCase(".?qw=er&f=b", true, "/?qw=er&f=b")]
+            [TestCase("/foo/bar/index.html?qw=er&f=b", true, "/foo/bar/index.html?qw=er&f=b")]
+            [TestCase("/foo/bar/index.htm?qw=er&f=b", true, "/foo/bar/index.htm?qw=er&f=b")]
+            [TestCase("/foo/bar/baz.html?qw=er&f=b", true, "/foo/bar/baz.html?qw=er&f=b")]
+            [TestCase("/index.html?qw=er&f=b", true, "/index.html?qw=er&f=b")]
+            [TestCase("index.html?qw=er&f=b", true, "/index.html?qw=er&f=b")]
+            [TestCase("/foo.html?qw=er&f=b", true, "/foo.html?qw=er&f=b")]
+            [TestCase("foo.html?qw=er&f=b", true, "/foo.html?qw=er&f=b")]
+            [TestCase("C:/bar/foo.html?qw=er&f=b", true, "/C:/bar/foo.html?qw=er&f=b")]
+            [TestCase("C:/bar/foo.html?qw=er&f=b", true, "/C:/bar/foo.html?qw=er&f=b")]
+
+            // makeAbsolute = false
+            [TestCase(".?qw=er&f=b", false, ".?qw=er&f=b")]
+            [TestCase("/foo/bar/index.html?qw=er&f=b", false, "/foo/bar/index.html?qw=er&f=b")]
+            [TestCase("/foo/bar/index.htm?qw=er&f=b", false, "/foo/bar/index.htm?qw=er&f=b")]
+            [TestCase("/foo/bar/baz.html?qw=er&f=b", false, "/foo/bar/baz.html?qw=er&f=b")]
+            [TestCase("/index.html?qw=er&f=b", false, "/index.html?qw=er&f=b")]
+            [TestCase("index.html?qw=er&f=b", false, "index.html?qw=er&f=b")]
+            [TestCase("/foo.html?qw=er&f=b", false, "/foo.html?qw=er&f=b")]
+            [TestCase("foo.html?qw=er&f=b", false, "foo.html?qw=er&f=b")]
+            [TestCase("C:/bar/foo.html?qw=er&f=b", false, "C:/bar/foo.html?qw=er&f=b")]
+            [TestCase("C:/bar/foo.html?qw=er&f=b", false, "C:/bar/foo.html?qw=er&f=b")]
+            public void MultipleQueryForFilePath(string path, bool makeAbsolute, string expected)
+            {
+                // Given
+                LinkGenerator linkGenerator = new LinkGenerator();
+
+                // When
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -614,11 +678,59 @@ namespace Statiq.Common.Tests.Util
             public void QueryForFilePathWithHostAndRoot(string host, string root, string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
+
+                // Then
+                link.ShouldBe(expected);
+            }
+
+            // makeAbsolute = true
+            [TestCase(null, null, "/foo/bar/abc.html?qw=er&f=b", true, "/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase(null, null, "foo/bar/abc.html?qw=er&f=b", true, "/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase(null, "baz", "/foo/bar/abc.html?qw=er&f=b", true, "/baz/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase(null, "baz/", "/foo/bar/abc.html?qw=er&f=b", true, "/baz/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase(null, "baz", "foo/bar/abc.html?qw=er&f=b", true, "/baz/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase(null, "baz/", "foo/bar/abc.html?qw=er&f=b", true, "/baz/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", null, "/foo/bar/abc.html?qw=er&f=b", true, "http://www.google.com/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", null, "/foo/bar/abc.html?qw=er&f=b", true, "http://www.google.com/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", "/xyz", "/foo/bar/abc.html?qw=er&f=b", true, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", "/xyz/", "/foo/bar/abc.html?qw=er&f=b", true, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", null, "foo/bar/abc.html?qw=er&f=b", true, "http://www.google.com/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", null, "foo/bar/abc.html?qw=er&f=b", true, "http://www.google.com/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", "/xyz", "foo/bar/abc.html?qw=er&f=b", true, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", "/xyz/", "foo/bar/abc.html?qw=er&f=b", true, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase(null, "baz", "?qw=er&f=b", true, "/baz/?qw=er&f=b")]
+            [TestCase("www.google.com", null, "?qw=er&f=b", true, "http://www.google.com/?qw=er&f=b")]
+            [TestCase("www.google.com", "/xyz", "?qw=er&f=b", true, "http://www.google.com/xyz/?qw=er&f=b")]
+
+            // makeAbsolute = false
+            [TestCase(null, null, "/foo/bar/abc.html?qw=er&f=b", false, "/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase(null, null, "foo/bar/abc.html?qw=er&f=b", false, "foo/bar/abc.html?qw=er&f=b")]
+            [TestCase(null, "baz", "/foo/bar/abc.html?qw=er&f=b", false, "/baz/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase(null, "baz/", "/foo/bar/abc.html?qw=er&f=b", false, "/baz/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase(null, "baz", "foo/bar/abc.html?qw=er&f=b", false, "foo/bar/abc.html?qw=er&f=b")]
+            [TestCase(null, "baz/", "foo/bar/abc.html?qw=er&f=b", false, "foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", null, "/foo/bar/abc.html?qw=er&f=b", false, "http://www.google.com/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", null, "/foo/bar/abc.html?qw=er&f=b", false, "http://www.google.com/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", "/xyz", "/foo/bar/abc.html?qw=er&f=b", false, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", "/xyz/", "/foo/bar/abc.html?qw=er&f=b", false, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", null, "foo/bar/abc.html?qw=er&f=b", false, "foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", null, "foo/bar/abc.html?qw=er&f=b", false, "foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", "/xyz", "foo/bar/abc.html?qw=er&f=b", false, "foo/bar/abc.html?qw=er&f=b")]
+            [TestCase("www.google.com", "/xyz/", "foo/bar/abc.html?qw=er&f=b", false, "foo/bar/abc.html?qw=er&f=b")]
+            [TestCase(null, "baz", "?qw=er&f=b", false, "?qw=er&f=b")]
+            [TestCase("www.google.com", null, "?qw=er&f=b", false, "?qw=er&f=b")]
+            [TestCase("www.google.com", "/xyz", "?qw=er&f=b", false, "?qw=er&f=b")]
+            public void MultipleQueryForFilePathWithHostAndRoot(string host, string root, string path, bool makeAbsolute, string expected)
+            {
+                // Given
+                LinkGenerator linkGenerator = new LinkGenerator();
+
+                // When
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -650,11 +762,45 @@ namespace Statiq.Common.Tests.Util
             public void QueryAndFragmentForFilePath(string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
+
+                // Then
+                link.ShouldBe(expected);
+            }
+
+            // makeAbsolute = true
+            [TestCase(".?qw=er&f=b#fizz", true, "/?qw=er&f=b#fizz")]
+            [TestCase("/foo/bar/index.html?qw=er&f=b#fizz", true, "/foo/bar/index.html?qw=er&f=b#fizz")]
+            [TestCase("/foo/bar/index.htm?qw=er&f=b#fizz", true, "/foo/bar/index.htm?qw=er&f=b#fizz")]
+            [TestCase("/foo/bar/baz.html?qw=er&f=b#fizz", true, "/foo/bar/baz.html?qw=er&f=b#fizz")]
+            [TestCase("/index.html?qw=er&f=b#fizz", true, "/index.html?qw=er&f=b#fizz")]
+            [TestCase("index.html?qw=er&f=b#fizz", true, "/index.html?qw=er&f=b#fizz")]
+            [TestCase("/foo.html?qw=er&f=b#fizz", true, "/foo.html?qw=er&f=b#fizz")]
+            [TestCase("foo.html?qw=er&f=b#fizz", true, "/foo.html?qw=er&f=b#fizz")]
+            [TestCase("C:/bar/foo.html?qw=er&f=b#fizz", true, "/C:/bar/foo.html?qw=er&f=b#fizz")]
+            [TestCase("C:/bar/foo.html?qw=er&f=b#fizz", true, "/C:/bar/foo.html?qw=er&f=b#fizz")]
+
+            // makeAbsolute = false
+            [TestCase(".?qw=er&f=b#fizz", false, ".?qw=er&f=b#fizz")]
+            [TestCase("/foo/bar/index.html?qw=er&f=b#fizz", false, "/foo/bar/index.html?qw=er&f=b#fizz")]
+            [TestCase("/foo/bar/index.htm?qw=er&f=b#fizz", false, "/foo/bar/index.htm?qw=er&f=b#fizz")]
+            [TestCase("/foo/bar/baz.html?qw=er&f=b#fizz", false, "/foo/bar/baz.html?qw=er&f=b#fizz")]
+            [TestCase("/index.html?qw=er&f=b#fizz", false, "/index.html?qw=er&f=b#fizz")]
+            [TestCase("index.html?qw=er&f=b#fizz", false, "index.html?qw=er&f=b#fizz")]
+            [TestCase("/foo.html?qw=er&f=b#fizz", false, "/foo.html?qw=er&f=b#fizz")]
+            [TestCase("foo.html?qw=er&f=b#fizz", false, "foo.html?qw=er&f=b#fizz")]
+            [TestCase("C:/bar/foo.html?qw=er&f=b#fizz", false, "C:/bar/foo.html?qw=er&f=b#fizz")]
+            [TestCase("C:/bar/foo.html?qw=er&f=b#fizz", false, "C:/bar/foo.html?qw=er&f=b#fizz")]
+            public void MultipleQueryAndFragmentForFilePath(string path, bool makeAbsolute, string expected)
+            {
+                // Given
+                LinkGenerator linkGenerator = new LinkGenerator();
+
+                // When
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -686,11 +832,45 @@ namespace Statiq.Common.Tests.Util
             public void QueryAndEmptyFragment(string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
+
+                // Then
+                link.ShouldBe(expected);
+            }
+
+            // makeAbsolute = true
+            [TestCase(".?qw=er&f=b#", true, "/?qw=er&f=b#")]
+            [TestCase("/foo/bar/index.html?qw=er&f=b#", true, "/foo/bar/index.html?qw=er&f=b#")]
+            [TestCase("/foo/bar/index.htm?qw=er&f=b#", true, "/foo/bar/index.htm?qw=er&f=b#")]
+            [TestCase("/foo/bar/baz.html?qw=er&f=b#", true, "/foo/bar/baz.html?qw=er&f=b#")]
+            [TestCase("/index.html?qw=er&f=b#", true, "/index.html?qw=er&f=b#")]
+            [TestCase("index.html?qw=er&f=b#", true, "/index.html?qw=er&f=b#")]
+            [TestCase("/foo.html?qw=er&f=b#", true, "/foo.html?qw=er&f=b#")]
+            [TestCase("foo.html?qw=er&f=b#", true, "/foo.html?qw=er&f=b#")]
+            [TestCase("C:/bar/foo.html?qw=er&f=b#", true, "/C:/bar/foo.html?qw=er&f=b#")]
+            [TestCase("C:/bar/foo.html?qw=er&f=b#", true, "/C:/bar/foo.html?qw=er&f=b#")]
+
+            // makeAbsolute = false
+            [TestCase(".?qw=er&f=b#", false, ".?qw=er&f=b#")]
+            [TestCase("/foo/bar/index.html?qw=er&f=b#", false, "/foo/bar/index.html?qw=er&f=b#")]
+            [TestCase("/foo/bar/index.htm?qw=er&f=b#", false, "/foo/bar/index.htm?qw=er&f=b#")]
+            [TestCase("/foo/bar/baz.html?qw=er&f=b#", false, "/foo/bar/baz.html?qw=er&f=b#")]
+            [TestCase("/index.html?qw=er&f=b#", false, "/index.html?qw=er&f=b#")]
+            [TestCase("index.html?qw=er&f=b#", false, "index.html?qw=er&f=b#")]
+            [TestCase("/foo.html?qw=er&f=b#", false, "/foo.html?qw=er&f=b#")]
+            [TestCase("foo.html?qw=er&f=b#", false, "foo.html?qw=er&f=b#")]
+            [TestCase("C:/bar/foo.html?qw=er&f=b#", false, "C:/bar/foo.html?qw=er&f=b#")]
+            [TestCase("C:/bar/foo.html?qw=er&f=b#", false, "C:/bar/foo.html?qw=er&f=b#")]
+            public void MultipleQueryAndEmptyFragment(string path, bool makeAbsolute, string expected)
+            {
+                // Given
+                LinkGenerator linkGenerator = new LinkGenerator();
+
+                // When
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -736,11 +916,59 @@ namespace Statiq.Common.Tests.Util
             public void QueryAndFragmentForFilePathWithHostAndRoot(string host, string root, string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
+
+                // Then
+                link.ShouldBe(expected);
+            }
+
+            // makeAbsolute = true
+            [TestCase(null, null, "/foo/bar/abc.html?qw=er&f=b#fizz", true, "/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase(null, null, "foo/bar/abc.html?qw=er&f=b#fizz", true, "/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase(null, "baz", "/foo/bar/abc.html?qw=er&f=b#fizz", true, "/baz/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase(null, "baz/", "/foo/bar/abc.html?qw=er&f=b#fizz", true, "/baz/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase(null, "baz", "foo/bar/abc.html?qw=er&f=b#fizz", true, "/baz/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase(null, "baz/", "foo/bar/abc.html?qw=er&f=b#fizz", true, "/baz/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", null, "/foo/bar/abc.html?qw=er&f=b#fizz", true, "http://www.google.com/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", null, "/foo/bar/abc.html?qw=er&f=b#fizz", true, "http://www.google.com/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", "/xyz", "/foo/bar/abc.html?qw=er&f=b#fizz", true, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", "/xyz/", "/foo/bar/abc.html?qw=er&f=b#fizz", true, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", null, "foo/bar/abc.html?qw=er&f=b#fizz", true, "http://www.google.com/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", null, "foo/bar/abc.html?qw=er&f=b#fizz", true, "http://www.google.com/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", "/xyz", "foo/bar/abc.html?qw=er&f=b#fizz", true, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", "/xyz/", "foo/bar/abc.html?qw=er&f=b#fizz", true, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase(null, "baz", "?qw=er&f=b#fizz", true, "/baz/?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", null, "?qw=er&f=b#fizz", true, "http://www.google.com/?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", "/xyz", "?qw=er&f=b#fizz", true, "http://www.google.com/xyz/?qw=er&f=b#fizz")]
+
+            // makeAbsolute = false
+            [TestCase(null, null, "/foo/bar/abc.html?qw=er&f=b#fizz", false, "/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase(null, null, "foo/bar/abc.html?qw=er&f=b#fizz", false, "foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase(null, "baz", "/foo/bar/abc.html?qw=er&f=b#fizz", false, "/baz/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase(null, "baz/", "/foo/bar/abc.html?qw=er&f=b#fizz", false, "/baz/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase(null, "baz", "foo/bar/abc.html?qw=er&f=b#fizz", false, "foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase(null, "baz/", "foo/bar/abc.html?qw=er&f=b#fizz", false, "foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", null, "/foo/bar/abc.html?qw=er&f=b#fizz", false, "http://www.google.com/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", null, "/foo/bar/abc.html?qw=er&f=b#fizz", false, "http://www.google.com/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", "/xyz", "/foo/bar/abc.html?qw=er&f=b#fizz", false, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", "/xyz/", "/foo/bar/abc.html?qw=er&f=b#fizz", false, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", null, "foo/bar/abc.html?qw=er&f=b#fizz", false, "foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", null, "foo/bar/abc.html?qw=er&f=b#fizz", false, "foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", "/xyz", "foo/bar/abc.html?qw=er&f=b#fizz", false, "foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", "/xyz/", "foo/bar/abc.html?qw=er&f=b#fizz", false, "foo/bar/abc.html?qw=er&f=b#fizz")]
+            [TestCase(null, "baz", "?qw=er&f=b#fizz", false, "?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", null, "?qw=er&f=b#fizz", false, "?qw=er&f=b#fizz")]
+            [TestCase("www.google.com", "/xyz", "?qw=er&f=b#fizz", false, "?qw=er&f=b#fizz")]
+            public void MultipleQueryAndFragmentForFilePathWithHostAndRoot(string host, string root, string path, bool makeAbsolute, string expected)
+            {
+                // Given
+                LinkGenerator linkGenerator = new LinkGenerator();
+
+                // When
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -786,11 +1014,59 @@ namespace Statiq.Common.Tests.Util
             public void QueryAndEmptyFragmentForFilePathWithHostAndRoot(string host, string root, string path, bool makeAbsolute, string expected)
             {
                 // Given
-                NormalizedPath filePath = path is null ? null : new NormalizedPath(path);
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, host, root is null ? null : new NormalizedPath(root), null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
+
+                // Then
+                link.ShouldBe(expected);
+            }
+
+            // makeAbsolute = true
+            [TestCase(null, null, "/foo/bar/abc.html?qw=er&f=b#", true, "/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase(null, null, "foo/bar/abc.html?qw=er&f=b#", true, "/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase(null, "baz", "/foo/bar/abc.html?qw=er&f=b#", true, "/baz/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase(null, "baz/", "/foo/bar/abc.html?qw=er&f=b#", true, "/baz/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase(null, "baz", "foo/bar/abc.html?qw=er&f=b#", true, "/baz/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase(null, "baz/", "foo/bar/abc.html?qw=er&f=b#", true, "/baz/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", null, "/foo/bar/abc.html?qw=er&f=b#", true, "http://www.google.com/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", null, "/foo/bar/abc.html?qw=er&f=b#", true, "http://www.google.com/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", "/xyz", "/foo/bar/abc.html?qw=er&f=b#", true, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", "/xyz/", "/foo/bar/abc.html?qw=er&f=b#", true, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", null, "foo/bar/abc.html?qw=er&f=b#", true, "http://www.google.com/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", null, "foo/bar/abc.html?qw=er&f=b#", true, "http://www.google.com/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", "/xyz", "foo/bar/abc.html?qw=er&f=b#", true, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", "/xyz/", "foo/bar/abc.html?qw=er&f=b#", true, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase(null, "baz", "?qw=er&f=b#", true, "/baz/?qw=er&f=b#")]
+            [TestCase("www.google.com", null, "?qw=er&f=b#", true, "http://www.google.com/?qw=er&f=b#")]
+            [TestCase("www.google.com", "/xyz", "?qw=er&f=b#", true, "http://www.google.com/xyz/?qw=er&f=b#")]
+
+            // makeAbsolute = false
+            [TestCase(null, null, "/foo/bar/abc.html?qw=er&f=b#", false, "/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase(null, null, "foo/bar/abc.html?qw=er&f=b#", false, "foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase(null, "baz", "/foo/bar/abc.html?qw=er&f=b#", false, "/baz/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase(null, "baz/", "/foo/bar/abc.html?qw=er&f=b#", false, "/baz/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase(null, "baz", "foo/bar/abc.html?qw=er&f=b#", false, "foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase(null, "baz/", "foo/bar/abc.html?qw=er&f=b#", false, "foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", null, "/foo/bar/abc.html?qw=er&f=b#", false, "http://www.google.com/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", null, "/foo/bar/abc.html?qw=er&f=b#", false, "http://www.google.com/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", "/xyz", "/foo/bar/abc.html?qw=er&f=b#", false, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", "/xyz/", "/foo/bar/abc.html?qw=er&f=b#", false, "http://www.google.com/xyz/foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", null, "foo/bar/abc.html?qw=er&f=b#", false, "foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", null, "foo/bar/abc.html?qw=er&f=b#", false, "foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", "/xyz", "foo/bar/abc.html?qw=er&f=b#", false, "foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase("www.google.com", "/xyz/", "foo/bar/abc.html?qw=er&f=b#", false, "foo/bar/abc.html?qw=er&f=b#")]
+            [TestCase(null, "baz", "?qw=er&f=b#", false, "?qw=er&f=b#")]
+            [TestCase("www.google.com", null, "?qw=er&f=b#", false, "?qw=er&f=b#")]
+            [TestCase("www.google.com", "/xyz", "?qw=er&f=b#", false, "?qw=er&f=b#")]
+            public void MultipleQueryAndEmptyFragmentForFilePathWithHostAndRoot(string host, string root, string path, bool makeAbsolute, string expected)
+            {
+                // Given
+                LinkGenerator linkGenerator = new LinkGenerator();
+
+                // When
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
 
                 // Then
                 link.ShouldBe(expected);
@@ -800,11 +1076,11 @@ namespace Statiq.Common.Tests.Util
             public void EscapesFragmentIdentifierInRootPath()
             {
                 // Given
-                NormalizedPath filePath = new NormalizedPath("/a/b/c?foo=bar#buzz");
+                string path = "/a/b/c?foo=bar#buzz";
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, "www.google.com", new NormalizedPath("x#y/z/"), null, null, null, false, true);
+                string link = linkGenerator.GetLink(path, "www.google.com", "x#y/z/", null, null, null, false, true);
 
                 // Then
                 link.ShouldBe("http://www.google.com/x%23y/z/a/b/c?foo=bar#buzz");
@@ -814,14 +1090,29 @@ namespace Statiq.Common.Tests.Util
             public void EscapesQueryIdentifierInRootPath()
             {
                 // Given
-                NormalizedPath filePath = new NormalizedPath("/a/b/c?foo=bar#buzz");
+                string path = "/a/b/c?foo=bar#buzz";
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(filePath, "www.google.com", new NormalizedPath("x?y/z/"), null, null, null, false, true);
+                string link = linkGenerator.GetLink(path, "www.google.com", "x?y/z/", null, null, null, false, true);
 
                 // Then
                 link.ShouldBe("http://www.google.com/x%3Fy/z/a/b/c?foo=bar#buzz");
+            }
+
+            // Double slashes in the path are a valid URL
+            [Test]
+            public void DoesNotCollapseDoubleSlashesInPath()
+            {
+                // Given
+                string path = "//a//b/c?foo=bar&fizz=//buzz#bizz";
+                LinkGenerator linkGenerator = new LinkGenerator();
+
+                // When
+                string link = linkGenerator.GetLink(path, "www.google.com", null, null, null, null, false, true);
+
+                // Then
+                link.ShouldBe("http://www.google.com//a//b/c?foo=bar&fizz=//buzz#bizz");
             }
         }
     }

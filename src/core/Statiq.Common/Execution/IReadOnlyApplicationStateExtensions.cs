@@ -11,7 +11,7 @@ namespace Statiq.Common
         /// <param name="applicationState">The application state.</param>
         /// <param name="command">The command.</param>
         /// <returns><c>true</c> if the application was run with the specified command, <c>false</c> otherwise.</returns>
-        public static bool IsCommand(this IReadOnlyApplicationState applicationState, string command) =>
+        public static bool IsCommand(this IApplicationState applicationState, string command) =>
             applicationState.CommandName.Equals(command, StringComparison.OrdinalIgnoreCase);
     }
 }

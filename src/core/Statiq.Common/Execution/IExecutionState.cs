@@ -55,7 +55,7 @@ namespace Statiq.Common
         /// <summary>
         /// Gets the state of the application when it was run.
         /// </summary>
-        IReadOnlyApplicationState ApplicationState { get; }
+        IApplicationState ApplicationState { get; }
 
         /// <summary>
         /// A catalog of all classes in all assemblies loaded by the current application context.

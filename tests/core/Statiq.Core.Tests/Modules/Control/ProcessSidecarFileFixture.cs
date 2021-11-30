@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Statiq.Common;
 using Statiq.Testing;
@@ -16,10 +17,9 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task LoadsSidecarFile()
             {
                 // Given
-                Engine engine = new Engine
-                {
-                    FileCleaner = new TestFileCleaner()
-                };
+                ServiceCollection services = new ServiceCollection();
+                services.AddSingleton<IFileCleaner>(new TestFileCleaner());
+                Engine engine = new Engine(services);
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument[] inputs =
                 {
@@ -44,10 +44,9 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task LoadsCustomSidecarFile()
             {
                 // Given
-                Engine engine = new Engine
-                {
-                    FileCleaner = new TestFileCleaner()
-                };
+                ServiceCollection services = new ServiceCollection();
+                services.AddSingleton<IFileCleaner>(new TestFileCleaner());
+                Engine engine = new Engine(services);
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument[] inputs =
                 {
@@ -72,10 +71,9 @@ namespace Statiq.Core.Tests.Modules.Control
             public async Task ReturnsOriginalDocumentForMissingSidecarFile()
             {
                 // Given
-                Engine engine = new Engine
-                {
-                    FileCleaner = new TestFileCleaner()
-                };
+                ServiceCollection services = new ServiceCollection();
+                services.AddSingleton<IFileCleaner>(new TestFileCleaner());
+                Engine engine = new Engine(services);
                 TestExecutionContext context = GetExecutionContext(engine);
                 TestDocument[] inputs =
                 {

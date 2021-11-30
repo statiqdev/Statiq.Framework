@@ -26,9 +26,9 @@ namespace Statiq.Common
         /// </param>
         /// <returns>A generated link.</returns>
         string GetLink(
-            NormalizedPath path,
+            string path,
             string host,
-            in NormalizedPath root,
+            string root,
             string scheme,
             string[] hidePages,
             string[] hideExtensions,
@@ -53,16 +53,5 @@ namespace Statiq.Common
         /// </param>
         /// <returns>The path or URL with an appended query and/or fragment.</returns>
         string AddQueryAndFragment(string path, string queryAndFragment);
-
-        /// <summary>
-        /// Adds a query and/or fragment to a path.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <param name="queryAndFragment">
-        /// The query and/or fragment to add. If a value is provided for this parameter
-        /// and it does not start with "?" or "#" then it will be assumed a query and a "?" will be prefixed.
-        /// </param>
-        /// <returns>The path with an appended query and/or fragment.</returns>
-        NormalizedPath AddQueryAndFragment(NormalizedPath path, string queryAndFragment);
     }
 }

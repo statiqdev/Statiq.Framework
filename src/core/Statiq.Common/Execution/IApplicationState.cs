@@ -5,7 +5,7 @@ namespace Statiq.Common
     /// <summary>
     /// Represents the state of the application when it was run.
     /// </summary>
-    public interface IReadOnlyApplicationState
+    public interface IApplicationState
     {
         /// <summary>
         /// Gets the raw arguments passed to the application (the first argument is typically the "command").

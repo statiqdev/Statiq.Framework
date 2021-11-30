@@ -16,7 +16,7 @@ namespace Statiq.Core
 
         private bool _firstExecution = true;
 
-        internal FileCleaner(IReadOnlySettings settings, IReadOnlyFileSystem fileSystem, ILogger logger)
+        public FileCleaner(IReadOnlySettings settings, IReadOnlyFileSystem fileSystem, ILogger logger)
         {
             _settings = settings.ThrowIfNull(nameof(fileSystem));
             _fileSystem = fileSystem.ThrowIfNull(nameof(fileSystem));
@@ -24,10 +24,10 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
-        public CleanMode CleanMode => _settings.Get(Keys.CleanMode, CleanMode.Unwritten);
+        public virtual CleanMode CleanMode => _settings.Get(Keys.CleanMode, CleanMode.Unwritten);
 
         /// <inheritdoc/>
-        public async Task CleanBeforeExecutionAsync()
+        public virtual async Task CleanBeforeExecutionAsync()
         {
             _fileSystem.WriteTracker.Reset();
 
@@ -65,7 +65,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
-        public async Task CleanAfterExecutionAsync()
+        public virtual async Task CleanAfterExecutionAsync()
         {
             if (CleanMode == CleanMode.Unwritten)
             {
@@ -82,7 +82,7 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc/>
-        public void CleanDirectory(IDirectory directory, string name = null)
+        public virtual void CleanDirectory(IDirectory directory, string name = null)
         {
             _ = directory.ThrowIfNull(nameof(directory));
 

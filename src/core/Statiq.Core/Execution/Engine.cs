@@ -32,7 +32,6 @@ namespace Statiq.Core
         private readonly IServiceScope _serviceScope;
 
         private FailureLoggerProvider _failureLoggerProvider;
-        private IFileCleaner _fileCleaner;
 
         // Gets initialized on first execute and reset when the pipeline collection changes
         private PipelinePhase[] _phases;
@@ -60,7 +59,7 @@ namespace Statiq.Core
         /// Creates an engine with the specified application state.
         /// </summary>
         /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
-        public Engine(ApplicationState applicationState)
+        public Engine(IApplicationState applicationState)
             : this(applicationState, null, null, null)
         {
         }
@@ -70,7 +69,7 @@ namespace Statiq.Core
         /// </summary>
         /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
-        public Engine(ApplicationState applicationState, IServiceCollection serviceCollection)
+        public Engine(IApplicationState applicationState, IServiceCollection serviceCollection)
             : this(applicationState, serviceCollection, null, null)
         {
         }
@@ -82,7 +81,7 @@ namespace Statiq.Core
         /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
         /// <param name="settings">The collection of settings.</param>
         public Engine(
-            ApplicationState applicationState,
+            IApplicationState applicationState,
             IServiceCollection serviceCollection,
             Settings settings)
             : this(applicationState, serviceCollection, settings, null)
@@ -97,7 +96,7 @@ namespace Statiq.Core
         /// <param name="settings">The collection of settings.</param>
         /// <param name="classCatalog">A class catalog of all assemblies in scope.</param>
         public Engine(
-            ApplicationState applicationState,
+            IApplicationState applicationState,
             IServiceCollection serviceCollection,
             Settings settings,
             ClassCatalog classCatalog)
@@ -106,16 +105,22 @@ namespace Statiq.Core
 
             _pipelines = new PipelineCollection(this);
             AnalyzerCollection = new AnalyzerCollection(this);
-            ApplicationState = applicationState ?? new ApplicationState(null, null, null);
             ClassCatalog = classCatalog ?? new ClassCatalog();
             ClassCatalog.Populate();
-            ScriptHelper = new ScriptHelper(this);
             settings = settings?.WithExecutionState(this) ?? new Settings();
             Settings = settings;
-            _serviceScope = GetServiceScope(serviceCollection, settings);
+            _serviceScope = GetServiceScope(serviceCollection, settings, applicationState);
+
+            // Set local properties to the registered services (or that use registered services)
             Logger = Services.GetRequiredService<ILogger<Engine>>();
-            DocumentFactory = new DocumentFactory(this, Settings);
-            _fileCleaner = new FileCleaner(Settings, FileSystem, Logger);
+            ApplicationState = Services.GetRequiredService<IApplicationState>();
+            LinkGenerator = Services.GetRequiredService<ILinkGenerator>();
+            MemoryStreamFactory = Services.GetRequiredService<IMemoryStreamFactory>();
+            Namespaces = Services.GetRequiredService<INamespacesCollection>();
+            ScriptHelper = Services.GetRequiredService<IScriptHelper>();
+            DocumentFactory = Services.GetRequiredService<IDocumentFactory>();
+            FileCleaner = Services.GetRequiredService<IFileCleaner>();
+
             _diagnosticsTraceListener = new DiagnosticsTraceListener(Logger);
             Trace.Listeners.Add(_diagnosticsTraceListener);
 
@@ -137,24 +142,33 @@ namespace Statiq.Core
         /// </remarks>
         /// <param name="serviceCollection">The service collection to create a scope for.</param>
         /// <param name="configuration">An implementation of the configuration interface (I.e. the settings).</param>
+        /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
         /// <returns>A built service scope (and provider).</returns>
-        private IServiceScope GetServiceScope(IServiceCollection serviceCollection, IConfiguration configuration)
+        private IServiceScope GetServiceScope(
+            IServiceCollection serviceCollection,
+            IConfiguration configuration,
+            IApplicationState applicationState)
         {
             serviceCollection ??= new ServiceCollection();
 
+            // Add native services without trying (I.e. if alternatives are already registered these should fail)
             serviceCollection.AddLogging();
             serviceCollection.AddOptions();
-            serviceCollection.TryAddSingleton<ApplicationState>(ApplicationState);
-            serviceCollection.TryAddSingleton<IReadOnlyEventCollection>(Events);
-            serviceCollection.TryAddSingleton<IReadOnlyFileSystem>(FileSystem);
-            serviceCollection.TryAddSingleton<IReadOnlySettings>(Settings);
-            serviceCollection.TryAddSingleton<IConfiguration>(configuration);
-            serviceCollection.TryAddSingleton<IReadOnlyShortcodeCollection>(Shortcodes);
-            serviceCollection.TryAddSingleton<IMemoryStreamFactory>(MemoryStreamFactory);
-            serviceCollection.TryAddSingleton<INamespacesCollection>(Namespaces);
-            serviceCollection.TryAddSingleton<IScriptHelper>(ScriptHelper);
-            serviceCollection.TryAddSingleton<ClassCatalog>(ClassCatalog);
-            serviceCollection.TryAddSingleton<ILinkGenerator>(LinkGenerator);
+            serviceCollection.AddSingleton<IReadOnlyEventCollection>(Events);
+            serviceCollection.AddSingleton<IReadOnlyFileSystem>(FileSystem);
+            serviceCollection.AddSingleton<IReadOnlySettings>(Settings);
+            serviceCollection.AddSingleton<IConfiguration>(configuration);
+            serviceCollection.AddSingleton<IReadOnlyShortcodeCollection>(Shortcodes);
+            serviceCollection.AddSingleton<ClassCatalog>(ClassCatalog);
+
+            // These ones can be overridden by registering an implementation before instantiating the engine
+            serviceCollection.TryAddSingleton<IApplicationState>(_ => applicationState ?? new ApplicationState(null, null, null));
+            serviceCollection.TryAddSingleton<IMemoryStreamFactory>(_ => new MemoryStreamFactory());
+            serviceCollection.TryAddSingleton<ILinkGenerator>(_ => new LinkGenerator());
+            serviceCollection.TryAddSingleton<INamespacesCollection>(_ => new NamespaceCollection());
+            serviceCollection.TryAddSingleton<IScriptHelper>(_ => new ScriptHelper(this));
+            serviceCollection.TryAddSingleton<IDocumentFactory>(_ => new DocumentFactory(this, Settings));
+            serviceCollection.TryAddSingleton<IFileCleaner>(s => new FileCleaner(Settings, FileSystem, s.GetRequiredService<ILogger<Engine>>()));
 
             // Add the failure logger
             LogLevel failureLogLevel = Settings.Get<LogLevel>(Keys.FailureLogLevel, LogLevel.Error);
@@ -197,10 +211,10 @@ namespace Statiq.Core
         public IServiceProvider Services => _serviceScope.ServiceProvider;
 
         /// <inheritdoc />
-        public ApplicationState ApplicationState { get; }
+        public IApplicationState ApplicationState { get; }
 
         /// <inheritdoc />
-        IReadOnlyApplicationState IExecutionState.ApplicationState => ApplicationState;
+        IApplicationState IExecutionState.ApplicationState => ApplicationState;
 
         /// <inheritdoc />
         public ClassCatalog ClassCatalog { get; }
@@ -242,10 +256,10 @@ namespace Statiq.Core
         public IReadOnlyPipelineCollection ExecutingPipelines { get; private set; } = new PipelineCollection((Engine)null); // Gets set on execution
 
         /// <inheritdoc />
-        public INamespacesCollection Namespaces { get; } = new NamespaceCollection();
+        public INamespacesCollection Namespaces { get; }
 
         /// <inheritdoc />
-        public IMemoryStreamFactory MemoryStreamFactory { get; } = new MemoryStreamFactory();
+        public IMemoryStreamFactory MemoryStreamFactory { get; }
 
         /// <inheritdoc />
         public IScriptHelper ScriptHelper { get; }
@@ -254,7 +268,7 @@ namespace Statiq.Core
         public IPipelineOutputs Outputs { get; private set; }
 
         /// <inheritdoc />
-        public ILinkGenerator LinkGenerator { get; } = new LinkGenerator();
+        public ILinkGenerator LinkGenerator { get; }
 
         /// <inheritdoc />
         public IAnalyzerCollection Analyzers => AnalyzerCollection;
@@ -273,16 +287,11 @@ namespace Statiq.Core
         /// <inheritdoc />
         public bool SerialExecution { get; set; }
 
-        /// <inheritdoc />
-        public IFileCleaner FileCleaner
-        {
-            get => _fileCleaner;
-            set => _fileCleaner = value.ThrowIfNull(nameof(value));
-        }
-
-        internal DocumentFactory DocumentFactory { get; }
-
         internal void ResetPipelinePhases() => _phases = null;
+
+        internal IFileCleaner FileCleaner { get; }
+
+        internal IDocumentFactory DocumentFactory { get; }
 
         /// <inheritdoc />
         public void SetDefaultDocumentType<TDocument>()
