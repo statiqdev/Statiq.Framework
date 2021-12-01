@@ -53,6 +53,12 @@ namespace Statiq.Common
         public const string LinkLowercase = nameof(LinkLowercase);
 
         /// <summary>
+        /// Indicates that a trailing slash should be appended when hiding a page due to <see cref="LinkHideIndexPages"/>.
+        /// </summary>
+        /// <type><see cref="bool"/></type>
+        public const string LinkHiddenPageTrailingSlash = nameof(LinkHiddenPageTrailingSlash);
+
+        /// <summary>
         /// Set to <c>true</c> to fail generation on all warnings and errors. The generation will finish but
         /// an exception will be thrown if any warnings or errors occurred during generation.
         /// </summary>

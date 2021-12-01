@@ -36,6 +36,8 @@ namespace Statiq.Common
 
             public bool MakeAbsolute { get; set; }
 
+            public bool HiddenPageTrailingSlash { get; set; }
+
             public bool Equals(GetLinkCacheKey other)
             {
                 if (ReferenceEquals(null, other))
@@ -55,7 +57,8 @@ namespace Statiq.Common
                    && Equals(HidePages, other.HidePages)
                    && Equals(HideExtensions, other.HideExtensions)
                    && Lowercase == other.Lowercase
-                   && MakeAbsolute == other.MakeAbsolute;
+                   && MakeAbsolute == other.MakeAbsolute
+                   && HiddenPageTrailingSlash == other.HiddenPageTrailingSlash;
             }
 
             public override bool Equals(object obj)
@@ -78,8 +81,20 @@ namespace Statiq.Common
                 return Equals((GetLinkCacheKey)obj);
             }
 
-            public override int GetHashCode() =>
-                HashCode.Combine(Path, Host, Root, Scheme, HidePages, HideExtensions, Lowercase, MakeAbsolute);
+            public override int GetHashCode()
+            {
+                HashCode hashCode = default;
+                hashCode.Add(Path);
+                hashCode.Add(Host);
+                hashCode.Add(Root);
+                hashCode.Add(Scheme);
+                hashCode.Add(HidePages);
+                hashCode.Add(HideExtensions);
+                hashCode.Add(Lowercase);
+                hashCode.Add(MakeAbsolute);
+                hashCode.Add(HiddenPageTrailingSlash);
+                return hashCode.ToHashCode();
+            }
         }
 
         /// <inheritdoc />
@@ -91,7 +106,8 @@ namespace Statiq.Common
             string[] hidePages,
             string[] hideExtensions,
             bool lowercase,
-            bool makeAbsolute = true) =>
+            bool makeAbsolute,
+            bool hiddenPageTrailingSlash) =>
             _links.GetOrAdd(
                 new GetLinkCacheKey
                 {
@@ -102,7 +118,8 @@ namespace Statiq.Common
                     HidePages = hidePages,
                     HideExtensions = hideExtensions,
                     Lowercase = lowercase,
-                    MakeAbsolute = makeAbsolute
+                    MakeAbsolute = makeAbsolute,
+                    HiddenPageTrailingSlash = hiddenPageTrailingSlash
                 },
                 key => GetLinkImplementation(
                     key.Path,
@@ -112,7 +129,8 @@ namespace Statiq.Common
                     key.HidePages,
                     key.HideExtensions,
                     key.Lowercase,
-                    key.MakeAbsolute));
+                    key.MakeAbsolute,
+                    key.HiddenPageTrailingSlash));
 
         private static string GetLinkImplementation(
             string path,
@@ -122,7 +140,8 @@ namespace Statiq.Common
             string[] hidePages,
             string[] hideExtensions,
             bool lowercase,
-            bool makeAbsolute)
+            bool makeAbsolute,
+            bool hiddenPageTrailingSlash)
         {
             if (path is object)
             {
@@ -133,6 +152,15 @@ namespace Statiq.Common
                     && hidePages.Any(x => x is object && fileName.Equals(x)))
                 {
                     path = Path.GetDirectoryName(path);
+
+                    // Add a trailing slash if we hid the page and requested to do so
+                    if (hiddenPageTrailingSlash
+                        && !string.IsNullOrEmpty(path)
+                        && !path.EndsWith("/")
+                        && !path.EndsWith("\\"))
+                    {
+                        path += "/";
+                    }
 
                     // We don't need to worry about hiding extensions if we crawled up
                     hideExtensions = null;

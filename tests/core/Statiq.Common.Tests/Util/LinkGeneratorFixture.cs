@@ -41,7 +41,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -90,7 +90,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -119,7 +119,36 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, new[] { "index.html" }, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, new[] { "index.html" }, null, false, makeAbsolute, false);
+
+                // Then
+                link.ShouldBe(expected);
+            }
+
+            // makeAbsolute = true
+            [TestCase("/foo/bar/index.html", true, "/foo/bar/")]
+            [TestCase("foo/bar/index.html", true, "/foo/bar/")]
+            [TestCase("/index.html", true, "/")]
+            [TestCase("index.html", true, "/")]
+            [TestCase("/foo/bar/baz.html", true, "/foo/bar/baz.html")]
+            [TestCase("foo/bar/baz.html", true, "/foo/bar/baz.html")]
+
+            // makeAbsolute = false
+            [TestCase("/foo/bar/index.html", false, "/foo/bar/")]
+            [TestCase("foo/bar/index.html", false, "foo/bar/")]
+            [TestCase("/index.html", false, "/")]
+            [TestCase("index.html", false, ".")] // special case when we remove the index page of a peer relative path
+            [TestCase("/foo/bar/baz.html", false, "/foo/bar/baz.html")]
+            [TestCase("foo/bar/baz.html", false, "foo/bar/baz.html")]
+            [TestCase("/foo/bar.html/index.html", false, "/foo/bar.html/")]
+            [TestCase("foo/bar.html/index.html", false, "foo/bar.html/")]
+            public void ShouldAddTrailingSlashForHiddenIndexPages(string path, bool makeAbsolute, string expected)
+            {
+                // Given
+                LinkGenerator linkGenerator = new LinkGenerator();
+
+                // When
+                string link = linkGenerator.GetLink(path, null, null, null, new[] { "index.html" }, null, false, makeAbsolute, true);
 
                 // Then
                 link.ShouldBe(expected);
@@ -162,7 +191,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, Array.Empty<string>(), false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, Array.Empty<string>(), false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -189,7 +218,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, new[] { "html", ".htm" }, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, new[] { "html", ".htm" }, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -216,7 +245,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, host, root, null, null, null, false);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, true, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -254,7 +283,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, host, root, null, null, null, false);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, true, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -268,7 +297,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, "www.google.com", null, "https", null, null, false);
+                string link = linkGenerator.GetLink(path, "www.google.com", null, "https", null, null, false, true, false);
 
                 // Then
                 link.ShouldBe("https://www.google.com/foo/bar");
@@ -282,7 +311,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, null, false);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, true, false);
 
                 // Then
                 link.ShouldBe("/");
@@ -296,7 +325,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, "root", null, null, null, false);
+                string link = linkGenerator.GetLink(path, null, "root", null, null, null, false, true, false);
 
                 // Then
                 link.ShouldBe("/root/");
@@ -310,7 +339,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, new[] { "index" }, null, false);
+                string link = linkGenerator.GetLink(path, null, null, null, new[] { "index" }, null, false, true, false);
 
                 // Then
                 link.ShouldBe("/");
@@ -324,7 +353,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, new[] { "html" }, false);
+                string link = linkGenerator.GetLink(path, null, null, null, null, new[] { "html" }, false, true, false);
 
                 // Then
                 link.ShouldBe("/");
@@ -338,7 +367,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, "www.google.com", null, "http", null, null, false);
+                string link = linkGenerator.GetLink(path, "www.google.com", null, "http", null, null, false, true, false);
 
                 // Then
                 link.ShouldBe("http://www.google.com/Foo/Bar");
@@ -352,7 +381,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, "www.google.com", null, "http", null, null, true);
+                string link = linkGenerator.GetLink(path, "www.google.com", null, "http", null, null, true, true, false);
 
                 // Then
                 link.ShouldBe("http://www.google.com/foo/bar");
@@ -366,7 +395,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, "www.google.com", null, "http", null, null, false, true);
+                string link = linkGenerator.GetLink(path, "www.google.com", null, "http", null, null, false, true, false);
 
                 // Then
                 link.ShouldBe("http://www.google.com/a/b/c%25d");
@@ -380,7 +409,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, false);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, false, false);
 
                 // Then
                 link.ShouldBe("a/b/c%25d");
@@ -394,7 +423,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, "www.google.com", null, "http", null, null, true);
+                string link = linkGenerator.GetLink(path, "www.google.com", null, "http", null, null, true, true, false);
 
                 // Then
                 link.ShouldBe("http://www.google.com/a/b/c/d");
@@ -429,7 +458,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -464,7 +493,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -513,7 +542,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -562,7 +591,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -597,7 +626,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -632,7 +661,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -681,7 +710,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -730,7 +759,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -765,7 +794,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -800,7 +829,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -835,7 +864,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -870,7 +899,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, null, null, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -919,7 +948,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -968,7 +997,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -1017,7 +1046,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -1066,7 +1095,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute);
+                string link = linkGenerator.GetLink(path, host, root, null, null, null, false, makeAbsolute, false);
 
                 // Then
                 link.ShouldBe(expected);
@@ -1080,7 +1109,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, "www.google.com", "x#y/z/", null, null, null, false, true);
+                string link = linkGenerator.GetLink(path, "www.google.com", "x#y/z/", null, null, null, false, true, false);
 
                 // Then
                 link.ShouldBe("http://www.google.com/x%23y/z/a/b/c?foo=bar#buzz");
@@ -1094,7 +1123,7 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, "www.google.com", "x?y/z/", null, null, null, false, true);
+                string link = linkGenerator.GetLink(path, "www.google.com", "x?y/z/", null, null, null, false, true, false);
 
                 // Then
                 link.ShouldBe("http://www.google.com/x%3Fy/z/a/b/c?foo=bar#buzz");
@@ -1109,10 +1138,25 @@ namespace Statiq.Common.Tests.Util
                 LinkGenerator linkGenerator = new LinkGenerator();
 
                 // When
-                string link = linkGenerator.GetLink(path, "www.google.com", null, null, null, null, false, true);
+                string link = linkGenerator.GetLink(path, "www.google.com", null, null, null, null, false, true, false);
 
                 // Then
                 link.ShouldBe("http://www.google.com//a//b/c?foo=bar&fizz=//buzz#bizz");
+            }
+
+            [Test]
+            public void NormalizesSlashes()
+            {
+                // Given
+                string path = "\\a/b\\c";
+                string root = "\\x/y\\z";
+                LinkGenerator linkGenerator = new LinkGenerator();
+
+                // When
+                string link = linkGenerator.GetLink(path, "www.google.com", root, null, null, null, false, true, false);
+
+                // Then
+                link.ShouldBe("http://www.google.com/x/y/z/a/b/c");
             }
         }
     }
