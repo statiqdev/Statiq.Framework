@@ -3,6 +3,7 @@
 - Made it easier to override certain interfaces used by the engine by registering alternate implementations in the service collection passed to the engine. Alternate implementations of the following can now be provided: `IApplicationState`, `IMemoryStreamFactory`, `ILinkGenerator`, `INamespacesCollection`, `IScriptHelper`, `IDocumentFactory`, and `IFileCleaner`. In addition, the default implementations of these interfaces have been refactored to make deriving from them easier (I.e. marked interface members as `virtual`).
 - Refactored the default `LinkGenerator` to use strings instead of `NormalizedPath` which could result in poor results in some edge cases like trailing slashes (#218).
 - Added toggle for keeping trailing slash when hiding a page in `LinkGenerator` and related extensions, also exposed via a new `Keys.LinkHiddenPageTrailingSlash` setting (#218).
+- Updated Spectre.Console reference in Statiq.App to 0.43.0.
 
 # 1.0.0-beta.51
 
