@@ -167,11 +167,11 @@ the family Rosaceae.</dd>
             }
 
             [Test]
-            public async Task EscapesAtByDefault()
+            public async Task ShouldEscapeAtByDefault()
             {
                 // Given
-                const string input = "Looking @Good, Man!";
-                const string output = @"<p>Looking &#64;Good, Man!</p>
+                const string input = "Looking @Good, @Man!";
+                const string output = @"<p>Looking &#64;Good, &#64;Man!</p>
 ";
                 TestDocument document = new TestDocument(input);
                 RenderMarkdown markdown = new RenderMarkdown();
@@ -184,10 +184,27 @@ the family Rosaceae.</dd>
             }
 
             [Test]
-            public async Task UnescapesDoubleAt()
+            public async Task ShouldNotEscapeAtWhenFalse()
             {
                 // Given
-                const string input = @"Looking @Good, \\@Man!";
+                const string input = "Looking @Good, @Man!";
+                const string output = @"<p>Looking @Good, @Man!</p>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown().EscapeAt(false);
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldNotEscapeAtWhenEscapedBySlash()
+            {
+                // Given
+                const string input = "Looking @Good, \\@Man!";
                 const string output = @"<p>Looking &#64;Good, @Man!</p>
 ";
                 TestDocument document = new TestDocument(input);
@@ -201,14 +218,14 @@ the family Rosaceae.</dd>
             }
 
             [Test]
-            public async Task DoesNotEscapeAtIfDisabled()
+            public async Task ShouldNotEscapeAtWhenEscapedByDoubleSlash()
             {
                 // Given
-                const string input = "Looking @Good, Man!";
-                const string output = @"<p>Looking @Good, Man!</p>
+                const string input = "Looking @Good, \\\\@Man!";
+                const string output = @"<p>Looking &#64;Good, \@Man!</p>
 ";
                 TestDocument document = new TestDocument(input);
-                RenderMarkdown markdown = new RenderMarkdown().EscapeAt(false);
+                RenderMarkdown markdown = new RenderMarkdown();
 
                 // When
                 TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();

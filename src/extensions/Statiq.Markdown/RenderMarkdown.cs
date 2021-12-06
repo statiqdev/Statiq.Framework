@@ -27,8 +27,6 @@ namespace Statiq.Markdown
     /// <category>Templates</category>
     public class RenderMarkdown : ParallelModule
     {
-        private static readonly Regex EscapeAtRegex = new Regex("(?<!\\\\)@");
-
         private readonly string _sourceKey;
         private readonly string _destinationKey;
         private readonly OrderedList<IMarkdownExtension> _extensions = new OrderedList<IMarkdownExtension>();
@@ -203,23 +201,24 @@ namespace Statiq.Markdown
                 return input.Yield();
             }
 
+            // Add the @ escaping extension if needed
+            OrderedList<IMarkdownExtension> extensions = _extensions;
+            if (_escapeAt)
+            {
+                extensions = new OrderedList<IMarkdownExtension>(_extensions.Concat(new EscapeAtExtension()));
+            }
+
             // Render the Markdown
             string result;
             MarkdownDocument markdownDocument;
             using (StringWriter writer = new StringWriter())
             {
-                markdownDocument = MarkdownHelper.RenderMarkdown(context, input, content, writer, _prependLinkRoot, _configuration, _extensions);
+                markdownDocument = MarkdownHelper.RenderMarkdown(context, input, content, writer, _prependLinkRoot, _configuration, extensions);
                 if (markdownDocument is null)
                 {
                     return input.Yield();
                 }
                 result = writer.ToString();
-            }
-
-            if (_escapeAt)
-            {
-                result = EscapeAtRegex.Replace(result, "&#64;");
-                result = result.Replace("\\@", "@");
             }
 
             MetadataItems metadataItems = new MetadataItems();
