@@ -204,7 +204,7 @@ the family Rosaceae.</dd>
             public async Task ShouldNotEscapeAtWhenEscapedBySlash()
             {
                 // Given
-                const string input = "Looking @Good, \\@Man!";
+                const string input = @"Looking @Good, \@Man!";
                 const string output = @"<p>Looking &#64;Good, @Man!</p>
 ";
                 TestDocument document = new TestDocument(input);
@@ -218,14 +218,214 @@ the family Rosaceae.</dd>
             }
 
             [Test]
-            public async Task ShouldNotEscapeAtWhenEscapedByDoubleSlash()
+            public async Task ShouldNotEscapeAtDoubleSlash()
             {
                 // Given
-                const string input = "Looking @Good, \\\\@Man!";
+                // The first slash is treated as a Markdown escape of the second slash,
+                // so a single slash is output, the EscapeAtParser doesn't see it and consume,
+                // and the EscapeAtWriter still sees the single output slash
+                const string input = @"Looking @Good, \\@Man!";
+                const string output = @"<p>Looking &#64;Good, @Man!</p>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldNotEscapeAtEscapedDoubleSlash()
+            {
+                // Given
+                const string input = @"Looking @Good, \\\@Man!";
                 const string output = @"<p>Looking &#64;Good, \@Man!</p>
 ";
                 TestDocument document = new TestDocument(input);
                 RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldEscapeAtInHtmlElement()
+            {
+                // Given
+                const string input = "<div>Looking @Good, @Man!</div>";
+                const string output = @"<div>Looking &#64;Good, &#64;Man!</div>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldNotEscapeAtWhenFalseInHtmlElement()
+            {
+                // Given
+                const string input = "<div>Looking @Good, @Man!</div>";
+                const string output = @"<div>Looking @Good, @Man!</div>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown().EscapeAt(false);
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldNotEscapeAtWhenEscapedBySlashInHtmlElement()
+            {
+                // Given
+                const string input = "<div>Looking @Good, \\@Man!</div>";
+                const string output = @"<div>Looking &#64;Good, @Man!</div>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldEscapeAtInCode()
+            {
+                // Given
+                const string input = "`Looking @Good, @Man!`";
+                const string output = @"<p><code>Looking &#64;Good, &#64;Man!</code></p>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldNotEscapeAtWhenFalseInCode()
+            {
+                // Given
+                const string input = "`Looking @Good, @Man!`";
+                const string output = @"<p><code>Looking @Good, @Man!</code></p>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown().EscapeAt(false);
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldNotEscapeAtWhenEscapedBySlashInCode()
+            {
+                // Given
+                const string input = "`Looking @Good, \\@Man!`";
+                const string output = @"<p><code>Looking &#64;Good, @Man!</code></p>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldEscapeAtInCodeFence()
+            {
+                // Given
+                const string input = @"```
+Looking @Good, @Man!
+```";
+                const string output = @"<pre><code>Looking &#64;Good, &#64;Man!
+</code></pre>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldNotEscapeAtWhenFalseInCodeFence()
+            {
+                // Given
+                const string input = @"```
+Looking @Good, @Man!
+```";
+                const string output = @"<pre><code>Looking @Good, @Man!
+</code></pre>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown().EscapeAt(false);
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldNotEscapeAtWhenEscapedBySlashInCodeFence()
+            {
+                // Given
+                const string input = @"```
+Looking @Good, \@Man!
+```";
+                const string output = @"<pre><code>Looking &#64;Good, @Man!
+</code></pre>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldPassThroughSlash()
+            {
+                // Given
+                // Need to use double-slashes in cases where Markdown would treat it as an escape
+                const string input = @"\Loo\king \\!Good, \\$Man!\\";
+                const string output = @"<p>\Loo\king \!Good, \$Man!\</p>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown().EscapeAt(false);
 
                 // When
                 TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();

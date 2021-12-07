@@ -1,3 +1,8 @@
+# 1.0.0-beta.53
+
+- Updated Markdig in `Statiq.Markdown` to 0.26.0.
+- Fixed a number of inconsistencies with the way the `@` symbol was being escaped in Markdown documents (using `\@` should now work reliably).
+
 # 1.0.0-beta.52
 
 - Made it easier to override certain interfaces used by the engine by registering alternate implementations in the service collection passed to the engine. Alternate implementations of the following can now be provided: `IApplicationState`, `IMemoryStreamFactory`, `ILinkGenerator`, `INamespacesCollection`, `IScriptHelper`, `IDocumentFactory`, and `IFileCleaner`. In addition, the default implementations of these interfaces have been refactored to make deriving from them easier (I.e. marked interface members as `virtual`).

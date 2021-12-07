@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Markdig;
 using Markdig.Helpers;
-using Markdig.Parsers;
-using Markdig.Renderers;
 using Markdig.Syntax;
 using Microsoft.Extensions.Logging;
 using Statiq.Common;
+using Statiq.Markdown.EscapeAt;
 
 namespace Statiq.Markdown
 {
@@ -201,7 +199,7 @@ namespace Statiq.Markdown
                 return input.Yield();
             }
 
-            // Add the @ escaping extension if needed
+            // Add the @ escaping extension if escaping @ symbols
             OrderedList<IMarkdownExtension> extensions = _extensions;
             if (_escapeAt)
             {
@@ -211,7 +209,7 @@ namespace Statiq.Markdown
             // Render the Markdown
             string result;
             MarkdownDocument markdownDocument;
-            using (StringWriter writer = new StringWriter())
+            using (TextWriter writer = new StringWriter())
             {
                 markdownDocument = MarkdownHelper.RenderMarkdown(context, input, content, writer, _prependLinkRoot, _configuration, extensions);
                 if (markdownDocument is null)
