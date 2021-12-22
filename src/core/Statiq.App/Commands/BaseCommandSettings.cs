@@ -6,6 +6,26 @@ namespace Statiq.App
 {
     public class BaseCommandSettings : CommandSettings
     {
+        [CommandOption("-i|--input <PATH>")]
+        [Description("The path(s) of input files, can be absolute or relative to the current folder.")]
+        public string[] InputPaths { get; set; }
+
+        [CommandOption("-o|--output <PATH>")]
+        [Description("The path to output files, can be absolute or relative to the current folder.")]
+        public string OutputPath { get; set; }
+
+        [CommandOption("--temp <PATH>")]
+        [Description("The path to output temporary files, can be absolute or relative to the current folder.")]
+        public string TempPath { get; set; }
+
+        [CommandOption("--cache <PATH>")]
+        [Description("The path to output cache files, can be absolute or relative to the current folder.")]
+        public string CachePath { get; set; }
+
+        [CommandOption("-r|--root")]
+        [Description("The root folder to use.")]
+        public string RootPath { get; set; }
+
         [CommandOption("-l|--log-level <LEVEL>")]
         [Description("Sets the minimum log level (\"Critical\", \"Error\", \"Warning\", \"Information\", \"Debug\", \"Trace\", \"None\").")]
         public LogLevel LogLevel { get; set; } = LogLevel.Information;

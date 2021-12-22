@@ -82,9 +82,6 @@ namespace Statiq.Testing
         public TestFileSystem FileSystem { get; set; } = new TestFileSystem();
 
         /// <inheritdoc />
-        IFileSystem IEngine.FileSystem => FileSystem;
-
-        /// <inheritdoc />
         IReadOnlyFileSystem IExecutionState.FileSystem => FileSystem;
 
         /// <inheritdoc />

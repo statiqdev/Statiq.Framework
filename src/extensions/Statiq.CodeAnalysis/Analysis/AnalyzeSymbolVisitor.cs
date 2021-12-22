@@ -387,6 +387,7 @@ namespace Statiq.CodeAnalysis.Analysis
                 new MetadataItem(CodeAnalysisKeys.Name, metadata => string.IsNullOrEmpty(symbol.Name) ? metadata.GetString(CodeAnalysisKeys.FullName) : symbol.Name),
                 new MetadataItem(CodeAnalysisKeys.FullName, _ => symbol.GetFullName(), true),
                 new MetadataItem(CodeAnalysisKeys.DisplayName, _ => symbol.GetDisplayName(), true),
+                new MetadataItem(Keys.Title, _ => symbol.GetDisplayName(), true),
                 new MetadataItem(CodeAnalysisKeys.QualifiedName, _ => symbol.GetQualifiedName(), true),
                 new MetadataItem(CodeAnalysisKeys.Kind, _ => symbol.Kind.ToString()),
                 new MetadataItem(CodeAnalysisKeys.ContainingNamespace, DocumentFor(symbol.ContainingNamespace)),

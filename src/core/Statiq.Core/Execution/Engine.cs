@@ -26,7 +26,6 @@ namespace Statiq.Core
         // Cache the HttpMessageHandler (the HttpClient is really just a thin wrapper around this)
         private static readonly HttpMessageHandler _httpMessageHandler = new HttpClientHandler();
 
-        private readonly FileSystem _fileSystem = new FileSystem();
         private readonly PipelineCollection _pipelines;
         private readonly DiagnosticsTraceListener _diagnosticsTraceListener;
         private readonly IServiceScope _serviceScope;
@@ -100,10 +99,29 @@ namespace Statiq.Core
             IServiceCollection serviceCollection,
             Settings settings,
             ClassCatalog classCatalog)
+            : this(applicationState, serviceCollection, settings, classCatalog, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates an engine with the specified application state, configuration, and service provider.
+        /// </summary>
+        /// <param name="applicationState">The state of the application (or <c>null</c> for an empty application state).</param>
+        /// <param name="serviceCollection">The service collection (or <c>null</c> for an empty default service collection).</param>
+        /// <param name="settings">The collection of settings.</param>
+        /// <param name="classCatalog">A class catalog of all assemblies in scope.</param>
+        /// <param name="fileSystem">The file system to use for the engine.</param>
+        public Engine(
+            IApplicationState applicationState,
+            IServiceCollection serviceCollection,
+            Settings settings,
+            ClassCatalog classCatalog,
+            IReadOnlyFileSystem fileSystem)
         {
             IExecutionState.Current = this;
 
             _pipelines = new PipelineCollection(this);
+            FileSystem = fileSystem ?? new FileSystem();
             AnalyzerCollection = new AnalyzerCollection(this);
             ClassCatalog = classCatalog ?? new ClassCatalog();
             ClassCatalog.Populate();
@@ -235,10 +253,7 @@ namespace Statiq.Core
         IReadOnlyEventCollection IExecutionState.Events => Events;
 
         /// <inheritdoc />
-        public IFileSystem FileSystem => _fileSystem;
-
-        /// <inheritdoc />
-        IReadOnlyFileSystem IExecutionState.FileSystem => FileSystem;
+        public IReadOnlyFileSystem FileSystem { get; }
 
         /// <inheritdoc />
         public IShortcodeCollection Shortcodes { get; } = new ShortcodeCollection();

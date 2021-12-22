@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,16 +25,20 @@ namespace Statiq.App
         protected BaseCommand(
             IConfiguratorCollection configurators,
             ISettings configurationSettings,
-            IServiceCollection serviceCollection)
+            IServiceCollection serviceCollection,
+            IFileSystem fileSystem)
         {
             Configurators = configurators;
             ServiceCollection = serviceCollection;
+            FileSystem = fileSystem;
             _configurationSettings = configurationSettings;
         }
 
         public IConfiguratorCollection Configurators { get; }
 
         public IServiceCollection ServiceCollection { get; }
+
+        public IFileSystem FileSystem { get; }
 
         public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings commandSettings)
         {
@@ -56,6 +62,32 @@ namespace Statiq.App
 
             // Set failure log level
             _configurationSettings.Add(Keys.FailureLogLevel, commandSettings.FailureLogLevel.ToString());
+
+            // Set paths, command settings will override any file system configuration done on the bootstrapper
+            if (!string.IsNullOrEmpty(commandSettings.RootPath))
+            {
+                NormalizedPath currentDirectory = Directory.GetCurrentDirectory();
+                FileSystem.RootPath = currentDirectory.Combine(commandSettings.RootPath);
+            }
+            if (commandSettings.InputPaths?.Length > 0)
+            {
+                // Clear existing default paths if new ones are set
+                // and reverse the inputs so the last one is first to match the semantics of multiple occurrence single options
+                FileSystem.InputPaths.Clear();
+                FileSystem.InputPaths.AddRange(commandSettings.InputPaths.Select(x => new NormalizedPath(x)).Reverse());
+            }
+            if (!string.IsNullOrEmpty(commandSettings.OutputPath))
+            {
+                FileSystem.OutputPath = commandSettings.OutputPath;
+            }
+            if (!string.IsNullOrEmpty(commandSettings.TempPath))
+            {
+                FileSystem.TempPath = commandSettings.TempPath;
+            }
+            if (!string.IsNullOrEmpty(commandSettings.CachePath))
+            {
+                FileSystem.CachePath = commandSettings.CachePath;
+            }
 
             // Build a temporary service provider so we can log and do some other stuff
             // Make sure to place it in it's own scope so transient services get correctly disposed
@@ -110,7 +142,8 @@ namespace Statiq.App
             }
 
             // Configure settings after other configuration so they can use the values
-            ConfigurableSettings configurableSettings = new ConfigurableSettings(_configurationSettings);
+            ConfigurableSettings configurableSettings = new ConfigurableSettings(
+                _configurationSettings, ServiceCollection, FileSystem);
             Configurators.Configure(configurableSettings);
 
             return await ExecuteCommandAsync(context, commandSettings);

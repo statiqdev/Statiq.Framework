@@ -15,6 +15,14 @@ namespace Statiq.App
         // stay in Statiq.App since commands depend on Spectre.Cli, but they should still use a generic
         // TBootstrapper in case other libraries want to use IInitalizer and depend on Statiq.App
 
+        public static TBootstrapper ConfigureCommands<TBootstrapper>(this TBootstrapper bootstrapper, Action<IConfigurator> action)
+            where TBootstrapper : IBootstrapper
+        {
+            bootstrapper.ThrowIfNull(nameof(bootstrapper));
+            bootstrapper.Configurators.Add<ConfigurableCommands>(x => action(x.Configurator));
+            return bootstrapper;
+        }
+
         public static Bootstrapper AddCommand<TCommand>(this Bootstrapper bootstrapper)
             where TCommand : class, ICommand =>
             bootstrapper.ConfigureCommands(x => x.AddCommand<TCommand>());

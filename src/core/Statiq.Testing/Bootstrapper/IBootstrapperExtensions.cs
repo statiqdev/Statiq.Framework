@@ -33,7 +33,10 @@ namespace Statiq.Testing
         /// <param name="throwLogLevel">The log level at which to throw.</param>
         /// <param name="fileProvider">The file provider to use.</param>
         /// <returns>Results from running the bootstrapper such as phase outputs and exit code.</returns>
-        public static async Task<BootstrapperTestResult> RunTestAsync(this IBootstrapper bootstrapper, LogLevel throwLogLevel, IFileProvider fileProvider = null)
+        public static async Task<BootstrapperTestResult> RunTestAsync(
+            this IBootstrapper bootstrapper,
+            LogLevel throwLogLevel,
+            IFileProvider fileProvider = null)
         {
             await RunLock.WaitAsync();
             try
@@ -50,6 +53,16 @@ namespace Statiq.Testing
                     services.RemoveAll<ILoggerProvider>();  // The console logger isn't friendly to tests
                     services.AddSingleton<ILoggerProvider>(loggerProvider);
                 });
+
+                // Add the file provider
+                if (fileProvider is object)
+                {
+                    bootstrapper.ConfigureFileSystem(fileSystem =>
+                    {
+                        fileSystem.RootPath = "/";
+                        fileSystem.FileProvider = fileProvider;
+                    });
+                }
 
                 // Instrument the Bootstrapper
                 GatherDocuments phaseInputs = new GatherDocuments();
@@ -69,13 +82,6 @@ namespace Statiq.Testing
                         pipeline.PostProcessModules?.Add(phaseOutputs);
                         pipeline.OutputModules?.Insert(0, phaseInputs);
                         pipeline.OutputModules?.Add(phaseOutputs);
-                    }
-
-                    // Add the file provider
-                    if (fileProvider is object)
-                    {
-                        engine.FileSystem.RootPath = "/";
-                        engine.FileSystem.FileProvider = fileProvider;
                     }
                 });
 

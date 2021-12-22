@@ -10,14 +10,6 @@ namespace Statiq.App
 {
     public static class BootstrapperConfigurationExtensions
     {
-        public static TBootstrapper ConfigureCommands<TBootstrapper>(this TBootstrapper bootstrapper, Action<IConfigurator> action)
-            where TBootstrapper : IBootstrapper
-        {
-            bootstrapper.ThrowIfNull(nameof(bootstrapper));
-            bootstrapper.Configurators.Add<ConfigurableCommands>(x => action(x.Configurator));
-            return bootstrapper;
-        }
-
         public static Bootstrapper Configure<TConfigurable>(this Bootstrapper bootstrapper, Action<TConfigurable> action)
             where TConfigurable : IConfigurable
         {

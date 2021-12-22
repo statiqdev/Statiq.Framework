@@ -6,15 +6,6 @@ namespace Statiq.Common
 {
     public static class BootstrapperConfigurationExtensions
     {
-        public static TBootstrapper ConfigureSettings<TBootstrapper>(this TBootstrapper bootstrapper, Action<ISettings> action)
-            where TBootstrapper : IBootstrapper
-        {
-            bootstrapper.ThrowIfNull(nameof(bootstrapper));
-            action.ThrowIfNull(nameof(action));
-            bootstrapper.Configurators.Add<ConfigurableSettings>(x => action(x.Settings));
-            return bootstrapper;
-        }
-
         public static TBootstrapper BuildConfiguration<TBootstrapper>(this TBootstrapper bootstrapper, Action<IConfigurationBuilder> action)
             where TBootstrapper : IBootstrapper
         {
@@ -33,12 +24,21 @@ namespace Statiq.Common
             return bootstrapper;
         }
 
-        public static TBootstrapper ConfigureServices<TBootstrapper>(this TBootstrapper bootstrapper, Action<IServiceCollection, ISettings> action)
+        public static TBootstrapper ConfigureServices<TBootstrapper>(this TBootstrapper bootstrapper, Action<IServiceCollection, IReadOnlySettings> action)
             where TBootstrapper : IBootstrapper
         {
             bootstrapper.ThrowIfNull(nameof(bootstrapper));
             action.ThrowIfNull(nameof(action));
             bootstrapper.Configurators.Add<ConfigurableServices>(x => action(x.Services, x.Settings));
+            return bootstrapper;
+        }
+
+        public static TBootstrapper ConfigureServices<TBootstrapper>(this TBootstrapper bootstrapper, Action<IServiceCollection, IReadOnlySettings, IReadOnlyFileSystem> action)
+            where TBootstrapper : IBootstrapper
+        {
+            bootstrapper.ThrowIfNull(nameof(bootstrapper));
+            action.ThrowIfNull(nameof(action));
+            bootstrapper.Configurators.Add<ConfigurableServices>(x => action(x.Services, x.Settings, x.FileSystem));
             return bootstrapper;
         }
 

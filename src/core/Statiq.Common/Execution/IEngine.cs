@@ -26,11 +26,6 @@ namespace Statiq.Common
         new ISettings Settings { get; }
 
         /// <summary>
-        /// Gets the file system.
-        /// </summary>
-        new IFileSystem FileSystem { get; }
-
-        /// <summary>
         /// Gets the shortcodes.
         /// </summary>
         new IShortcodeCollection Shortcodes { get; }

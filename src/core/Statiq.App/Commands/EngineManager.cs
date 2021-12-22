@@ -41,7 +41,12 @@ namespace Statiq.App
 
             // Create the engine and get a logger
             // The configuration settings should not be used after this point
-            Engine = new Engine(applicationState, serviceCollection, settings, bootstrapper.ClassCatalog);
+            Engine = new Engine(
+                applicationState,
+                serviceCollection,
+                settings,
+                bootstrapper.ClassCatalog,
+                bootstrapper.FileSystem);
 
             // Get the logger from the engine and store it for use during execute
             _logger = Engine.Services.GetRequiredService<ILogger<Bootstrapper>>();
@@ -126,31 +131,6 @@ namespace Statiq.App
 
         private static void ApplyCommandSettings(Engine engine, EngineCommandSettings commandSettings)
         {
-            // Set folders
-            NormalizedPath currentDirectory = Environment.CurrentDirectory;
-            engine.FileSystem.RootPath = string.IsNullOrEmpty(commandSettings.RootPath)
-                ? currentDirectory
-                : currentDirectory.Combine(commandSettings.RootPath);
-            if (commandSettings.InputPaths?.Length > 0)
-            {
-                // Clear existing default paths if new ones are set
-                // and reverse the inputs so the last one is first to match the semantics of multiple occurrence single options
-                engine.FileSystem.InputPaths.Clear();
-                engine.FileSystem.InputPaths.AddRange(commandSettings.InputPaths.Select(x => new NormalizedPath(x)).Reverse());
-            }
-            if (!string.IsNullOrEmpty(commandSettings.OutputPath))
-            {
-                engine.FileSystem.OutputPath = commandSettings.OutputPath;
-            }
-            if (!string.IsNullOrEmpty(commandSettings.TempPath))
-            {
-                engine.FileSystem.TempPath = commandSettings.TempPath;
-            }
-            if (!string.IsNullOrEmpty(commandSettings.CachePath))
-            {
-                engine.FileSystem.CachePath = commandSettings.CachePath;
-            }
-
             // Clean mode
             if (commandSettings.NoClean)
             {

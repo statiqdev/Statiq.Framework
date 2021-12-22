@@ -6,7 +6,7 @@ using Statiq.Common;
 namespace Statiq.Core
 {
     // Initially based on code from Cake (http://cakebuild.net/)
-    internal class FileSystem : IFileSystem
+    public class FileSystem : IFileSystem
     {
         private NormalizedPath _rootPath = Directory.GetCurrentDirectory();
         private NormalizedPath _outputPath = "output";

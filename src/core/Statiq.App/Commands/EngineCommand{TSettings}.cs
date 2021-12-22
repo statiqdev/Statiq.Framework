@@ -13,8 +13,9 @@ namespace Statiq.App
             IConfiguratorCollection configurators,
             Settings settings,
             IServiceCollection serviceCollection,
+            IFileSystem fileSystem,
             Bootstrapper bootstrapper)
-            : base(configurators, settings, serviceCollection)
+            : base(configurators, settings, serviceCollection, fileSystem)
         {
             Bootstrapper = bootstrapper;
             Settings = settings;

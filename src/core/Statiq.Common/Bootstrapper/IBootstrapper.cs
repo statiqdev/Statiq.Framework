@@ -20,6 +20,11 @@ namespace Statiq.Common
         IBaseCommand Command { get; }
 
         /// <summary>
+        /// Gets the file system that will be passed to the engine.
+        /// </summary>
+        IFileSystem FileSystem { get; }
+
+        /// <summary>
         /// Executes the engine.
         /// </summary>
         /// <returns>The exit code (0 for success).</returns>

@@ -33,6 +33,9 @@ namespace Statiq.App
         public string[] Arguments { get; }
 
         /// <inheritdoc/>
+        public IFileSystem FileSystem { get; } = new FileSystem();
+
+        /// <inheritdoc/>
         public Bootstrapper SetDefaultCommand<TCommand>()
             where TCommand : class, ICommand
         {
@@ -59,6 +62,8 @@ namespace Statiq.App
             Configurators.Configure(configurableConfiguration);
             IConfigurationRoot configurationRoot = configurationBuilder.Build();
             Settings settings = new Settings(configurationRoot);
+            ConfigurableInitialSettings configurableInitialSettings = new ConfigurableInitialSettings(settings);
+            Configurators.Configure(configurableInitialSettings);
 
             // Create the service collection
             IServiceCollection serviceCollection = CreateServiceCollection() ?? new ServiceCollection();
@@ -69,12 +74,16 @@ namespace Statiq.App
             serviceCollection.TryAddSingleton<ISettings>(settings);
 
             // Run configurators on the service collection
-            ConfigurableServices configurableServices = new ConfigurableServices(serviceCollection, settings);
+            ConfigurableServices configurableServices = new ConfigurableServices(serviceCollection, settings, FileSystem);
             Configurators.Configure(configurableServices);
 
             // Add simple logging to make sure it's available in commands before the engine adds in,
             // but add it after the configurators have a chance to configure logging
             serviceCollection.AddLogging();
+
+            // Configure the file system after settings so configurators can use them if needed
+            ConfigurableFileSystem configurableFileSystem = new ConfigurableFileSystem(FileSystem, settings, serviceCollection);
+            Configurators.Configure(configurableFileSystem);
 
             // Create the stand-alone command line service container and register a few types needed for the CLI
             CommandServiceTypeRegistrar registrar = new CommandServiceTypeRegistrar();
@@ -82,6 +91,7 @@ namespace Statiq.App
             registrar.RegisterInstance(typeof(IConfigurationRoot), settings);
             registrar.RegisterInstance(typeof(IServiceCollection), serviceCollection);
             registrar.RegisterInstance(typeof(IConfiguratorCollection), Configurators);
+            registrar.RegisterInstance(typeof(IFileSystem), FileSystem);
             registrar.RegisterInstance(typeof(Bootstrapper), this);
 
             // Create the command line parser and run the command

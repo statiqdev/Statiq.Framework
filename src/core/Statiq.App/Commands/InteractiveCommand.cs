@@ -31,11 +31,13 @@ namespace Statiq.App
             IConfiguratorCollection configurators,
             Settings settings,
             IServiceCollection serviceCollection,
+            IFileSystem fileSystem,
             Bootstrapper bootstrapper)
             : base(
                   configurators,
                   settings,
                   serviceCollection,
+                  fileSystem,
                   bootstrapper)
         {
         }

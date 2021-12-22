@@ -5,14 +5,20 @@ namespace Statiq.Common
 {
     public class ConfigurableServices : IConfigurable
     {
-        public ConfigurableServices(IServiceCollection services, ISettings settings)
+        public ConfigurableServices(
+            IServiceCollection services,
+            IReadOnlySettings settings,
+            IReadOnlyFileSystem fileSystem)
         {
             Services = services;
             Settings = settings;
+            FileSystem = fileSystem;
         }
 
         public IServiceCollection Services { get; }
 
-        public ISettings Settings { get; }
+        public IReadOnlySettings Settings { get; }
+
+        public IReadOnlyFileSystem FileSystem { get; }
     }
 }
