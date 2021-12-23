@@ -441,7 +441,7 @@ namespace Statiq.CodeAnalysis
         {
             // Create the compilation (have to supply an XmlReferenceResolver to handle include XML doc comments)
             MetadataReference mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
-            Compilation compilation = CSharpCompilation
+            CSharpCompilation compilation = CSharpCompilation
                 .Create(await _compilationAssemblyName.GetValueAsync(null, context))
                 .WithReferences(mscorlib)
                 .WithOptions(new CSharpCompilationOptions(
@@ -470,7 +470,7 @@ namespace Statiq.CodeAnalysis
             return visitor.Finish();
         }
 
-        private async Task<Compilation> AddSourceFilesAsync(IExecutionContext context, Compilation compilation)
+        private async Task<CSharpCompilation> AddSourceFilesAsync(IExecutionContext context, CSharpCompilation compilation)
         {
             ConcurrentBag<SyntaxTree> syntaxTrees = new ConcurrentBag<SyntaxTree>();
             if (await _inputDocuments.GetValueAsync(null, context))
@@ -507,7 +507,8 @@ namespace Statiq.CodeAnalysis
             return result;
         }
 
-        private async Task<Compilation> AddAssemblyReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
+        private async Task<CSharpCompilation> AddAssemblyReferencesAsync(
+            IExecutionContext context, List<ISymbol> symbols, CSharpCompilation compilation)
         {
             List<string> assemblyGlobs = await GetGlobValuesAsync(_assemblyGlobs, context);
             IEnumerable<IFile> assemblyFiles = context.FileSystem.GetInputFiles(assemblyGlobs);
@@ -538,7 +539,8 @@ namespace Statiq.CodeAnalysis
             }
         }
 
-        private async Task<Compilation> AddProjectReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
+        private async Task<CSharpCompilation> AddProjectReferencesAsync(
+            IExecutionContext context, List<ISymbol> symbols, CSharpCompilation compilation)
         {
             // Generate a single Workspace and add all of the projects to it
             StringWriter log = new StringWriter();
@@ -581,7 +583,8 @@ namespace Statiq.CodeAnalysis
             return await AddProjectReferencesAsync(context, projects, symbols, compilation);
         }
 
-        private async Task<Compilation> AddSolutionReferencesAsync(IExecutionContext context, List<ISymbol> symbols, Compilation compilation)
+        private async Task<CSharpCompilation> AddSolutionReferencesAsync(
+            IExecutionContext context, List<ISymbol> symbols, CSharpCompilation compilation)
         {
             List<string> solutionGlobs = await GetGlobValuesAsync(_solutionGlobs, context);
             IEnumerable<IFile> solutionFiles = context.FileSystem.GetInputFiles(solutionGlobs);
@@ -620,7 +623,8 @@ namespace Statiq.CodeAnalysis
             return compilation;
         }
 
-        private async Task<Compilation> AddProjectReferencesAsync(IExecutionContext context, IEnumerable<Project> projects, List<ISymbol> symbols, Compilation compilation)
+        private async Task<CSharpCompilation> AddProjectReferencesAsync(
+            IExecutionContext context, IEnumerable<Project> projects, List<ISymbol> symbols, CSharpCompilation compilation)
         {
             // Add a references to the compilation for each project in the solution
             MetadataReference[] compilationReferences = await projects

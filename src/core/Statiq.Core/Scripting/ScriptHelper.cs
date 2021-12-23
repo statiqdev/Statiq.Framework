@@ -112,41 +112,7 @@ namespace Statiq.Core
             using (MemoryStream memoryStream = _executionState.MemoryStreamFactory.GetStream())
             {
                 EmitResult result = compilation.Emit(memoryStream);
-
-                // Log warnings
-                List<string> warningMessages = result.Diagnostics
-                    .Where(x => x.Severity == DiagnosticSeverity.Warning)
-                    .Select(GetCompilationErrorMessage)
-                    .ToList();
-                if (warningMessages.Count > 0)
-                {
-                    logger.LogWarning(
-                        "{0} warnings compiling script:{1}{2}",
-                        warningMessages.Count,
-                        Environment.NewLine,
-                        string.Join(Environment.NewLine, warningMessages));
-                }
-
-                // Log errors
-                List<string> errorMessages = result.Diagnostics
-                    .Where(x => x.Severity == DiagnosticSeverity.Error)
-                    .Select(GetCompilationErrorMessage)
-                    .ToList();
-                if (errorMessages.Count > 0)
-                {
-                    logger.LogError(
-                        "{0} errors compiling script:{1}{2}",
-                        errorMessages.Count,
-                        Environment.NewLine,
-                        string.Join(Environment.NewLine, errorMessages));
-                }
-
-                // Throw for errors or not success
-                if (!result.Success || errorMessages.Count > 0)
-                {
-                    throw new ScriptCompilationException(errorMessages);
-                }
-
+                LogAndEnsureCompilationSuccess(result, logger);
                 memoryStream.Seek(0, SeekOrigin.Begin);
                 return memoryStream.ToArray();
             }
@@ -181,6 +147,45 @@ namespace Statiq.Core
             namespaces.Add("System.Text");
             namespaces.Add("Statiq.Core");
             return namespaces;
+        }
+
+        public static void LogAndEnsureCompilationSuccess(EmitResult result, ILogger logger, string name = null)
+        {
+            // Log warnings
+            List<string> warningMessages = result.Diagnostics
+                .Where(x => x.Severity == DiagnosticSeverity.Warning)
+                .Select(GetCompilationErrorMessage)
+                .ToList();
+            if (warningMessages.Count > 0)
+            {
+                logger.LogWarning(
+                    "{0} warnings compiling {1}:{2}{3}",
+                    warningMessages.Count,
+                    name ?? "script",
+                    Environment.NewLine,
+                    string.Join(Environment.NewLine, warningMessages));
+            }
+
+            // Log errors
+            List<string> errorMessages = result.Diagnostics
+                .Where(x => x.Severity == DiagnosticSeverity.Error)
+                .Select(GetCompilationErrorMessage)
+                .ToList();
+            if (errorMessages.Count > 0)
+            {
+                logger.LogError(
+                    "{0} errors compiling {1}:{2}{3}",
+                    errorMessages.Count,
+                    name ?? "script",
+                    Environment.NewLine,
+                    string.Join(Environment.NewLine, errorMessages));
+            }
+
+            // Throw for errors or not success
+            if (!result.Success || errorMessages.Count > 0)
+            {
+                throw new ScriptCompilationException(errorMessages);
+            }
         }
 
         private static string GetCompilationErrorMessage(Diagnostic diagnostic)

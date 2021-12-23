@@ -30,7 +30,7 @@ namespace Statiq.CodeAnalysis.Analysis
         private readonly ConcurrentHashSet<IMethodSymbol> _extensionMethods =
             new ConcurrentHashSet<IMethodSymbol>();
 
-        private readonly Compilation _compilation;
+        private readonly CSharpCompilation _compilation;
         private readonly IExecutionContext _context;
         private readonly Func<ISymbol, Compilation, bool> _symbolPredicate;
         private readonly Func<ISymbol, Compilation, NormalizedPath> _destination;
@@ -50,7 +50,7 @@ namespace Statiq.CodeAnalysis.Analysis
         private bool _finished; // When this is true, we're visiting external symbols and should omit certain metadata and don't descend
 
         public AnalyzeSymbolVisitor(
-            Compilation compilation,
+            CSharpCompilation compilation,
             IExecutionContext context,
             Func<ISymbol, Compilation, bool> symbolPredicate,
             Func<ISymbol, Compilation, NormalizedPath> destination,
@@ -69,21 +69,20 @@ namespace Statiq.CodeAnalysis.Analysis
             _implicitInheritDoc = implicitInheritDoc;
 
             // Get any reflected methods we need
-            Assembly reflectedAssembly = typeof(Workspace).Assembly;
-            Type reflectedType = reflectedAssembly.GetType("Microsoft.CodeAnalysis.Shared.Extensions.ITypeSymbolExtensions");
+            Assembly workspacesAssembly = typeof(Workspace).Assembly;
+            Type reflectedType = workspacesAssembly.GetType("Microsoft.CodeAnalysis.Shared.Extensions.ITypeSymbolExtensions");
             MethodInfo reflectedMethod = reflectedType.GetMethod("GetAccessibleMembersInThisAndBaseTypes");
             _getAccessibleMembersInThisAndBaseTypes = reflectedMethod.MakeGenericMethod(typeof(ISymbol));
 
-            reflectedAssembly = typeof(CSharpCompilation).Assembly;
-            _documentationCommentCompiler = reflectedAssembly.GetType("Microsoft.CodeAnalysis.CSharp.DocumentationCommentCompiler");
+            Assembly csharpAssembly = typeof(CSharpCompilation).Assembly;
+            _documentationCommentCompiler = csharpAssembly.GetType("Microsoft.CodeAnalysis.CSharp.DocumentationCommentCompiler");
             _documentationCommentCompilerDefaultVisit = _documentationCommentCompiler.GetMethod("DefaultVisit");
 
-            _publicModelSymbol = reflectedAssembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel.Symbol");
+            _publicModelSymbol = csharpAssembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel.Symbol");
             _publicModelSymbolUnderlyingType = _publicModelSymbol.GetProperty("UnderlyingSymbol", BindingFlags.Instance | BindingFlags.NonPublic);
 
-            reflectedAssembly = typeof(Diagnostic).Assembly;
-            reflectedType = reflectedAssembly.GetType("Microsoft.CodeAnalysis.DiagnosticBag");
-            _diagnosticBagGetInstance = reflectedType.GetMethod("GetInstance", BindingFlags.Static | BindingFlags.NonPublic);
+            reflectedType = csharpAssembly.GetType("Microsoft.CodeAnalysis.CSharp.BindingDiagnosticBag");
+            _diagnosticBagGetInstance = reflectedType.GetMethod("GetInstance", 0, BindingFlags.Static | BindingFlags.NonPublic, null, Array.Empty<Type>(), null);
             _diagnosticBagFree = reflectedType.GetMethod("Free", BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
@@ -321,7 +320,7 @@ namespace Statiq.CodeAnalysis.Analysis
             ImmutableHashSet<ISymbol> remove = members
                 .Select(x => (ISymbol)(x as IMethodSymbol)?.OverriddenMethod ?? (x as IPropertySymbol)?.OverriddenProperty)
                 .Where(x => x is object)
-                .ToImmutableHashSet();
+                .ToImmutableHashSet(SymbolEqualityComparer.Default);
             members.RemoveAll(x => remove.Contains(x));
             return members;
         }
@@ -494,8 +493,8 @@ namespace Statiq.CodeAnalysis.Analysis
                 new object[]
                 {
                     (string)null,
-                    _compilation,
-                    writer,
+                    (CSharpCompilation)_compilation,
+                    (TextWriter)writer,
                     (SyntaxTree)null,
                     (TextSpan?)null,
                     true,
@@ -545,7 +544,9 @@ namespace Statiq.CodeAnalysis.Analysis
 
         private IReadOnlyList<IDocument> GetImplementingTypes(INamedTypeSymbol symbol) =>
             _namedTypes
-                .Where(x => x.Key.AllInterfaces.Select(GetOriginalSymbolDefinition).Contains(GetOriginalSymbolDefinition(symbol)))
+                .Where(x => x.Key.AllInterfaces
+                    .Select(GetOriginalSymbolDefinition)
+                    .Contains(GetOriginalSymbolDefinition(symbol), SymbolEqualityComparer.Default))
                 .Select(x => x.Value)
                 .ToImmutableArray();
 

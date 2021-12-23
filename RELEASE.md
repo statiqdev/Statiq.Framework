@@ -3,10 +3,13 @@
 - **Breaking change:** `IFileSystem` must now be injected and passed to `BaseCommand` when creating custom commands that derive from it.
 - **Breaking change:** `IEngine.FileSystem` is now a `IReadOnlyFileSystem` instead of `IFileSystem` (I.e. the file system can no longer be edited one the engine has been created).
 - **Breaking change:** The file system can no longer be configured through `Bootstrapper.ConfigureEngine()` and must be done through `Bootstrapper.ConfigureFileSystem()` or one of the other more specific file system bootstrapper extensions like `Bootstrapper.SetRootPath()`.
-- Updated Markdig in `Statiq.Markdown` to 0.26.0.
+- Updated `Markdig` in `Statiq.Markdown` to 0.26.0.
 - Fixed a number of inconsistencies with the way the `@` symbol was being escaped in Markdown documents (using `\@` should now work reliably, see https://github.com/statiqdev/Discussions/discussions/109).
 - `Engine` now accepts a `IReadOnlyFileSystem` as a constructor argument (a new file system will be created if one is not provided).
 - Added bootstrapper support for "initial" settings which are set before other parts of the bootstrapper (like the file system or services). Use these new initial settings bootstrapper extensions when you need to add a setting very early in the bootstrapper process just after reading configuration files (for most use cases the existing settings extensions continue to be preferred).
+- Updated `Buildalyzer` in `Statiq.CodeAnalysis` to 3.2.5.
+- Updated `Microsoft.CodeAnalysis.CSharp` in `Statiq.Core` to 3.11.0.
+- 
 
 # 1.0.0-beta.52
 

@@ -204,13 +204,52 @@ namespace Statiq.Common
             }
         }
 
-        private void LoadAssemblies(Assembly assembly, HashSet<Assembly> visited)
+        /// <summary>
+        /// Adds additional assemblies to the catalog.
+        /// </summary>
+        /// <param name="assembliesToAdd">The assemblies to add.</param>
+        public void AddAssemblies(IEnumerable<Assembly> assembliesToAdd)
+        {
+            assembliesToAdd.ThrowIfNull(nameof(assembliesToAdd));
+            Populate();
+            lock (_populateLock)
+            {
+                HashSet<Assembly> visitedAssemblies = new HashSet<Assembly>(_assemblies, new AssemblyComparer());
+                HashSet<Assembly> addedAssemblies = new HashSet<Assembly>(new AssemblyComparer());
+                foreach (Assembly assembly in assembliesToAdd)
+                {
+                    LoadAssemblies(assembly, visitedAssemblies, addedAssemblies);
+
+                    if (addedAssemblies.Count > 0)
+                    {
+                        // Load types in parallel
+                        Parallel.ForEach(addedAssemblies, assembly =>
+                        {
+                            _debugMessages.Enqueue($"Cataloging types in assembly {assembly.FullName}");
+                            foreach (Type type in GetLoadableTypes(assembly).Where(x => x.IsPublic && x.IsClass))
+                            {
+                                _classTypes.TryAdd(type.FullName, type);
+                            }
+                        });
+
+                        // Reset the array with the new assemblies
+                        _assemblies = visitedAssemblies.ToArray();
+                    }
+                }
+            }
+        }
+
+        private void LoadAssemblies(Assembly assembly, HashSet<Assembly> visited, HashSet<Assembly> added = null)
         {
             if (visited.Contains(assembly))
             {
                 return;
             }
             visited.Add(assembly);
+            if (added is object)
+            {
+                added.Add(assembly);
+            }
 
             try
             {
@@ -219,7 +258,7 @@ namespace Statiq.Common
                     try
                     {
                         Assembly referencedAssembly = Assembly.Load(assemblyName);
-                        LoadAssemblies(referencedAssembly, visited);
+                        LoadAssemblies(referencedAssembly, visited, added);
                     }
                     catch (Exception ex)
                     {
