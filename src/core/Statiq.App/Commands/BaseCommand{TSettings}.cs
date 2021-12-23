@@ -89,48 +89,44 @@ namespace Statiq.App
                 FileSystem.CachePath = commandSettings.CachePath;
             }
 
-            // Build a temporary service provider so we can log and do some other stuff
-            // Make sure to place it in it's own scope so transient services get correctly disposed
-            // Singleton resolutions must *only* be done on types that were registered as instances, not constructed by the service provider
+            // Set the command in the bootstrapper
+            Bootstrapper bootstrapper = ServiceCollection.GetRequiredImplementationInstance<Bootstrapper>();
+            bootstrapper.Command = this;
+
+            // Build a temporary service provider just to get a logger
             IServiceProvider services = ServiceCollection.BuildServiceProvider();
-            ClassCatalog classCatalog = services.GetService<ClassCatalog>();
-            using (IServiceScope serviceScope = services.CreateScope())
+            ILogger logger = services.GetRequiredService<ILogger<Bootstrapper>>();
+
+            // Log pending ClassCatalog messages
+            ClassCatalog classCatalog = ServiceCollection.GetRequiredImplementationInstance<ClassCatalog>();
+            classCatalog?.LogDebugMessagesTo(logger);
+
+            // Debug/Attach
+            if (commandSettings.Debug)
             {
-                // Set the command in the bootstrapper (this is okay from the temporary service provider
-                // and gets the same instance because the bootstrapper is registered as an instance singleton)
-                serviceScope.ServiceProvider.GetRequiredService<Bootstrapper>().Command = this;
-
-                // Log pending messages
-                ILogger logger = serviceScope.ServiceProvider.GetRequiredService<ILogger<Bootstrapper>>();
-                classCatalog?.LogDebugMessagesTo(logger);
-
-                // Debug/Attach
+                logger.LogInformation($"Waiting to launch a debugger for process {Process.GetCurrentProcess().Id}...");
+                Debugger.Launch();
+            }
+            if ((commandSettings.Attach || commandSettings.Debug) && !Debugger.IsAttached)
+            {
                 if (commandSettings.Debug)
                 {
-                    logger.LogInformation($"Waiting to launch a debugger for process {Process.GetCurrentProcess().Id}...");
-                    Debugger.Launch();
+                    // If we got here the debug command was unsuccessful
+                    logger.LogInformation($"Could not launch a debugger, waiting for manual attach");
                 }
-                if ((commandSettings.Attach || commandSettings.Debug) && !Debugger.IsAttached)
+                logger.LogInformation($"Waiting for a debugger to attach to process {Process.GetCurrentProcess().Id} (or press a key to continue)...");
+                while (!Debugger.IsAttached && !Console.KeyAvailable)
                 {
-                    if (commandSettings.Debug)
-                    {
-                        // If we got here the debug command was unsuccessful
-                        logger.LogInformation($"Could not launch a debugger, waiting for manual attach");
-                    }
-                    logger.LogInformation($"Waiting for a debugger to attach to process {Process.GetCurrentProcess().Id} (or press a key to continue)...");
-                    while (!Debugger.IsAttached && !Console.KeyAvailable)
-                    {
-                        Thread.Sleep(100);
-                    }
-                    if (Console.KeyAvailable)
-                    {
-                        Console.ReadKey(true);
-                        logger.LogInformation("Key pressed, continuing execution");
-                    }
-                    else
-                    {
-                        logger.LogInformation("Debugger attached, continuing execution");
-                    }
+                    Thread.Sleep(100);
+                }
+                if (Console.KeyAvailable)
+                {
+                    Console.ReadKey(true);
+                    logger.LogInformation("Key pressed, continuing execution");
+                }
+                else
+                {
+                    logger.LogInformation("Debugger attached, continuing execution");
                 }
             }
 

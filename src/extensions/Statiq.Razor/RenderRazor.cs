@@ -31,7 +31,7 @@ namespace Statiq.Razor
     /// </para>
     /// <para>
     /// This module requires Razor services to be registered before use with
-    /// <see cref="IServiceCollectionExtensions.AddRazor(IServiceCollection, IReadOnlyFileSystem, ClassCatalog)"/>.
+    /// <see cref="IServiceCollectionExtensions.AddRazor(IServiceCollection, IReadOnlyFileSystem)"/>.
     /// This is done automatically when using Statiq.App and the Bootstrapper.
     /// </para>
     /// </remarks>

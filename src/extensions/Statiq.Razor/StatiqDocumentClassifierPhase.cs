@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Razor.Extensions;
 using Microsoft.AspNetCore.Mvc.Razor.TagHelpers;
@@ -80,9 +81,13 @@ namespace Statiq.Razor
         // Add namespaces
         private void AddNamespaces(NamespaceDeclarationIntermediateNode namespaceDeclaration)
         {
+            HashSet<string> existing = namespaceDeclaration.Children
+                .OfType<UsingDirectiveIntermediateNode>()
+                .Select(x => x.Content)
+                .ToHashSet();
             int insertIndex = namespaceDeclaration.Children.IndexOf(
                 namespaceDeclaration.Children.OfType<UsingDirectiveIntermediateNode>().First());
-            foreach (string ns in _namespaces)
+            foreach (string ns in _namespaces.Where(x => !existing.Contains(x)))
             {
                 namespaceDeclaration.Children.Insert(
                     insertIndex,

@@ -23,9 +23,8 @@ namespace Statiq.Razor
         /// </summary>
         /// <param name="serviceCollection">The service collection to register services in.</param>
         /// <param name="fileSystem">The file system or <c>null</c> if we're expecting one to already be registered.</param>
-        /// <param name="classCatalog">An existing class catalog or <c>null</c> to scan assemblies during registration.</param>
         /// <returns>The service collection.</returns>
-        public static IServiceCollection AddRazor(this IServiceCollection serviceCollection, IReadOnlyFileSystem fileSystem = null, ClassCatalog classCatalog = null)
+        public static IServiceCollection AddRazor(this IServiceCollection serviceCollection, IReadOnlyFileSystem fileSystem = null)
         {
             // Register the file system if we're not expecting one from an engine
             if (fileSystem is object)
@@ -59,10 +58,10 @@ namespace Statiq.Razor
                 .AddRazorViewEngine();
 
             // Remove *any* existing IViewCompilerProvider registration before adding the one in AddRazorRuntimeCompilation (see #204)
-            ServiceDescriptor serviceDescriptor = builder.Services.FirstOrDefault((ServiceDescriptor f) => f.ServiceType == typeof(IViewCompilerProvider));
-            if (serviceDescriptor is object)
+            ServiceDescriptor viewCompilerProviderDescriptor = builder.Services.FirstOrDefault((ServiceDescriptor f) => f.ServiceType == typeof(IViewCompilerProvider));
+            if (viewCompilerProviderDescriptor is object)
             {
-                builder.Services.Remove(serviceDescriptor);
+                builder.Services.Remove(viewCompilerProviderDescriptor);
             }
 
             builder = builder.AddRazorRuntimeCompilation();
@@ -77,7 +76,7 @@ namespace Statiq.Razor
             // Replace the runtime view compiler provider with our own
             // Create a short-lived service provider to get an instance we can inject
             // This is expected to be a RuntimeViewCompilerProvider (see #204)
-            ServiceDescriptor viewCompilerProviderDescriptor = serviceCollection.First((ServiceDescriptor f) => f.ServiceType == typeof(IViewCompilerProvider));
+            viewCompilerProviderDescriptor = serviceCollection.First((ServiceDescriptor f) => f.ServiceType == typeof(IViewCompilerProvider));
             serviceCollection.Replace(ServiceDescriptor.Describe(
                 typeof(IViewCompilerProvider),
                 serviceProvider =>
@@ -89,15 +88,10 @@ namespace Statiq.Razor
                         serviceProvider.GetRequiredService<INamespacesCollection>()),
                 viewCompilerProviderDescriptor.Lifetime));
 
-            // Add all loaded assemblies
-            CompilationReferencesProvider referencesProvider = new CompilationReferencesProvider();
-            referencesProvider.Assemblies.AddRange((classCatalog ?? new ClassCatalog()).GetAssemblies());
-
-            // And a couple needed assemblies that might not be loaded in the AppDomain yet
-            referencesProvider.Assemblies.Add(typeof(IHtmlContent).Assembly);
-            referencesProvider.Assemblies.Add(Assembly.Load(new AssemblyName("Microsoft.CSharp")));
-
-            // Add the reference provider as an ApplicationPart
+            // Add the reference provider as an ApplicationPart, getting an existing
+            // ClassCatalog from the service collection if there is one
+            ClassCatalog classCatalog = builder.Services.GetImplementationInstance<ClassCatalog>();
+            CompilationReferencesProvider referencesProvider = new CompilationReferencesProvider(classCatalog);
             builder.ConfigureApplicationPartManager(x => x.ApplicationParts.Add(referencesProvider));
 
             return serviceCollection;
@@ -106,16 +100,47 @@ namespace Statiq.Razor
         // Need to use a custom ICompilationReferencesProvider because the default one won't provide a path for the running assembly
         // (see Microsoft.AspNetCore.Mvc.ApplicationParts.AssemblyPartExtensions.GetReferencePaths() for why,
         // the running assembly returns a DependencyContext when used with "dotnet run" and therefore won't return it's own path)
+        // We also need to lazily calculate the reference paths so that late additions to the ClassCatalog get
+        // picked up (like compiled theme projects)
         private class CompilationReferencesProvider : ApplicationPart, ICompilationReferencesProvider
         {
+            private static readonly object ReferencePathLock = new object();
+
+            private readonly ClassCatalog _classCatalog;
+
+            private string[] _referencePaths;
+
+            public CompilationReferencesProvider(ClassCatalog classCatalog)
+            {
+                _classCatalog = classCatalog;
+            }
+
             public HashSet<Assembly> Assemblies { get; } = new HashSet<Assembly>(new AssemblyComparer());
 
             public override string Name => nameof(CompilationReferencesProvider);
 
-            public IEnumerable<string> GetReferencePaths() =>
-                Assemblies
-                    .Where(x => !x.IsDynamic && !string.IsNullOrEmpty(x.Location))
-                    .Select(x => x.Location);
+            public IEnumerable<string> GetReferencePaths()
+            {
+                lock (ReferencePathLock)
+                {
+                    if (_referencePaths is null)
+                    {
+                        HashSet<Assembly> assemblies = new HashSet<Assembly>(new AssemblyComparer());
+                        assemblies.AddRange((_classCatalog ?? new ClassCatalog()).GetAssemblies());
+
+                        // And a couple needed assemblies that might not be loaded in the AppDomain yet
+                        assemblies.Add(typeof(IHtmlContent).Assembly);
+                        assemblies.Add(Assembly.Load(new AssemblyName("Microsoft.CSharp")));
+
+                        _referencePaths = assemblies
+                            .Where(x => !x.IsDynamic && !string.IsNullOrEmpty(x.Location))
+                            .Select(x => x.Location)
+                            .ToArray();
+                    }
+
+                    return _referencePaths;
+                }
+            }
         }
     }
 }

@@ -7,9 +7,9 @@
 - Fixed a number of inconsistencies with the way the `@` symbol was being escaped in Markdown documents (using `\@` should now work reliably, see https://github.com/statiqdev/Discussions/discussions/109).
 - `Engine` now accepts a `IReadOnlyFileSystem` as a constructor argument (a new file system will be created if one is not provided).
 - Added bootstrapper support for "initial" settings which are set before other parts of the bootstrapper (like the file system or services). Use these new initial settings bootstrapper extensions when you need to add a setting very early in the bootstrapper process just after reading configuration files (for most use cases the existing settings extensions continue to be preferred).
-- Updated `Buildalyzer` in `Statiq.CodeAnalysis` to 3.2.5.
+- Updated `Buildalyzer` in `Statiq.CodeAnalysis` to 3.2.6.
 - Updated `Microsoft.CodeAnalysis.CSharp` in `Statiq.Core` to 3.11.0.
-- 
+- Improved diagnostic logging of compilation message in `Statiq.Razor`.
 
 # 1.0.0-beta.52
 

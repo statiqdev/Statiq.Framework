@@ -48,7 +48,7 @@ namespace Statiq.Razor
 
         /// <summary>
         /// Creates a Razor compiler using an existing set of services, which must already have Razor services registered using
-        /// <see cref="IServiceCollectionExtensions.AddRazor(IServiceCollection, IReadOnlyFileSystem, ClassCatalog)"/>.
+        /// <see cref="IServiceCollectionExtensions.AddRazor(IServiceCollection, IReadOnlyFileSystem)"/>.
         /// </summary>
         /// <param name="serviceProvider">The service provider to use.</param>
         public RazorCompiler(IServiceProvider serviceProvider)

@@ -166,6 +166,18 @@ namespace Statiq.Razor
                 pdbStream,
                 options: AssemblyEmitOptions);
 
+            // Log diagnostics and throw if there are errors
+            foreach (Diagnostic diagnostic in result.Diagnostics.Where(x => !x.IsSuppressed))
+            {
+                LogLevel logLevel = diagnostic.Severity switch
+                {
+                    DiagnosticSeverity.Error => LogLevel.Error,
+                    DiagnosticSeverity.Warning => LogLevel.Warning,
+                    DiagnosticSeverity.Info => LogLevel.Information,
+                    _ => LogLevel.Debug
+                };
+                IExecutionContext.Current.Log(logLevel, diagnostic.ToString());
+            }
             if (!result.Success)
             {
                 throw CreateCompilationFailedExceptionFromDiagnostics(codeDocument, generatedCode, assemblyName, result.Diagnostics);
