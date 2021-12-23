@@ -6,6 +6,7 @@ using Spectre.Console.Cli;
 namespace Statiq.App
 {
     // Wraps a standalone service collection just for command use
+    // Singleton resolutions must *only* be done on types that were registered as instances, not constructed by the service provider
     internal class CommandServiceTypeRegistrar : ITypeRegistrar
     {
         private readonly IServiceCollection _serviceCollection = new ServiceCollection();

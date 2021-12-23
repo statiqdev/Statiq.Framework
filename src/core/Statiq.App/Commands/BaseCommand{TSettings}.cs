@@ -91,11 +91,13 @@ namespace Statiq.App
 
             // Build a temporary service provider so we can log and do some other stuff
             // Make sure to place it in it's own scope so transient services get correctly disposed
+            // Singleton resolutions must *only* be done on types that were registered as instances, not constructed by the service provider
             IServiceProvider services = ServiceCollection.BuildServiceProvider();
             ClassCatalog classCatalog = services.GetService<ClassCatalog>();
             using (IServiceScope serviceScope = services.CreateScope())
             {
-                // Set the command in the bootstrapper
+                // Set the command in the bootstrapper (this is okay from the temporary service provider
+                // and gets the same instance because the bootstrapper is registered as an instance singleton)
                 serviceScope.ServiceProvider.GetRequiredService<Bootstrapper>().Command = this;
 
                 // Log pending messages
