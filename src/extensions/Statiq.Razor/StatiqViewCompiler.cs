@@ -135,7 +135,8 @@ namespace Statiq.Razor
             });
 
             // Create a view descriptor from the result
-            return new CompiledViewDescriptor(compilationResult.CompiledItem)
+            RazorCompiledItem compiledItem = compilationResult.GetCompiledItem();
+            return new CompiledViewDescriptor(compiledItem)
             {
                 RelativePath = normalizedPath,
                 ExpirationTokens = expirationTokens
@@ -186,11 +187,7 @@ namespace Statiq.Razor
             // Load the assembly from the streams
             assemblyStream.Seek(0, SeekOrigin.Begin);
             pdbStream.Seek(0, SeekOrigin.Begin);
-            Assembly assembly = Assembly.Load(assemblyStream.ToArray(), pdbStream.ToArray());
-
-            // Get the Razor item and return
-            RazorCompiledItem razorCompiledItem = CompiledItemLoader.LoadItems(assembly).SingleOrDefault();
-            return new CompilationResult(assemblyName, assemblyStream, pdbStream, assembly, razorCompiledItem);
+            return new DynamicCompilationResult(assemblyStream, pdbStream, assemblyName);
         }
     }
 }

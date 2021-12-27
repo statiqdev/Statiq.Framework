@@ -105,14 +105,16 @@ namespace Statiq.Core
         {
             IEnumerable<IFile> files = context.FileSystem.GetInputFiles(value);
             files = await files.ParallelWhereAsync(async file => _predicate is null || await _predicate(file));
-            return files.AsParallel().Select(file =>
-            {
-                context.LogDebug($"Read file {file.Path.FullPath}");
-                IContentProvider contentProvider = _mediaType is null
-                    ? file?.GetContentProvider()
-                    : file?.GetContentProvider(_mediaType(file));
-                return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(), contentProvider);
-            });
+            return files.AsParallel()
+                .Select(file =>
+                {
+                    context.LogDebug($"Read file {file.Path.FullPath}");
+                    IContentProvider contentProvider = _mediaType is null
+                        ? file?.GetContentProvider()
+                        : file?.GetContentProvider(_mediaType(file));
+                    return context.CloneOrCreateDocument(input, file.Path, file.Path.GetRelativeInputPath(), contentProvider);
+                })
+                .OrderBy(x => x.Source); // Use a deterministic output ordering
         }
     }
 }

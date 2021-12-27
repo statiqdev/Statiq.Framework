@@ -55,15 +55,9 @@ namespace Statiq.Razor
             {
                 try
                 {
-                    Assembly assembly = Assembly.LoadFile(item.Value);
                     _compilationCache.TryAdd(
                         item.Key.CompilerCacheKey,
-                        new CompilationResult(
-                            Path.GetFileName(item.Value),
-                            null,
-                            null,
-                            assembly,
-                            StatiqViewCompiler.CompiledItemLoader.LoadItems(assembly).SingleOrDefault()));
+                        new FileCompilationResult(item.Value));
                     count++;
                 }
                 catch (Exception ex)
@@ -87,7 +81,8 @@ namespace Statiq.Razor
                 if (!_requestedCompilationResults.Contains(compilationCacheKey)
                     && _compilationCache.TryRemove(compilationCacheKey, out CompilationResult compilationResult))
                 {
-                    compilationResult.DisposeMemoryStreams(); // Just in case
+                    // This will unload the assembly and dispose the memory streams if a dynamic compilation
+                    compilationResult.Dispose();
                     removed++;
                 }
             }

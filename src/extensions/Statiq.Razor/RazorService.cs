@@ -134,8 +134,7 @@ namespace Statiq.Razor
                 foreach (KeyValuePair<CompilerCacheKey, CompilationResult> compilerCacheItem in compilerCache)
                 {
                     AssemblyCacheKey addAssemblyCacheKey = AssemblyCacheKey.Get(compilerItem.Key, compilerCacheItem.Key);
-                    if (!_cachedAssemblies.ContainsKey(addAssemblyCacheKey)
-                        && compilerCacheItem.Value.AssemblyStream is object)
+                    if (!_cachedAssemblies.ContainsKey(addAssemblyCacheKey) && compilerCacheItem.Value is DynamicCompilationResult dynamicCompilationResult)
                     {
                         // Only cache to disk if using the cache
                         if (useCache)
@@ -143,35 +142,27 @@ namespace Statiq.Razor
                             // Make a best effort to save the assemblies, but don't panic if they don't
                             try
                             {
-                                string assemblyFileName = $"razor/{compilerCacheItem.Value.AssemblyName}.dll";
-                                IFile assemblyFile = args.Engine.FileSystem.GetCacheFile(assemblyFileName);
-                                compilerCacheItem.Value.AssemblyStream.Seek(0, SeekOrigin.Begin);
-                                await assemblyFile.WriteFromAsync(compilerCacheItem.Value.AssemblyStream, cancellationToken: args.Engine.CancellationToken);
-
-                                // Also save the PDB if we have one
-                                if (compilerCacheItem.Value.PdbStream is object)
+                                string assemblyFileName = await dynamicCompilationResult.SaveToCacheAsync(
+                                    args.Engine.FileSystem, args.Engine.CancellationToken);
+                                if (assemblyFileName is object)
                                 {
-                                    IFile pdbFile = args.Engine.FileSystem.GetCacheFile(Path.ChangeExtension(assemblyFileName, ".pdb"));
-                                    compilerCacheItem.Value.PdbStream.Seek(0, SeekOrigin.Begin);
-                                    await pdbFile.WriteFromAsync(compilerCacheItem.Value.PdbStream, cancellationToken: args.Engine.CancellationToken);
+                                    _cachedAssemblies.Add(addAssemblyCacheKey, assemblyFileName);
+                                    addCount++;
                                 }
-
-                                _cachedAssemblies.Add(addAssemblyCacheKey, assemblyFileName);
-                                addCount++;
                             }
                             catch (Exception ex)
                             {
-                                args.Engine.Logger.LogDebug($"Error while saving assembly or pdb file {compilerCacheItem.Value.AssemblyName} to cache: {ex.Message}");
+                                args.Engine.Logger.LogDebug($"Error while saving assembly or pdb file {dynamicCompilationResult.AssemblyName} to cache: {ex.Message}");
                             }
                         }
-                    }
 
-                    // Whether we saved the assembly or not, go ahead and dispose the memory streams so they can be collected
-                    compilerCacheItem.Value.DisposeMemoryStreams();
+                        // Whether we saved the assembly or not, go ahead and dispose the memory streams so they can be collected
+                        dynamicCompilationResult.DisposeMemoryStreams();
+                    }
                 }
             }
-            args.Engine.Logger.LogDebug($"Removed {removeCount} stale Razor assemblies from the cache");
-            args.Engine.Logger.LogDebug($"Cached and saved {addCount} new Razor assemblies");
+            args.Engine.Logger.LogInformation($"Removed {removeCount} stale Razor assemblies from the cache");
+            args.Engine.Logger.LogInformation($"Cached and saved {addCount} new Razor assemblies");
 
             // Clean up and write the cache index if we're caching
             if (useCache)
@@ -184,7 +175,7 @@ namespace Statiq.Razor
                     HashSet<string> cachedAssemblyFiles = new HashSet<string>(_cachedAssemblies.Values);
                     foreach (IFile assemblyFile in cacheDirectory.GetFiles())
                     {
-                        if (!_cachedAssemblies.Values.Contains($"razor/{assemblyFile.Path.FileNameWithoutExtension}.dll"))
+                        if (!cachedAssemblyFiles.Contains($"razor/{assemblyFile.Path.FileNameWithoutExtension}.dll"))
                         {
                             try
                             {
@@ -197,7 +188,7 @@ namespace Statiq.Razor
                             }
                         }
                     }
-                    args.Engine.Logger.LogDebug($"Deleted {deleteCount} stale cached Razor assembly files");
+                    args.Engine.Logger.LogInformation($"Deleted {deleteCount} stale cached Razor assembly files");
                 }
 
                 // Write the updated cache file
