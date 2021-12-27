@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -39,6 +40,7 @@ namespace Statiq.Core
         private Config<bool> _invalidateDocuments;
         private string[] _pipelineDependencies;
         private Config<IEnumerable<IDocument>> _documentDependencies;
+        private bool _withoutSourceMapping;
 
         public CacheDocuments(params IModule[] modules)
             : base(modules)
@@ -98,6 +100,25 @@ namespace Statiq.Core
         public CacheDocuments WithDocumentDependencies(Config<IEnumerable<IDocument>> documentDependencies)
         {
             _documentDependencies = documentDependencies;
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies whether source mapping of inputs to outputs should be used (the default is to use source mapping).
+        /// </summary>
+        /// <remarks>
+        /// By default output documents are cached based on mapping their document source to the same source
+        /// from input documents. This allows for fine-grained cache invalidation. Setting this to <c>true</c>
+        /// will treat all input documents as a single unit and will invalidate the entire cache if any of them change.
+        /// </remarks>
+        /// <param name="withoutSourceMapping">
+        /// <c>true</c> if source mapping should be disabled and a change in
+        /// any input document should result in invalidating the entire cache.
+        /// </param>
+        /// <returns>The current module instance.</returns>
+        public CacheDocuments WithoutSourceMapping(bool withoutSourceMapping = true)
+        {
+            _withoutSourceMapping = withoutSourceMapping;
             return this;
         }
 
@@ -170,9 +191,15 @@ namespace Statiq.Core
             {
                 // If the current cache is null, this is the first run through
                 misses.AddRange(context.Inputs);
-                IEnumerable<IGrouping<NormalizedPath, IDocument>> inputGroups = context.Inputs
-                    .Where(input => !input.Source.IsNull)
-                    .GroupBy(input => input.Source);
+                IEnumerable<IGrouping<NormalizedPath, IDocument>> inputGroups = _withoutSourceMapping
+                    ? new[]
+                    {
+                        // If we're not mapping sources, group everything under an empty path
+                        new ExplicitGrouping<NormalizedPath, IDocument>(NormalizedPath.Empty, context.Inputs)
+                    }
+                    : context.Inputs
+                        .Where(input => !input.Source.IsNull)
+                        .GroupBy(input => input.Source);
                 foreach (IGrouping<NormalizedPath, IDocument> inputGroup in inputGroups)
                 {
                     missesBySource.Add(inputGroup.Key, await CombineCacheCodesAsync(inputGroup, context));
@@ -182,7 +209,14 @@ namespace Statiq.Core
             {
                 // Note that due to cloning we could have multiple inputs and outputs with the same source
                 // so we need to check all inputs with a given source and only consider a hit when they all match
-                foreach (IGrouping<NormalizedPath, IDocument> inputGroup in context.Inputs.GroupBy(x => x.Source))
+                IEnumerable<IGrouping<NormalizedPath, IDocument>> inputGroups = _withoutSourceMapping
+                    ? new[]
+                    {
+                        // If we're not mapping sources, group everything under an empty path
+                        new ExplicitGrouping<NormalizedPath, IDocument>(NormalizedPath.Empty, context.Inputs)
+                    }
+                    : context.Inputs.GroupBy(input => input.Source);
+                foreach (IGrouping<NormalizedPath, IDocument> inputGroup in inputGroups)
                 {
                     string message = null;
 
@@ -223,9 +257,11 @@ namespace Statiq.Core
                                 }
                                 message = $"Cache miss for documents with source {inputGroup.Key}: document(s) were invalidated";
                             }
-
-                            // Miss due to corresponding input hash not matching
-                            message = $"Cache miss for documents with source {inputGroup.Key}: dependent documents have changed";
+                            else
+                            {
+                                // Miss due to corresponding input hash not matching
+                                message = $"Cache miss for documents with source {inputGroup.Key}: dependent documents have changed";
+                            }
                         }
 
                         // Miss with non-null source: track source and input documents so we can cache for next pass
@@ -246,8 +282,16 @@ namespace Statiq.Core
             IReadOnlyList<IDocument> results = misses.Count == 0
                 ? ImmutableArray<IDocument>.Empty
                 : await context.ExecuteModulesAsync(Children, misses);
-            Dictionary<NormalizedPath, IGrouping<NormalizedPath, IDocument>> resultsBySource =
-                results.Where(x => !x.Source.IsNull).GroupBy(x => x.Source).ToDictionary(x => x.Key, x => x);
+            Dictionary<NormalizedPath, IGrouping<NormalizedPath, IDocument>> resultsBySource = _withoutSourceMapping
+                ? new Dictionary<NormalizedPath, IGrouping<NormalizedPath, IDocument>>
+                {
+                    // If we're not mapping sources, group everything under an empty path
+                    {
+                        NormalizedPath.Empty,
+                        new ExplicitGrouping<NormalizedPath, IDocument>(NormalizedPath.Empty, results)
+                    }
+                }
+                : results.Where(x => !x.Source.IsNull).GroupBy(x => x.Source).ToDictionary(x => x.Key, x => x);
             outputs.AddRange(results);
 
             // Cache all miss sources, even if they resulted in an empty result document set

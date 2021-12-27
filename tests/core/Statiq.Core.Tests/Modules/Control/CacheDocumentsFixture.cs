@@ -362,6 +362,84 @@ namespace Statiq.Core.Tests.Modules.Control
                 missedContent.ShouldBe(new[] { "a1", "a2", "b", "a1", "a2" });
                 results.Select(x => x.Content).ShouldBe(new[] { "b", "a1", "a2" });
             }
+
+            [Test]
+            public async Task InvalidatesAllWhenNotSourceMapping()
+            {
+                // Given
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a1");
+                TestDocument a2 = new TestDocument(new NormalizedPath("/a"), "a2");
+                TestDocument a3 = new TestDocument(new NormalizedPath("/a"), "a3");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
+
+                List<string> missedContent = new List<string>();
+                CacheDocuments cacheDocuments = new CacheDocuments(
+                    new ExecuteConfig(Config.FromDocument(async doc =>
+                    {
+                        missedContent.Add(await doc.GetContentStringAsync());
+                        return doc;
+                    })).WithParallelExecution(false))
+                    .WithoutSourceMapping();
+
+                // When
+                _ = await ExecuteAsync(new[] { a1, a2, b1 }, cacheDocuments);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a1, a3, b1 }, cacheDocuments);
+
+                // Then
+                missedContent.ShouldBe(new[] { "a1", "a2", "b", "a1", "a3", "b" });
+                results.Select(x => x.Content).ShouldBe(new[] { "a1", "a3", "b" });
+            }
+
+            [Test]
+            public async Task SendsAllToChildModulesWhenNotSourceMapping()
+            {
+                // Given
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
+                TestDocument b2 = new TestDocument(new NormalizedPath("/b"), "b2");
+
+                List<string> missedContent = new List<string>();
+                CacheDocuments cacheDocuments = new CacheDocuments(
+                    new ExecuteConfig(Config.FromDocument(async doc =>
+                    {
+                        missedContent.Add(await doc.GetContentStringAsync());
+                        return doc;
+                    })).WithParallelExecution(false))
+                    .WithoutSourceMapping();
+
+                // When
+                _ = await ExecuteAsync(new[] { a1, b1 }, cacheDocuments);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a1, b2 }, cacheDocuments);
+
+                // Then
+                missedContent.ShouldBe(new[] { "a", "b", "a", "b2" });
+                results.Select(x => x.Content).ShouldBe(new[] { "a", "b2" });
+            }
+
+            [Test]
+            public async Task ReturnsCachedDocumentsWhenNotSourceMapping()
+            {
+                // Given
+                TestDocument a1 = new TestDocument(new NormalizedPath("/a"), "a");
+                TestDocument b1 = new TestDocument(new NormalizedPath("/b"), "b");
+
+                List<string> missedContent = new List<string>();
+                CacheDocuments cacheDocuments = new CacheDocuments(
+                        new ExecuteConfig(Config.FromDocument(async doc =>
+                        {
+                            missedContent.Add(await doc.GetContentStringAsync());
+                            return doc;
+                        })).WithParallelExecution(false))
+                    .WithoutSourceMapping();
+
+                // When
+                _ = await ExecuteAsync(new[] { a1, b1 }, cacheDocuments);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a1, b1 }, cacheDocuments);
+
+                // Then
+                missedContent.ShouldBe(new[] { "a", "b" });
+                results.Select(x => x.Content).ShouldBe(new[] { "a", "b" });
+            }
         }
     }
 }
