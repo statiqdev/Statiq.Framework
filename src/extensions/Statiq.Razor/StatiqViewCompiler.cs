@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -151,12 +152,79 @@ namespace Statiq.Razor
         public string GetNormalizedPath(string relativePath) =>
             (string)GetNormalizedPathMethod.Invoke(InnerViewCompilerProvider.GetCompiler(), new object[] { relativePath });
 
+        private class RazorSourceDocumentListAdapter : IReadOnlyList<char>
+        {
+            private readonly RazorSourceDocument _sourceDocument;
+
+            public RazorSourceDocumentListAdapter(RazorSourceDocument sourceDocument)
+            {
+                _sourceDocument = sourceDocument;
+            }
+
+            public IEnumerator<char> GetEnumerator() =>
+                throw new NotSupportedException();
+
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+            public int Count => _sourceDocument.Length;
+
+            // Convert it to all lower for case-insensitive comparisons
+            public char this[int index] => char.ToLower(_sourceDocument[index]);
+        }
+
+        private static readonly IReadOnlyList<char> InheritsDirective = "@inherits".ToCharArray();
+
+        private static readonly IReadOnlyList<char> ModelDirective = "@model".ToCharArray();
+
         // Adapted from RuntimeViewCompiler.CompileAndEmit() (Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation.dll) to save assembly to disk for caching
         // Also called from RazorCompiler for consistency (from the single global StatiqViewCompiler instance for access to the InnerViewCompilerProvider)
         public CompilationResult CompileAndEmit(RazorCodeDocument codeDocument, string generatedCode)
         {
+            // Display a warning if we have a @inherits directive and a @model directive
+            RazorSourceDocument inheritImportSource = codeDocument.Imports?.FirstOrDefault(x =>
+            {
+                int inheritsIndex = new RazorSourceDocumentListAdapter(x).IndexOf(InheritsDirective);
+                return inheritsIndex > -1
+                    && (inheritsIndex == 0 || x[inheritsIndex - 1] == '\r' || x[inheritsIndex - 1] == '\n');
+            });
+            if (inheritImportSource is object)
+            {
+                int modelIndex = new RazorSourceDocumentListAdapter(codeDocument.Source).IndexOf(ModelDirective);
+                if (modelIndex > -1
+                    && (modelIndex == 0 || codeDocument.Source[modelIndex - 1] == '\r' || codeDocument.Source[modelIndex - 1] == '\n'))
+                {
+                    IExecutionContext.Current.LogWarning(
+                        $"{codeDocument.Source.GetFilePathForDisplay()} includes a \"@model\" directive that"
+                        + $" is potentially overridden by a \"@inherits\" directive in {inheritImportSource.GetFilePathForDisplay()},"
+                        + $" consider using \"@inherits StatiqRazorPage<TModel>\" in {Path.GetFileName(codeDocument.Source.FilePath)} instead");
+                }
+            }
+
+            // If we have a source, use that (accounting for length and special chars), otherwise use a random file name
+            string assemblyName;
+            if (!string.IsNullOrEmpty(codeDocument.Source.FilePath))
+            {
+                assemblyName = codeDocument.Source.FilePath.Trim(new[] { '/', '\\' });
+                if (assemblyName.Length > 80)
+                {
+                    assemblyName = assemblyName.Substring(0, 80) + "." + Path.GetRandomFileName();
+                }
+                char[] sourceBuffer = assemblyName.ToCharArray();
+                for (int c = 0; c < sourceBuffer.Length; c++)
+                {
+                    if (sourceBuffer[c] != '.' && !char.IsLetterOrDigit(sourceBuffer[c]))
+                    {
+                        sourceBuffer[c] = '_';
+                    }
+                }
+                assemblyName = new string(sourceBuffer);
+            }
+            else
+            {
+                assemblyName = Path.GetRandomFileName();
+            }
+
             // Create the compilation
-            string assemblyName = Path.GetRandomFileName();
             CSharpCompilation compilation = CreateCompilation(generatedCode, assemblyName);
 
             // Emit the compilation to memory streams (disposed later at the end of this execution round)
