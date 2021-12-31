@@ -1,3 +1,5 @@
+# 1.0.0-beta.54
+
 # 1.0.0-beta.53
 
 - **Breaking change:** `IFileSystem` must now be injected and passed to `BaseCommand` when creating custom commands that derive from it.
