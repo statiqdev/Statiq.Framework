@@ -1,5 +1,7 @@
 # 1.0.0-beta.54
 
+- Added a new `RetryModules` module that provides simple retry behavior for it's child modules (it essentially wraps module execution with [Polly](http://www.thepollyproject.org/)).
+
 # 1.0.0-beta.53
 
 - **Breaking change:** `IFileSystem` must now be injected and passed to `BaseCommand` when creating custom commands that derive from it.
