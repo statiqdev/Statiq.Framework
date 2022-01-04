@@ -71,9 +71,9 @@ namespace Statiq.App
             }
             if (commandSettings.InputPaths?.Length > 0)
             {
-                // Clear existing default paths if new ones are set
+                // Remove the defaults if new ones are set
                 // and reverse the inputs so the last one is first to match the semantics of multiple occurrence single options
-                FileSystem.InputPaths.Clear();
+                FileSystem.InputPaths.RemoveDefault();
                 FileSystem.InputPaths.AddRange(commandSettings.InputPaths.Select(x => new NormalizedPath(x)).Reverse());
             }
             if (!string.IsNullOrEmpty(commandSettings.OutputPath))

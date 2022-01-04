@@ -12,7 +12,7 @@ namespace Statiq.Common
     public class PathCollection : IReadOnlyList<NormalizedPath>
     {
         private readonly object _pathsLock = new object();
-        private readonly List<NormalizedPath> _paths = new List<NormalizedPath>();
+        private readonly List<(NormalizedPath Path, bool IsDefault)> _paths = new List<(NormalizedPath, bool)>();
 
         /// <summary>
         /// Initializes a new path collection.
@@ -24,16 +24,22 @@ namespace Statiq.Common
         /// <summary>
         /// Initializes a new path collection.
         /// </summary>
-        /// <param name="paths">The paths.</param>
+        /// <param name="paths">The default paths.</param>
         public PathCollection(IEnumerable<NormalizedPath> paths)
         {
-            AddRange(paths);
+            if (paths is object)
+            {
+                foreach (NormalizedPath path in paths.Distinct(PathEqualityComparer.Default))
+                {
+                    _paths.Add((path, true));
+                }
+            }
         }
 
         /// <summary>
         /// Initializes a new path collection.
         /// </summary>
-        /// <param name="paths">The paths.</param>
+        /// <param name="paths">The default paths.</param>
         public PathCollection(params NormalizedPath[] paths)
             : this((IEnumerable<NormalizedPath>)paths)
         {
@@ -50,13 +56,21 @@ namespace Statiq.Common
             lock (_pathsLock)
             {
                 // Copy to a new list for consumers so as not to lock during enumeration
-                return _paths.ToList().GetEnumerator();
+                return _paths.Select(x => x.Path).ToList().GetEnumerator();
             }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public int RemoveDefault()
+        {
+            lock (_pathsLock)
+            {
+                return _paths.RemoveAll(x => x.IsDefault);
+            }
         }
 
         /// <summary>
@@ -88,7 +102,7 @@ namespace Statiq.Common
             {
                 lock (_pathsLock)
                 {
-                    return _paths[index];
+                    return _paths[index].Path;
                 }
             }
             set
@@ -96,7 +110,7 @@ namespace Statiq.Common
                 value.ThrowIfNull(nameof(value));
                 lock (_pathsLock)
                 {
-                    _paths[index] = value;
+                    _paths[index] = (value, false);
                 }
             }
         }
@@ -108,16 +122,16 @@ namespace Statiq.Common
         /// <returns>
         /// <c>true</c> if the path was added; <c>false</c> if the path was already present.
         /// </returns>
-        public bool Add(in NormalizedPath path)
+        public bool Add(NormalizedPath path)
         {
             path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
             {
-                if (_paths.Contains(path, PathEqualityComparer.Default))
+                if (_paths.Any(x => PathEqualityComparer.Default.Equals(x.Path, path)))
                 {
                     return false;
                 }
-                _paths.Add(path);
+                _paths.Add((path, false));
                 return true;
             }
         }
@@ -134,9 +148,9 @@ namespace Statiq.Common
             {
                 foreach (NormalizedPath path in paths)
                 {
-                    if (!_paths.Contains(path, PathEqualityComparer.Default))
+                    if (!_paths.Any(x => PathEqualityComparer.Default.Equals(x.Path, path)))
                     {
-                        _paths.Add(path);
+                        _paths.Add((path, false));
                     }
                 }
             }
@@ -158,11 +172,11 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns><c>true</c> if the collection contains the path, otherwise <c>false</c>.</returns>
-        public bool Contains(in NormalizedPath path)
+        public bool Contains(NormalizedPath path)
         {
             lock (_pathsLock)
             {
-                return _paths.Contains(path, PathEqualityComparer.Default);
+                return _paths.Any(x => PathEqualityComparer.Default.Equals(x.Path, path));
             }
         }
 
@@ -176,7 +190,7 @@ namespace Statiq.Common
             path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
             {
-                int index = _paths.FindIndex(x => x.Equals(path));
+                int index = _paths.FindIndex(x => x.Path.Equals(path));
                 if (index == -1)
                 {
                     return false;
@@ -198,7 +212,7 @@ namespace Statiq.Common
             {
                 foreach (NormalizedPath path in paths)
                 {
-                    int index = _paths.FindIndex(x => x.Equals(path));
+                    int index = _paths.FindIndex(x => x.Path.Equals(path));
                     if (index != -1)
                     {
                         _paths.RemoveAt(index);
@@ -217,7 +231,7 @@ namespace Statiq.Common
             path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
             {
-                return _paths.FindIndex(x => x.Equals(path));
+                return _paths.FindIndex(x => x.Path.Equals(path));
             }
         }
 
@@ -227,16 +241,16 @@ namespace Statiq.Common
         /// <param name="index">The index where the path should be inserted.</param>
         /// <param name="path">The path to insert.</param>
         /// <returns><c>true</c> if the collection did not contain the path and it was inserted, otherwise <c>false</c></returns>
-        public bool Insert(int index, in NormalizedPath path)
+        public bool Insert(int index, NormalizedPath path)
         {
             path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
             {
-                if (_paths.Contains(path, PathEqualityComparer.Default))
+                if (_paths.Any(x => PathEqualityComparer.Default.Equals(x.Path, path)))
                 {
                     return false;
                 }
-                _paths.Insert(index, path);
+                _paths.Insert(index, (path, false));
                 return true;
             }
         }
