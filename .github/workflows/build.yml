@@ -22,4 +22,4 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Build and Test
-        run: dotnet run --project "build/Statiq.Framework.Build/Statiq.Framework.Build.csproj" -- test
+        run: dotnet test
