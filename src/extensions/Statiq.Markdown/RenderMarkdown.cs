@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,9 +23,14 @@ namespace Statiq.Markdown
     /// Razor modules. If you want to include a raw <c>@</c> symbol when <c>EscapeAt()</c> is <c>true</c>, use
     /// <c>\@</c>. Use the <c>EscapeAt()</c> fluent method to modify this behavior.
     /// </remarks>
+    /// <metadata cref="MarkdownKeys.MarkdownExtensions" usage="Input" />
     /// <category>Templates</category>
     public class RenderMarkdown : ParallelModule
     {
+        // Used to cache extensions from the metadata key
+        private readonly ConcurrentCache<string, (Type, IMarkdownExtension)> _extensionCache =
+            new ConcurrentCache<string, (Type, IMarkdownExtension)>(false, StringComparer.OrdinalIgnoreCase);
+
         private readonly string _sourceKey;
         private readonly string _destinationKey;
         private readonly OrderedList<IMarkdownExtension> _extensions = new OrderedList<IMarkdownExtension>();
@@ -138,13 +144,7 @@ namespace Statiq.Markdown
                 IMarkdownExtension extension = Activator.CreateInstance(type) as IMarkdownExtension;
                 if (extension is object)
                 {
-                    // Need - public void AddIfNotAlready<TElement>(TElement telement) where TElement : T;
-                    // Kind of hack'ish, but no other way to preserve types.
-                    MethodInfo addIfNotAlready = typeof(OrderedList<IMarkdownExtension>).GetMethods()
-                        .Where(x => x.IsGenericMethod && x.Name == nameof(OrderedList<IMarkdownExtension>.AddIfNotAlready) && x.GetParameters().Length == 1)
-                        .Select(x => x.MakeGenericMethod(type))
-                        .Single();
-                    addIfNotAlready.Invoke(_extensions, new object[] { extension });
+                    AddUntypedExtension(_extensions, type, extension);
                 }
             }
 
@@ -199,11 +199,76 @@ namespace Statiq.Markdown
                 return input.Yield();
             }
 
-            // Add the @ escaping extension if escaping @ symbols
             OrderedList<IMarkdownExtension> extensions = _extensions;
+
+            // Add extensions from the metadata key
+            IReadOnlyList<string> extensionNames = input.GetList<string>(MarkdownKeys.MarkdownExtensions);
+            if (extensionNames is object && extensionNames.Count > 0)
+            {
+                extensions = new OrderedList<IMarkdownExtension>(_extensions);
+                foreach (string extensionName in extensionNames)
+                {
+                    (Type, IMarkdownExtension) extension = _extensionCache.GetOrAdd(
+                        extensionName,
+                        (key, classCatalog) =>
+                        {
+                            // Try to find it in the class catalog by exact name
+                            Type extensionType = classCatalog
+                                .FindTypes(key, StringComparison.OrdinalIgnoreCase)
+                                .FirstOrDefault(x => typeof(IMarkdownExtension).IsAssignableFrom(x));
+
+                            // Then try to find if by appending "Extension" (if not already)
+                            if (extensionType is null && !key.EndsWith("Extension", StringComparison.OrdinalIgnoreCase))
+                            {
+                                extensionType = classCatalog
+                                    .FindTypes(key + "Extension", StringComparison.OrdinalIgnoreCase)
+                                    .FirstOrDefault(x => typeof(IMarkdownExtension).IsAssignableFrom(x));
+                            }
+
+                            if (extensionType is object)
+                            {
+                                ConstructorInfo[] constructors = extensionType.GetConstructors();
+                                ParameterInfo[][] constructorParameters = constructors
+                                    .Select(x => x.GetParameters())
+                                    .OrderBy(x => x.Length)
+                                    .ToArray();
+                                if (constructorParameters.Any(x => x.Length == 0))
+                                {
+                                    return (extensionType, (IMarkdownExtension)Activator.CreateInstance(extensionType));
+                                }
+
+                                // That didn't work so try to create it using default arguments
+                                ParameterInfo[] usableParameters = constructorParameters
+                                    .FirstOrDefault(x => x.All(p => p.HasDefaultValue));
+                                if (usableParameters is object)
+                                {
+                                    return (
+                                        extensionType,
+                                        (IMarkdownExtension)Activator.CreateInstance(
+                                            extensionType, usableParameters.Select(p => p.DefaultValue).ToArray()));
+                                }
+
+                                throw new Exception($"Markdown extension {extensionName} does not have a usable constructor");
+                            }
+
+                            throw new Exception($"Could not find Markdown extension {extensionName}");
+                        },
+                        context.ClassCatalog);
+                    AddUntypedExtension(extensions, extension.Item1, extension.Item2);
+                }
+            }
+
+            // Add the @ escaping extension if escaping @ symbols
             if (_escapeAt)
             {
-                extensions = new OrderedList<IMarkdownExtension>(_extensions.Concat(new EscapeAtExtension()));
+                if (extensions == _extensions)
+                {
+                    extensions = new OrderedList<IMarkdownExtension>(_extensions.Concat(new EscapeAtExtension()));
+                }
+                else
+                {
+                    extensions.Add(new EscapeAtExtension());
+                }
             }
 
             // Render the Markdown
@@ -240,6 +305,20 @@ namespace Statiq.Markdown
                     .Clone(metadataItems)
                     .Yield();
             }
+        }
+
+        private static void AddUntypedExtension(
+            OrderedList<IMarkdownExtension> extensions,
+            Type extensionType,
+            IMarkdownExtension extension)
+        {
+            // Need - public void AddIfNotAlready<TElement>(TElement element) where TElement : T;
+            // Kind of hackish, but no other way to preserve types.
+            MethodInfo addIfNotAlready = typeof(OrderedList<IMarkdownExtension>).GetMethods()
+                .Where(x => x.IsGenericMethod && x.Name == nameof(OrderedList<IMarkdownExtension>.AddIfNotAlready) && x.GetParameters().Length == 1)
+                .Select(x => x.MakeGenericMethod(extensionType))
+                .Single();
+            addIfNotAlready.Invoke(extensions, new object[] { extension });
         }
     }
 }

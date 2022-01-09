@@ -93,6 +93,28 @@ namespace Statiq.Common
         }
 
         /// <summary>
+        /// Finds types by searching for the provided type name.
+        /// </summary>
+        /// <param name="name">The type name to search for.</param>
+        /// <returns>All matching types.</returns>
+        public IEnumerable<Type> FindTypes(string name) => FindTypes(name, StringComparison.Ordinal);
+
+        /// <summary>
+        /// Finds types by searching for the provided type name.
+        /// </summary>
+        /// <param name="name">The type name to search for.</param>
+        /// <param name="comparisonType">The comparison type to use.</param>
+        /// <returns>All matching types.</returns>
+        public IEnumerable<Type> FindTypes(string name, StringComparison comparisonType)
+        {
+            name.ThrowIfNull(nameof(name));
+            Populate();
+            return _classTypes
+                .Where(x => x.Value.Name.Equals(name, comparisonType))
+                .Select(x => x.Value);
+        }
+
+        /// <summary>
         /// Gets an instance for a specified full name.
         /// </summary>
         /// <param name="fullName">The full name of the type.</param>

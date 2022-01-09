@@ -587,6 +587,98 @@ Looking @Good, \@Man!
                 // Then
                 result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
+
+            [Test]
+            public async Task ShouldAddExtensionsFromMetadata()
+            {
+                // Given
+                const string input = @"# Hi!
+
+A simple | table
+-- | --
+with multiple | lines
+
+End";
+                const string output = @"<h1>Hi!</h1>
+<table class=""table"">
+<thead>
+<tr>
+<th>A simple</th>
+<th>table</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>with multiple</td>
+<td>lines</td>
+</tr>
+</tbody>
+</table>
+<p>End</p>
+";
+                TestDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        {
+                            MarkdownKeys.MarkdownExtensions,
+                            new[] { "PipeTableExtension", "BootstrapExtension" }
+                        }
+                    },
+                    input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldAddExtensionsFromMetadataWithSimpleNames()
+            {
+                // Given
+                const string input = @"# Hi!
+
+A simple | table
+-- | --
+with multiple | lines
+
+End";
+                const string output = @"<h1>Hi!</h1>
+<table class=""table"">
+<thead>
+<tr>
+<th>A simple</th>
+<th>table</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>with multiple</td>
+<td>lines</td>
+</tr>
+</tbody>
+</table>
+<p>End</p>
+";
+                TestDocument document = new TestDocument(
+                    new MetadataItems
+                    {
+                        {
+                            MarkdownKeys.MarkdownExtensions,
+                            new[] { "PipeTableExtension", "BootstrapExtension" }
+                        }
+                    },
+                    input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
         }
     }
 }

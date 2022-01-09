@@ -213,9 +213,9 @@ namespace Statiq.Core
         /// <remarks>
         /// By default, error process output is logged as error messages.
         /// </remarks>
-        /// <param name="logOutput"><c>true</c> or <c>null</c> to log error process output as error messages, <c>false</c> to log them as debug messages.</param>
+        /// <param name="logErrors"><c>true</c> or <c>null</c> to log error process output as error messages, <c>false</c> to log them as debug messages.</param>
         /// <returns>The current module instance.</returns>
-        public StartProcess LogErrors(Config<bool> logOutput = null) => (StartProcess)SetConfig(LogErrorsKey, logOutput ?? true);
+        public StartProcess LogErrors(Config<bool> logErrors = null) => (StartProcess)SetConfig(LogErrorsKey, logErrors ?? true);
 
         /// <summary>
         /// Toggles throwing an exception if the process exits with a non-zero exit code.

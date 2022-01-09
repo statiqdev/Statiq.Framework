@@ -2,6 +2,7 @@
 
 - Added a new `RetryModules` module that provides simple retry behavior for it's child modules (it essentially wraps module execution with [Polly](http://www.thepollyproject.org/)).
 - Added a new `PathCollection.RemoveDefault()` method that only removes the default paths, and used it to clear only default paths when alternate input paths are specified on the command line.
+- Added a new `MarkdownExtensions` metadata key that can add Markdown (I.e. Markdig) extension types per-document or per-execution using metadata/settings (#222). 
 
 # 1.0.0-beta.53
 
