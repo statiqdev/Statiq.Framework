@@ -62,8 +62,6 @@ namespace Statiq.App
             Configurators.Configure(configurableConfiguration);
             IConfigurationRoot configurationRoot = configurationBuilder.Build();
             Settings settings = new Settings(configurationRoot);
-            ConfigurableInitialSettings configurableInitialSettings = new ConfigurableInitialSettings(settings);
-            Configurators.Configure(configurableInitialSettings);
 
             // Create the service collection
             IServiceCollection serviceCollection = CreateServiceCollection() ?? new ServiceCollection();
@@ -80,6 +78,10 @@ namespace Statiq.App
             // Add simple logging to make sure it's available in commands before the engine adds in,
             // but add it after the configurators have a chance to configure logging
             serviceCollection.AddLogging();
+
+            // Configure additional settings
+            ConfigurableSettings configurableSettings = new ConfigurableSettings(settings, serviceCollection, FileSystem);
+            Configurators.Configure(configurableSettings);
 
             // Configure the file system after settings so configurators can use them if needed
             ConfigurableFileSystem configurableFileSystem = new ConfigurableFileSystem(FileSystem, settings, serviceCollection);

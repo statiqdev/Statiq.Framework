@@ -12,7 +12,7 @@ namespace Statiq.Common
     public class PathCollection : IReadOnlyList<NormalizedPath>
     {
         private readonly object _pathsLock = new object();
-        private readonly List<(NormalizedPath Path, bool IsDefault)> _paths = new List<(NormalizedPath, bool)>();
+        private readonly List<(NormalizedPath Path, bool IsRemovable)> _paths = new List<(NormalizedPath, bool)>();
 
         /// <summary>
         /// Initializes a new path collection.
@@ -65,14 +65,6 @@ namespace Statiq.Common
             return GetEnumerator();
         }
 
-        public int RemoveDefault()
-        {
-            lock (_pathsLock)
-            {
-                return _paths.RemoveAll(x => x.IsDefault);
-            }
-        }
-
         /// <summary>
         /// Gets the number of directories in the collection.
         /// </summary>
@@ -110,7 +102,7 @@ namespace Statiq.Common
                 value.ThrowIfNull(nameof(value));
                 lock (_pathsLock)
                 {
-                    _paths[index] = (value, false);
+                    _paths[index] = (value, true);
                 }
             }
         }
@@ -122,7 +114,17 @@ namespace Statiq.Common
         /// <returns>
         /// <c>true</c> if the path was added; <c>false</c> if the path was already present.
         /// </returns>
-        public bool Add(NormalizedPath path)
+        public bool Add(NormalizedPath path) => Add(path, true);
+
+        /// <summary>
+        /// Adds the specified path to the collection.
+        /// </summary>
+        /// <param name="path">The path to add.</param>
+        /// <param name="removable">Indicates if this path can be removed from the collection.</param>
+        /// <returns>
+        /// <c>true</c> if the path was added; <c>false</c> if the path was already present.
+        /// </returns>
+        public bool Add(NormalizedPath path, bool removable)
         {
             path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
@@ -131,7 +133,7 @@ namespace Statiq.Common
                 {
                     return false;
                 }
-                _paths.Add((path, false));
+                _paths.Add((path, removable));
                 return true;
             }
         }
@@ -140,7 +142,14 @@ namespace Statiq.Common
         /// Adds the specified paths to the collection.
         /// </summary>
         /// <param name="paths">The paths to add.</param>
-        public void AddRange(IEnumerable<NormalizedPath> paths)
+        public void AddRange(IEnumerable<NormalizedPath> paths) => AddRange(paths, true);
+
+        /// <summary>
+        /// Adds the specified paths to the collection.
+        /// </summary>
+        /// <param name="paths">The paths to add.</param>
+        /// <param name="removable">Indicates if this path can be removed from the collection.</param>
+        public void AddRange(IEnumerable<NormalizedPath> paths, bool removable)
         {
             paths.ThrowIfNull(nameof(paths));
 
@@ -150,20 +159,20 @@ namespace Statiq.Common
                 {
                     if (!_paths.Any(x => PathEqualityComparer.Default.Equals(x.Path, path)))
                     {
-                        _paths.Add((path, false));
+                        _paths.Add((path, removable));
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Clears all paths from the collection.
+        /// Clears all removable paths from the collection.
         /// </summary>
         public void Clear()
         {
             lock (_pathsLock)
             {
-                _paths.Clear();
+                _paths.RemoveAll(x => x.IsRemovable);
             }
         }
 
@@ -184,14 +193,14 @@ namespace Statiq.Common
         /// Removes the specified path.
         /// </summary>
         /// <param name="path">The path to remove.</param>
-        /// <returns><c>true</c> if the collection contained the path, otherwise <c>false</c>.</returns>
+        /// <returns><c>true</c> if the collection contained the path and it was removable, otherwise <c>false</c>.</returns>
         public bool Remove(NormalizedPath path)
         {
             path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
             {
                 int index = _paths.FindIndex(x => x.Path.Equals(path));
-                if (index == -1)
+                if (index == -1 || !_paths[index].IsRemovable)
                 {
                     return false;
                 }
@@ -201,7 +210,7 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Removes the specified paths from the collection.
+        /// Removes the specified paths from the collection if they're removable.
         /// </summary>
         /// <param name="paths">The paths to remove.</param>
         public void RemoveRange(IEnumerable<NormalizedPath> paths)
@@ -213,7 +222,7 @@ namespace Statiq.Common
                 foreach (NormalizedPath path in paths)
                 {
                     int index = _paths.FindIndex(x => x.Path.Equals(path));
-                    if (index != -1)
+                    if (index != -1 || !_paths[index].IsRemovable)
                     {
                         _paths.RemoveAt(index);
                     }
@@ -241,7 +250,16 @@ namespace Statiq.Common
         /// <param name="index">The index where the path should be inserted.</param>
         /// <param name="path">The path to insert.</param>
         /// <returns><c>true</c> if the collection did not contain the path and it was inserted, otherwise <c>false</c></returns>
-        public bool Insert(int index, NormalizedPath path)
+        public bool Insert(int index, NormalizedPath path) => Insert(index, path, true);
+
+        /// <summary>
+        /// Inserts the path at the specified index.
+        /// </summary>
+        /// <param name="index">The index where the path should be inserted.</param>
+        /// <param name="path">The path to insert.</param>
+        /// <param name="removable">Indicates if this path can be removed from the collection.</param>
+        /// <returns><c>true</c> if the collection did not contain the path and it was inserted, otherwise <c>false</c></returns>
+        public bool Insert(int index, NormalizedPath path, bool removable)
         {
             path.ThrowIfNull(nameof(path));
             lock (_pathsLock)
@@ -250,19 +268,23 @@ namespace Statiq.Common
                 {
                     return false;
                 }
-                _paths.Insert(index, (path, false));
+                _paths.Insert(index, (path, removable));
                 return true;
             }
         }
 
         /// <summary>
-        /// Removes the path at the specified index.
+        /// Removes the path at the specified index if it's removable.
         /// </summary>
         /// <param name="index">The index where the path should be removed.</param>
         public void RemoveAt(int index)
         {
             lock (_pathsLock)
             {
+                if ((index >= 0 || index < _paths.Count) && !_paths[index].IsRemovable)
+                {
+                    return;
+                }
                 _paths.RemoveAt(index);
             }
         }

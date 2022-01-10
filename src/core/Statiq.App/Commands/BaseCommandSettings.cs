@@ -48,6 +48,6 @@ namespace Statiq.App
 
         [CommandOption("--failure-log-level <LEVEL>")]
         [Description("Indicates that the generation should fail for all log messages above the specified level threshold.")]
-        public LogLevel FailureLogLevel { get; set; } = LogLevel.Error;
+        public LogLevel? FailureLogLevel { get; set; }
     }
 }

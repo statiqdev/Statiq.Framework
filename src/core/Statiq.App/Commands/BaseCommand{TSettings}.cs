@@ -60,8 +60,15 @@ namespace Statiq.App
                 });
             }
 
-            // Set failure log level
-            _configurationSettings.Add(Keys.FailureLogLevel, commandSettings.FailureLogLevel.ToString());
+            // Set failure log level, but only if set on the command line, otherwise set it to a default if not already
+            if (commandSettings.FailureLogLevel.HasValue)
+            {
+                _configurationSettings[Keys.FailureLogLevel] = commandSettings.FailureLogLevel.ToString();
+            }
+            else
+            {
+                _configurationSettings.TryAdd(Keys.FailureLogLevel, nameof(LogLevel.Error));
+            }
 
             // Set paths, command settings will override any file system configuration done on the bootstrapper
             if (!string.IsNullOrEmpty(commandSettings.RootPath))
@@ -73,7 +80,7 @@ namespace Statiq.App
             {
                 // Remove the defaults if new ones are set
                 // and reverse the inputs so the last one is first to match the semantics of multiple occurrence single options
-                FileSystem.InputPaths.RemoveDefault();
+                FileSystem.InputPaths.Clear();
                 FileSystem.InputPaths.AddRange(commandSettings.InputPaths.Select(x => new NormalizedPath(x)).Reverse());
             }
             if (!string.IsNullOrEmpty(commandSettings.OutputPath))
@@ -130,7 +137,8 @@ namespace Statiq.App
                 }
             }
 
-            // Add settings
+            // Add settings from the command line, note that some settings like InputPaths may already have been
+            // actioned and therefore cannot be set from the command line
             if (commandSettings.Settings?.Length > 0)
             {
                 foreach (KeyValuePair<string, string> setting in SettingsParser.Parse(commandSettings.Settings))
@@ -138,11 +146,6 @@ namespace Statiq.App
                     _configurationSettings[setting.Key] = setting.Value;
                 }
             }
-
-            // Configure settings after other configuration so they can use the values
-            ConfigurableSettings configurableSettings = new ConfigurableSettings(
-                _configurationSettings, ServiceCollection, FileSystem);
-            Configurators.Configure(configurableSettings);
 
             return await ExecuteCommandAsync(context, commandSettings);
         }

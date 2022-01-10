@@ -1,8 +1,13 @@
+# 1.0.0-beta.55
+
+- Added a new `MarkdownExtensions` metadata key that can add Markdown (I.e. Markdig) extension types per-document or per-execution using metadata/settings (#222).
+- Removed the recently added `PathCollection.RemoveDefault()` method and instead allow optionally specifying whether paths that get added to a `PathCollection` are removable (the default is `true`).
+- Removed the recently added notion of "initial settings" due to being confusing and instead moved settings initialization up in the order of bootstrapper operations (this _shouldn't_ result in a breaking change, but be on the lookout for problems).
+
 # 1.0.0-beta.54
 
 - Added a new `RetryModules` module that provides simple retry behavior for it's child modules (it essentially wraps module execution with [Polly](http://www.thepollyproject.org/)).
 - Added a new `PathCollection.RemoveDefault()` method that only removes the default paths, and used it to clear only default paths when alternate input paths are specified on the command line.
-- Added a new `MarkdownExtensions` metadata key that can add Markdown (I.e. Markdig) extension types per-document or per-execution using metadata/settings (#222). 
 
 # 1.0.0-beta.53
 
