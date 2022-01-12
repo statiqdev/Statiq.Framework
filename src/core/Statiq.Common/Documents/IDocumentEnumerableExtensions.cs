@@ -117,7 +117,12 @@ namespace Statiq.Common
                 .Select(x => fileProvider.GetDirectory(x.Path));
             IEnumerable<IFile> matches = directories.SelectMany(x => Globber.GetFiles(x, patterns));
             return new FilteredDocumentList<TDocument>(
-                matches.Select(x => x.Path).Distinct().Select(match => fileProvider.GetDocument(match)).Cast<TDocument>(),
+                matches
+                    .Select(x => x.Path)
+                    .Distinct()
+                    .Select(match => fileProvider.GetDocument(match))
+                    .Cast<TDocument>()
+                    .OrderByDescending(x => x.Timestamp),
                 x => x.Source,
                 (docs, patterns) => docs.FilterSources(patterns));
         }
@@ -169,7 +174,12 @@ namespace Statiq.Common
             DocumentFileProvider fileProvider = new DocumentFileProvider((IEnumerable<IDocument>)documents, false, flatten, childrenKey);
             IEnumerable<IFile> matches = Globber.GetFiles(fileProvider.GetDirectory("/"), patterns);
             return new FilteredDocumentList<TDocument>(
-                matches.Select(x => x.Path).Distinct().Select(match => fileProvider.GetDocument(match)).Cast<TDocument>(),
+                matches
+                    .Select(x => x.Path)
+                    .Distinct()
+                    .Select(match => fileProvider.GetDocument(match))
+                    .Cast<TDocument>()
+                    .OrderByDescending(x => x.Timestamp),
                 x => x.Destination,
                 (docs, patterns) => docs.FilterDestinations(patterns));
         }

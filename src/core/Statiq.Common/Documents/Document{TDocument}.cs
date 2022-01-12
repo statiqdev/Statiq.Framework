@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -173,6 +174,10 @@ namespace Statiq.Common
                 throw new InvalidOperationException($"Document with ID {Id} was previously initialized");
             }
         }
+
+        /// <inheritdoc />
+        [PropertyMetadata(null)]
+        public long Timestamp { get; } = IDocument.TimestampStopwatch.ElapsedTicks;
 
         /// <inheritdoc />
         [PropertyMetadata(null)]

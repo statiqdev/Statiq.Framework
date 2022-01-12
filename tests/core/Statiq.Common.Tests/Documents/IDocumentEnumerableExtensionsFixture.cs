@@ -29,6 +29,25 @@ namespace Statiq.Common.Tests.Documents
                 // Then
                 results.ShouldBe(new[] { a, b }, true);
             }
+
+            [Test]
+            public void OrderedDescendingByTimestamp()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.FileSystem.InputPaths.Add("theme");
+                TestDocument a = new TestDocument(new NormalizedPath("/input/Foo/a.txt"));
+                TestDocument b = new TestDocument(new NormalizedPath("/theme/Foo/Bar/b.txt"));
+                TestDocument c = new TestDocument(new NormalizedPath("/Foo/Bar/c.txt"));
+                TestDocument d = new TestDocument(new NormalizedPath("/Baz/d.txt"));
+                TestDocument[] documents = new[] { d, c, b, a };
+
+                // When
+                TestDocument[] results = documents.FilterSources("Foo/**/*.txt").ToArray();
+
+                // Then
+                results.ShouldBe(new[] { a, b }, true);
+            }
         }
 
         public class FilterDestinationsTests : IDocumentEnumerableExtensionsFixture
@@ -69,6 +88,25 @@ namespace Statiq.Common.Tests.Documents
 
                 // Then
                 results.ShouldBe(new[] { a, c }, true);
+            }
+
+            [Test]
+            public void OrderedDescendingByTimestamp()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.FileSystem.InputPaths.Add("theme");
+                TestDocument a = new TestDocument(new NormalizedPath("/input/Foo/a.txt"), new NormalizedPath("a/b/c.txt"));
+                TestDocument b = new TestDocument(new NormalizedPath("/theme/Foo/Bar/b.txt"), new NormalizedPath("a/x/y.txt"));
+                TestDocument c = new TestDocument(new NormalizedPath("/Foo/Bar/c.txt"), new NormalizedPath("l/m.txt"));
+                TestDocument d = new TestDocument(new NormalizedPath("/Baz/d.txt"), new NormalizedPath("l/n.md"));
+                TestDocument[] documents = new[] { d, c, b, a };
+
+                // When
+                TestDocument[] results = documents.FilterDestinations("a/**/*.txt").ToArray();
+
+                // Then
+                results.ShouldBe(new[] { b, a }, true);
             }
         }
     }

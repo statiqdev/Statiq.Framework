@@ -29,6 +29,7 @@ namespace Statiq.Core
             return _phaseResults
                 .Where(x => !x.Key.Equals(pipelineName, StringComparison.OrdinalIgnoreCase))
                 .SelectMany(x => x.Value.Last(x => x is object).Outputs)
+                .OrderByDescending(x => x.Timestamp)
                 .ToDocumentList();
         }
 
@@ -40,8 +41,16 @@ namespace Statiq.Core
                 : DocumentList<IDocument>.Empty;
         }
 
-        public IEnumerator<IDocument> GetEnumerator() =>
-            _phaseResults.SelectMany(x => x.Value.Last(x => x is object).Outputs).GetEnumerator();
+        /// <summary>
+        /// Enumerates documents from the most recent phase over all pipelines,
+        /// ordering documents in descending order of their timestamp
+        /// (I.e. the most recently created documents are returned first).
+        /// </summary>
+        /// <returns>An ordered enumerator over all documents in descending order of their timestamp.</returns>
+        public IEnumerator<IDocument> GetEnumerator() => _phaseResults
+            .SelectMany(x => x.Value.Last(x => x is object).Outputs)
+            .OrderByDescending(x => x.Timestamp)
+            .GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

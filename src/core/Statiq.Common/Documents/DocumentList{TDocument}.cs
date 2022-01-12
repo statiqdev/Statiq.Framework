@@ -41,7 +41,33 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="destinationPatterns">The globbing pattern(s) to filter by (can be a single path).</param>
         /// <returns>The documents that satisfy the pattern or <c>null</c>.</returns>
-        public virtual FilteredDocumentList<TDocument> this[params string[] destinationPatterns] => _documents.FilterDestinations(destinationPatterns);
+        public virtual FilteredDocumentList<TDocument> this[params string[] destinationPatterns] =>
+            _documents.FilterDestinations(destinationPatterns);
+
+        /// <summary>
+        /// Gets the first document in the list with the given destination path.
+        /// </summary>
+        /// <param name="destinationPath">The destination path of the document to get.</param>
+        /// <returns>The first matching document or <c>null</c> if no document contains the given destination path.</returns>
+        public IDocument GetDestination(NormalizedPath destinationPath) =>
+            _documents.FirstOrDefault(x => x.Destination.Equals(destinationPath));
+
+        /// <summary>
+        /// Gets the first document in the list with the given source path (note that source paths are generally absolute).
+        /// </summary>
+        /// <param name="sourcePath">The source path of the document to get.</param>
+        /// <returns>The first matching document or <c>null</c> if no document contains the given source path.</returns>
+        public IDocument GetSource(NormalizedPath sourcePath) =>
+            _documents.FirstOrDefault(x => x.Source.Equals(sourcePath));
+
+        /// <summary>
+        /// Gets the first document in the list with the given relative source path
+        /// (since source paths are generally absolute, this tests against the source path relative to it's input path).
+        /// </summary>
+        /// <param name="relativeSourcePath">The relative source path of the document to get.</param>
+        /// <returns>The first matching document or <c>null</c> if no document contains the given relative source path.</returns>
+        public IDocument GetRelativeSource(NormalizedPath relativeSourcePath) =>
+            _documents.FirstOrDefault(x => !x.Source.IsNull && x.Source.GetRelativeInputPath().Equals(relativeSourcePath));
 
         // IReadOnlyList<IDocument>
 

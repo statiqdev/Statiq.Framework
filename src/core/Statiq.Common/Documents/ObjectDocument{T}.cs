@@ -22,6 +22,9 @@ namespace Statiq.Common
         private readonly IMetadata _metadata;
 
         /// <inheritdoc />
+        public long Timestamp { get; } = IDocument.TimestampStopwatch.ElapsedTicks;
+
+        /// <inheritdoc />
         public Guid Id { get; }
 
         /// <summary>

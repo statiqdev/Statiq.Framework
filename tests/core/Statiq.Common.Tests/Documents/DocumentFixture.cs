@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using Shouldly;
 using Statiq.Testing;
@@ -19,6 +20,19 @@ namespace Statiq.Common.Tests.Documents
 
                 // Then
                 Assert.AreNotEqual(a.Id, b.Id);
+            }
+
+            [Test]
+            public void TimestampReflectsDocumentCreationOrder()
+            {
+                // Given
+                Document a = new Document();
+                Document b = new Document();
+                Document c = new Document();
+
+                // When, Then
+                a.Timestamp.ShouldBeLessThan(b.Timestamp);
+                b.Timestamp.ShouldBeLessThan(c.Timestamp);
             }
         }
 

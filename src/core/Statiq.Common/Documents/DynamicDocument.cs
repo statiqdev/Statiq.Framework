@@ -26,6 +26,9 @@ namespace Statiq.Common
         public object this[string key] => _document[key];
 
         /// <inheritdoc />
+        public long Timestamp => _document.Timestamp;
+
+        /// <inheritdoc />
         public Guid Id => _document.Id;
 
         /// <inheritdoc />

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +15,17 @@ namespace Statiq.Common
     /// </summary>
     public interface IDocument : IMetadata, IDisplayable, IContentProviderFactory, ILogger, ICacheCode
     {
+        /// <summary>
+        /// Provides a stopwatch that can be used by implementations to set the <see cref="Timestamp"/>,
+        /// typically by getting <see cref="Stopwatch.ElapsedTicks"/> in the <see cref="Timestamp"/> initializer.
+        /// </summary>
+        protected static readonly Stopwatch TimestampStopwatch = Stopwatch.StartNew();
+
+        /// <summary>
+        /// A timestamp when this document was created that helps ordering documents based on creation.
+        /// </summary>
+        long Timestamp { get; }
+
         /// <summary>
         /// An identifier that is generated when the document is created and stays the same after cloning.
         /// </summary>

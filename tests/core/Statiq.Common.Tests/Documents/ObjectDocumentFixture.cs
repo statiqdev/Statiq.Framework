@@ -74,6 +74,26 @@ namespace Statiq.Common.Tests.Documents
         public class MetadataTests : ObjectDocumentFixture
         {
             [Test]
+            public void DoesNotIncludeDocumentProperties()
+            {
+                // Given
+                CustomObject obj = new CustomObject
+                {
+                    Foo = "abc"
+                };
+                MetadataItems settings = new MetadataItems
+                {
+                    { "A", "a" }
+                };
+
+                // When
+                IDocument document = new ObjectDocument<CustomObject>(obj, new Metadata(settings));
+
+                // Then
+                document.Keys.ShouldBe(new[] { "Foo", "A" }, true);
+            }
+
+            [Test]
             public void MetadataOverwritesSettings()
             {
                 // Given

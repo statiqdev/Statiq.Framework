@@ -1,3 +1,10 @@
+# 1.0.0-beta.56
+
+- Added `DocumentList<TDocument>.GetDestination(NormalizedPath destinationPath)`, `.GetSource(NormalizedPath sourcePath)`, and `.GetRelativeSource(NormalizedPath sourcePath)` to better provide single document results from a document list.
+- Added `IPipelineOutputs.GetDestination(NormalizedPath destinationPath)`, `.GetSource(NormalizedPath sourcePath)`, and `.GetRelativeSource(NormalizedPath sourcePath)` to better provide single document results from pipeline output collections.
+- Added `IDocument.Timestamp` that holds a timestamp of document instantiation and is useful for ordering documents based on "most recent" semantics.
+- Uses the new `IDocument.Timestamp` property to order certain document results like the `PipelineOutputs` enumerator, `PipelineOutputs.ExceptPipeline()`, `IEnumerable<IDocument>.FilterDestinations()`, and `IEnumerable<IDocument>.FilterSources()` in descending creation order (in other words, document results that otherwise don't have a natural order are ordered by timestamp now) (#226).
+
 # 1.0.0-beta.55
 
 - Added a new `MarkdownExtensions` metadata key that can add Markdown (I.e. Markdig) extension types per-document or per-execution using metadata/settings (#222).
