@@ -31,7 +31,7 @@ namespace Statiq.Core.Tests.Documents
 
                 // Then
                 results["Pipeline A"].ToArray().ShouldBe(new[] { _e });
-                results["Pipeline B"].ToArray().ShouldBe(new[] { _f, _a });
+                results["Pipeline B"].ToArray().ShouldBe(new[] { _a, _f });
             }
         }
 
@@ -140,7 +140,7 @@ namespace Statiq.Core.Tests.Documents
                 new[]
                 {
                     new PhaseResult("Pipeline A", Phase.Input, new[] { _b }.ToImmutableArray(), default, default),
-                    new PhaseResult("Pipeline A", Phase.Process, new[] { _f, _a }.ToImmutableArray(), default, default)
+                    new PhaseResult("Pipeline A", Phase.Process, new[] { _a, _f }.ToImmutableArray(), default, default)
                 }
             }
         };
