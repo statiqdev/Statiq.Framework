@@ -1,3 +1,7 @@
+# 1.0.0-beta.57
+
+- Fixed a bug when multiple modules call `IEngine.GetJavaScriptEnginePool()` for the first time concurrently.
+
 # 1.0.0-beta.56
 
 - Added `DocumentList<TDocument>.GetDestination(NormalizedPath destinationPath)`, `.GetSource(NormalizedPath sourcePath)`, and `.GetRelativeSource(NormalizedPath sourcePath)` to better provide single document results from a document list.

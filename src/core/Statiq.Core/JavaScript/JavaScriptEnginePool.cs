@@ -9,6 +9,8 @@ namespace Statiq.Core
 {
     internal class JavaScriptEnginePool : IJavaScriptEnginePool
     {
+        private static readonly object EngineSwitcherLock = new object();
+
         private readonly JsPool<JavaScriptEngine> _pool;
         private bool _disposed = false;
 
@@ -23,10 +25,13 @@ namespace Statiq.Core
             // by checking the DefaultEngineName being set. If that's there we can safely assume
             // its been configured somehow (maybe via a configuration file). If not we'll wire up
             // Jint as the default engine.
-            if (string.IsNullOrWhiteSpace(JsEngineSwitcher.Current.DefaultEngineName))
+            lock (EngineSwitcherLock)
             {
-                JsEngineSwitcher.Current.EngineFactories.Add(new JintJsEngineFactory());
-                JsEngineSwitcher.Current.DefaultEngineName = JintJsEngine.EngineName;
+                if (string.IsNullOrWhiteSpace(JsEngineSwitcher.Current.DefaultEngineName))
+                {
+                    JsEngineSwitcher.Current.EngineFactories.Add(new JintJsEngineFactory());
+                    JsEngineSwitcher.Current.DefaultEngineName = JintJsEngine.EngineName;
+                }
             }
 
             _pool = new JsPool<JavaScriptEngine>(new JsPoolConfig<JavaScriptEngine>
