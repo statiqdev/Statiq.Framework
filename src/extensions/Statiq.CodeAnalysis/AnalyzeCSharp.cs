@@ -61,7 +61,7 @@ namespace Statiq.CodeAnalysis
     /// <metadata cref="CodeAnalysisKeys.Attributes" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.Parameters" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.ReturnType" usage="Output"/>
-    /// <metadata cref="CodeAnalysisKeys.OverriddenMethod" usage="Output"/>
+    /// <metadata cref="CodeAnalysisKeys.Overridden" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.Type" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.HasConstantValue" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.ConstantValue" usage="Output"/>

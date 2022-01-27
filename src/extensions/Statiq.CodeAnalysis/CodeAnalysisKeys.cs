@@ -242,10 +242,11 @@ namespace Statiq.CodeAnalysis
         public const string ReturnType = nameof(ReturnType);
 
         /// <summary>
-        /// This is available for method symbols and contains a document that represents the method being overridden (or <c>null</c> if no method is overriden by this one).
+        /// This is available for method, event, and property symbols and contains a document that represents the member being overridden
+        /// (or <c>null</c> if no member is overriden by this one).
         /// </summary>
         /// <type><see cref="IDocument"/></type>
-        public const string OverriddenMethod = nameof(OverriddenMethod);
+        public const string Overridden = nameof(Overridden);
 
         /// <summary>
         /// This is available for field, event, property, and parameter symbols and contains the document that represents the type of the symbol.
