@@ -1,13 +1,11 @@
-# 1.0.0-beta.57
-
-- Fixed a bug when multiple modules call `IEngine.GetJavaScriptEnginePool()` for the first time concurrently.
-
 # 1.0.0-beta.56
 
 - Added `DocumentList<TDocument>.GetDestination(NormalizedPath destinationPath)`, `.GetSource(NormalizedPath sourcePath)`, and `.GetRelativeSource(NormalizedPath sourcePath)` to better provide single document results from a document list.
 - Added `IPipelineOutputs.GetDestination(NormalizedPath destinationPath)`, `.GetSource(NormalizedPath sourcePath)`, and `.GetRelativeSource(NormalizedPath sourcePath)` to better provide single document results from pipeline output collections.
 - Added `IDocument.Timestamp` that holds a timestamp of document instantiation and is useful for ordering documents based on "most recent" semantics.
 - Uses the new `IDocument.Timestamp` property to order certain document results like the `PipelineOutputs` enumerator, `PipelineOutputs.ExceptPipeline()`, `IEnumerable<IDocument>.FilterDestinations()`, and `IEnumerable<IDocument>.FilterSources()` in descending creation order (in other words, document results that otherwise don't have a natural order are ordered by timestamp now) (#226).
+- Fixed a bug when multiple modules call `IEngine.GetJavaScriptEnginePool()` for the first time concurrently.
+- Added `CodeAnalysisKeys.Implements` to the documents produced by the `AnalyzeCSharp` module to represent the interface member(s) being implemented by properties, events, and methods. 
 
 # 1.0.0-beta.55
 

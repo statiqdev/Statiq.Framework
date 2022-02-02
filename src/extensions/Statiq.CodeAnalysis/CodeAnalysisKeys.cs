@@ -285,6 +285,13 @@ namespace Statiq.CodeAnalysis
         /// <type><see cref="Microsoft.CodeAnalysis.AttributeData"/></type>
         public const string AttributeData = nameof(AttributeData);
 
+        /// <summary>
+        /// This is available for method, event, and property symbols and contains a collection of the documents
+        /// that represent the interface member being implemented by this method, event, or property.
+        /// </summary>
+        /// <type><c>IReadOnlyList&lt;IDocument&gt;</c></type>
+        public const string Implements = nameof(Implements);
+
         // Documentation keys (not present for external symbols)
 
         /// <summary>
