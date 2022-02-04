@@ -5,7 +5,8 @@
 - Added `IDocument.Timestamp` that holds a timestamp of document instantiation and is useful for ordering documents based on "most recent" semantics.
 - Uses the new `IDocument.Timestamp` property to order certain document results like the `PipelineOutputs` enumerator, `PipelineOutputs.ExceptPipeline()`, `IEnumerable<IDocument>.FilterDestinations()`, and `IEnumerable<IDocument>.FilterSources()` in descending creation order (in other words, document results that otherwise don't have a natural order are ordered by timestamp now) (#226).
 - Fixed a bug when multiple modules call `IEngine.GetJavaScriptEnginePool()` for the first time concurrently.
-- Added `CodeAnalysisKeys.Implements` to the documents produced by the `AnalyzeCSharp` module to represent the interface member(s) being implemented by properties, events, and methods. 
+- Added `CodeAnalysisKeys.Implements` to the documents produced by the `AnalyzeCSharp` module to represent the interface member(s) being implemented by properties, events, and methods.
+- Added the ability to inject Sass variables via metadata by prefixing with "Sass_" which should make providing theme customizations a lot easier.
 
 # 1.0.0-beta.55
 

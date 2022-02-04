@@ -312,10 +312,53 @@ body {
                 result.Destination.FullPath.ShouldBe("assets/test.css");
             }
 
-            // TODO: Change above test to just use exact file name
-            // TODO: Test include with missing extension
-            // TODO: Test include with _ prefix
-            // TODO: Test include with missing extension and _ prefix
+            [TestCase("Sass_primary-color")]
+            [TestCase("sass_primary-color")]
+            [TestCase("sass_primary color")]
+            [TestCase("Sass-primary-color")]
+            [TestCase("sass-primary-color")]
+            [TestCase("sass-primary color")]
+            public async Task InjectsMetadataVariables(string metadataName)
+            {
+                // Given
+                const string input = @"
+body {
+  color: $primary-color;
+}";
+
+                const string output = "body { color: #333; }\n";
+
+                TestFileProvider fileProvider = new TestFileProvider();
+                fileProvider.AddDirectory("/");
+                fileProvider.AddDirectory("/input");
+                fileProvider.AddDirectory("/input/assets");
+                fileProvider.AddFile("/input/assets/test.scss", input);
+                TestFileSystem fileSystem = new TestFileSystem
+                {
+                    FileProvider = fileProvider
+                };
+                TestExecutionContext context = new TestExecutionContext
+                {
+                    FileSystem = fileSystem
+                };
+                TestDocument document = new TestDocument(
+                    new NormalizedPath("/input/assets/test.scss"),
+                    new NormalizedPath("assets/test.scss"),
+                    new MetadataItems
+                    {
+                        { metadataName, "#333" }
+                    },
+                    input);
+
+                CompileSass sass = new CompileSass().WithCompactOutputStyle();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, context, sass).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output);
+                result.Destination.FullPath.ShouldBe("assets/test.css");
+            }
         }
     }
 }

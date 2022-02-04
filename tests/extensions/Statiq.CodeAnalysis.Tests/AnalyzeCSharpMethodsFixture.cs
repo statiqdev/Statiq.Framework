@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
 
@@ -334,6 +335,117 @@ namespace Statiq.CodeAnalysis.Tests
                 IDocument y = (IDocument)x["Type"];
                 object z = y["Name"];
                 Assert.AreEqual("int[]", ((IDocument)GetParameter(results, "Yellow", "X", "z")["Type"])["Name"]);
+            }
+
+            [Test]
+            public async Task ImplementsIsCorrect()
+            {
+                // Given
+                const string code = @"
+                    namespace Foo
+                    {
+                        public interface IRed
+                        {
+                            void Green();
+                        }
+                        
+                        public class Blue : IRed
+                        {
+                            public void Green()
+                            {
+                            }
+                        }
+                    }
+                ";
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
+                IModule module = new AnalyzeCSharp();
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
+
+                // Then
+                IReadOnlyList<IDocument> implements = GetMember(results, "Blue", "Green").Get<IReadOnlyList<IDocument>>("Implements");
+                IDocument red = implements.ShouldHaveSingleItem();
+                red.GetString("Name").ShouldBe("Green");
+                red.GetDocument("ContainingType").GetString("Name").ShouldBe("IRed");
+            }
+
+            [Test]
+            public async Task MultipleImplementsIsCorrect()
+            {
+                // Given
+                const string code = @"
+                    namespace Foo
+                    {
+                        public interface IRed
+                        {
+                            void Green();
+                        }
+                        
+                        public interface IGreen
+                        {
+                            void Green();
+                        }
+                        
+                        public class Blue : IRed, IGreen
+                        {
+                            public void Green()
+                            {
+                            }
+                        }
+                    }
+                ";
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
+                IModule module = new AnalyzeCSharp();
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
+
+                // Then
+                IReadOnlyList<IDocument> implements = GetMember(results, "Blue", "Green").Get<IReadOnlyList<IDocument>>("Implements");
+                implements
+                    .Select(x => x.GetDocument("ContainingType").GetString("Name"))
+                    .ShouldBe(new[] { "IRed", "IGreen" }, true);
+            }
+
+            [Test]
+            public async Task NestedImplementsIsCorrect()
+            {
+                // Given
+                const string code = @"
+                    namespace Foo
+                    {
+                        public interface IRed
+                        {
+                            void Green();
+                        }
+                        
+                        public interface IGreen : IRed
+                        {
+                        }
+                        
+                        public class Blue : IGreen
+                        {
+                            public void Green()
+                            {
+                            }
+                        }
+                    }
+                ";
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
+                IModule module = new AnalyzeCSharp();
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
+
+                // Then
+                IReadOnlyList<IDocument> implements = GetMember(results, "Blue", "Green").Get<IReadOnlyList<IDocument>>("Implements");
+                IDocument red = implements.ShouldHaveSingleItem();
+                red.GetString("Name").ShouldBe("Green");
+                red.GetDocument("ContainingType").GetString("Name").ShouldBe("IRed");
             }
         }
     }

@@ -13,7 +13,20 @@ namespace Statiq.Sass
     /// Compiles Sass CSS files to CSS stylesheets.
     /// </summary>
     /// <remarks>
-    /// The content of the input document is compiled to CSS and the content of the output document contains the compiled CSS stylesheet.
+    /// <para>
+    /// The content of the input document is compiled to CSS and the content
+    /// of the output document contains the compiled CSS stylesheet.
+    /// </para>
+    /// <para>
+    /// Any metadata prefixed with "Sass_" or "Sass-" (case-insensitive) will be
+    /// injected into the beginning of the Sass content as variables. Any spaces will
+    /// be converted to "-" and the "Sass_" or "Sass-" prefix will be removed for the
+    /// Sass variable name. Note that because these are injected at the top of the Sass
+    /// content, and because the order of metadata is undefined, variables defined this
+    /// way should not use other variables in their values. Using the <c>!default</c>
+    /// syntax in Sass files where metadata variables might override the ones in the
+    /// Sass file is one technique for working with metadata-defined Sass variables.
+    /// </para>
     /// </remarks>
     /// <category>Templates</category>
     public class CompileSass : ParallelModule
@@ -136,6 +149,19 @@ namespace Statiq.Sass
             }
 
             string content = await input.GetContentStringAsync();
+
+            // Inject any "Sass_" metadata as variables
+            string[] variables = input.Keys
+                .Where(x => !x.IsNullOrWhiteSpace()
+                    && (x.StartsWith("sass_", StringComparison.OrdinalIgnoreCase) || x.StartsWith("sass-", StringComparison.OrdinalIgnoreCase)))
+                .Select(x => (x.Remove(0, 5).Replace(" ", "-"), input.GetString(x)))
+                .Where(x => !x.Item1.IsNullOrWhiteSpace() && !x.Item2.IsNullOrWhiteSpace())
+                .Select(x => $"${x.Item1}: {x.Item2};")
+                .ToArray();
+            if (variables.Length > 0)
+            {
+                content = $"{string.Join(Environment.NewLine, variables)}{Environment.NewLine}{content}";
+            }
 
             // Sass conversion
             FileImporter importer = new FileImporter(context.FileSystem, _importPathFunc);
