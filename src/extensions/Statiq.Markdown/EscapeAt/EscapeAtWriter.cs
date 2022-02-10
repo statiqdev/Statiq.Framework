@@ -7,7 +7,9 @@ namespace Statiq.Markdown.EscapeAt
     {
         private readonly TextWriter _writer;
 
-        private bool _previousSlash;
+        private char _previousChar;
+
+        private bool _processingInstruction;
 
         public override Encoding Encoding => _writer.Encoding;
 
@@ -18,38 +20,51 @@ namespace Statiq.Markdown.EscapeAt
 
         public override void Write(char value)
         {
-            switch (value)
+            if (!_processingInstruction)
             {
-                case '\\':
-                    if (_previousSlash)
-                    {
-                        // If this is a second, etc. slash, go ahead and write the previous one
-                        _writer.Write('\\');
-                    }
-                    _previousSlash = true;
-                    return;
-                case '@':
-                    _writer.Write(_previousSlash ? "@" : "&#64;");
-                    _previousSlash = false;
-                    return;
-                default:
-                    if (_previousSlash)
-                    {
-                        _writer.Write('\\');
-                    }
-                    _previousSlash = false;
-                    break;
+                switch (value)
+                {
+                    case '\\':
+                        if (_previousChar == '\\')
+                        {
+                            // If this is a second, etc. slash, go ahead and write the previous one
+                            _writer.Write('\\');
+                        }
+                        _previousChar = '\\';
+                        return;
+                    case '@':
+                        _writer.Write(_previousChar == '\\' ? "@" : "&#64;");
+                        _previousChar = '@';
+                        return;
+                    case '?':
+                        if (_previousChar == '<')
+                        {
+                            _processingInstruction = true;
+                        }
+                        break;
+                    default:
+                        if (_previousChar == '\\')
+                        {
+                            _writer.Write('\\');
+                        }
+                        break;
+                }
             }
+            else if (value == '>' && _previousChar == '?')
+            {
+                _processingInstruction = false;
+            }
+
+            _previousChar = value;
             _writer.Write(value);
         }
 
         public override void Flush()
         {
-            if (_previousSlash)
+            if (_previousChar == '\\')
             {
                 _writer.Write('\\');
             }
-            _previousSlash = false;
         }
     }
 }

@@ -222,6 +222,31 @@ namespace Statiq.Core.Tests.Shortcodes
             }
 
             [Test]
+            public void HandlesMultilineWildcardProcessingInstruction()
+            {
+                // Given
+                Stream stream = new MemoryStream(Encoding.UTF8.GetBytes(@"<?# name ?>
+<?*
+Fizz buzz
+?>
+<?#/ name ?>"));
+                IShortcodeCollection shortcodeCollection = new TestShortcodeCollection();
+                shortcodeCollection.Add("name", typeof(TestShortcode));
+                ShortcodeParser parser = new ShortcodeParser(
+                    ShortcodeParser.DefaultStartDelimiter,
+                    ShortcodeParser.DefaultEndDelimiter,
+                    shortcodeCollection);
+
+                // When
+                List<ShortcodeLocation> result = parser.Parse(stream);
+
+                // Then
+                result.Single().Content.ShouldBe(@"
+Fizz buzz
+");
+            }
+
+            [Test]
             public void ThrowsForUnnamedShortcodeName()
             {
                 // Given

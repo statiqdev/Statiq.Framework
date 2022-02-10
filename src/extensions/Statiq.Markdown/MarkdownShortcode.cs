@@ -31,13 +31,23 @@ namespace Statiq.Markdown
     {
         private const string Configuration = nameof(Configuration);
         private const string PrependLinkRoot = nameof(PrependLinkRoot);
+        private const string PassThroughRawFence = nameof(PassThroughRawFence);
 
         public override ShortcodeResult Execute(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
-            IMetadataDictionary dictionary = args.ToDictionary(Configuration, PrependLinkRoot);
+            IMetadataDictionary dictionary = args.ToDictionary(Configuration, PrependLinkRoot, PassThroughRawFence);
             using (StringWriter writer = new StringWriter())
             {
-                MarkdownHelper.RenderMarkdown(context, document, content, writer, dictionary.GetBool(PrependLinkRoot), dictionary.GetString(Configuration, MarkdownHelper.DefaultConfiguration), null);
+                MarkdownHelper.RenderMarkdown(
+                    context,
+                    document,
+                    content,
+                    writer,
+                    dictionary.GetBool(PrependLinkRoot),
+                    dictionary.GetBool(PassThroughRawFence, true),
+                    false,
+                    dictionary.GetString(Configuration, MarkdownHelper.DefaultConfiguration),
+                    null);
                 return writer.ToString();
             }
         }

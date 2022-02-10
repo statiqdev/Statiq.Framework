@@ -1,3 +1,8 @@
+# 1.0.0-beta.57
+
+- Added support for "raw" code fences to the `RenderMarkdown` module that bypasses markdown processing.
+- Fixed a bug when instantiating a `ShortcodeResult` from the bootstrapper due to lack of availability of an execution context (since the engine hasn't been created yet).
+
 # 1.0.0-beta.56
 
 - Added `DocumentList<TDocument>.GetDestination(NormalizedPath destinationPath)`, `.GetSource(NormalizedPath sourcePath)`, and `.GetRelativeSource(NormalizedPath sourcePath)` to better provide single document results from a document list.

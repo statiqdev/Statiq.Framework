@@ -6,6 +6,7 @@ using Markdig.Parsers;
 using Markdig.Renderers;
 using Markdig.Syntax;
 using Microsoft.Extensions.Logging;
+using NetFabric.Hyperlinq;
 using Statiq.Common;
 
 namespace Statiq.Markdown
@@ -21,8 +22,10 @@ namespace Statiq.Markdown
             IExecutionState executionState,
             IDocument document,
             string content,
-            TextWriter writer,
+            TextWriter writer = null,
             bool prependLinkRoot = false,
+            bool passThroughRawFence = true,
+            bool escapeAtInRawFence = false,
             string configuration = DefaultConfiguration,
             OrderedList<IMarkdownExtension> extensions = null)
         {
@@ -42,7 +45,7 @@ namespace Statiq.Markdown
                 MarkdownPipeline pipeline = pipelineBuilder.Build();
 
                 // Render the content
-                HtmlRenderer htmlRenderer = new HtmlRenderer(writer);
+                HtmlRenderer htmlRenderer = new HtmlRenderer(writer ?? NullTextWriter.Instance);
                 pipeline.Setup(htmlRenderer);
 
                 htmlRenderer.LinkRewriter = (link) =>
@@ -74,6 +77,35 @@ namespace Statiq.Markdown
                 };
 
                 MarkdownDocument markdownDocument = MarkdownParser.Parse(content, pipeline);
+
+                // Pass through raw code fences
+                if (passThroughRawFence)
+                {
+                    foreach (FencedCodeBlock codeBlock in markdownDocument.Descendants<FencedCodeBlock>())
+                    {
+                        if (codeBlock.Info == "raw")
+                        {
+                            ContainerBlock parent = codeBlock.Parent;
+                            int childIndex = parent.IndexOf(codeBlock);
+                            parent.Remove(codeBlock);
+                            HtmlBlock rawBlock = new HtmlBlock(null)
+                            {
+                                Lines = codeBlock.Lines
+                            };
+                            if (escapeAtInRawFence)
+                            {
+                                string lines = rawBlock.Lines.ToString();
+                                if (lines.Contains('@'))
+                                {
+                                    rawBlock.Lines.Clear();
+                                    rawBlock.Lines = new StringLineGroup(lines.Replace("@", "\\@"));
+                                }
+                            }
+                            parent.Insert(childIndex, rawBlock);
+                        }
+                    }
+                }
+
                 htmlRenderer.Render(markdownDocument);
                 writer.Flush();
                 return markdownDocument;

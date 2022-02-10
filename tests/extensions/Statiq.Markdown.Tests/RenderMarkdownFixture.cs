@@ -435,6 +435,143 @@ Looking @Good, \@Man!
             }
 
             [Test]
+            public async Task ShouldOutputProcessingInstructionsVerbatim()
+            {
+                // Given
+                const string input = @"<?^ Raw ?>
+<?*
+@section Name { }
+?>
+<?^/ Raw ?>";
+                const string output = @"<?^ Raw ?>
+<?*
+@section Name { }
+?>
+<?^/ Raw ?>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldPassThroughRawFenceByDefault()
+            {
+                // Given
+                const string input = @"Fizz
+```raw
+Hello! @foo <b>bar</b>
+
+    After return and spaces
+    
+```";
+                const string output = @"<p>Fizz</p>
+Hello! @foo <b>bar</b>
+
+    After return and spaces
+    
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldNotEscapeAtInRawFence()
+            {
+                // Given
+                const string input = @"Fizz
+```raw
+Hello! @foo <b>bar</b>
+
+    After return and spaces
+    
+```";
+                const string output = @"<p>Fizz</p>
+Hello! @foo <b>bar</b>
+
+    After return and spaces
+    
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown().EscapeAt(false);
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldNotPassThroughRawFence()
+            {
+                // Given
+                const string input = @"Fizz
+```raw
+Hello! @foo <b>bar</b>
+
+    After return and spaces
+    
+```";
+                const string output = @"<p>Fizz</p>
+<pre><code class=""language-raw"">Hello! &#64;foo &lt;b&gt;bar&lt;/b&gt;
+
+    After return and spaces
+    
+</code></pre>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown().PassThroughRawFence(false);
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldNotPassThroughRawFenceOrEscapeAt()
+            {
+                // Given
+                const string input = @"Fizz
+```raw
+Hello! @foo <b>bar</b>
+
+    After return and spaces
+    
+```";
+                const string output = @"<p>Fizz</p>
+<pre><code class=""language-raw"">Hello! @foo &lt;b&gt;bar&lt;/b&gt;
+
+    After return and spaces
+    
+</code></pre>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown()
+                    .PassThroughRawFence(false)
+                    .EscapeAt(false);
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
             public async Task RendersMarkdownFromMetadata()
             {
                 // Given

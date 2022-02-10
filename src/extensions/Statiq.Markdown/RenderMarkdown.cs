@@ -37,6 +37,7 @@ namespace Statiq.Markdown
         private string _configuration = MarkdownHelper.DefaultConfiguration;
         private bool _escapeAt = true;
         private bool _prependLinkRoot = false;
+        private bool _passThroughRawFence = true;
         private string _markdownDocumentKey = nameof(MarkdownDocument);
 
         /// <summary>
@@ -55,6 +56,20 @@ namespace Statiq.Markdown
         {
             _sourceKey = sourceKey;
             _destinationKey = destinationKey;
+        }
+
+        /// <summary>
+        /// Specifies whether code fences with a language of "raw" (I.e. <c>```raw</c>) should
+        /// be passed through verbatim (the default is <c>true</c>).
+        /// </summary>
+        /// <param name="passThroughRawFence">
+        /// If set to <c>true</c>, code fences with the language "raw" are passed through verbatim.
+        /// </param>
+        /// <returns>The current module instance.</returns>
+        public RenderMarkdown PassThroughRawFence(bool passThroughRawFence = true)
+        {
+            _passThroughRawFence = passThroughRawFence;
+            return this;
         }
 
         /// <summary>
@@ -276,7 +291,16 @@ namespace Statiq.Markdown
             MarkdownDocument markdownDocument;
             using (TextWriter writer = new StringWriter())
             {
-                markdownDocument = MarkdownHelper.RenderMarkdown(context, input, content, writer, _prependLinkRoot, _configuration, extensions);
+                markdownDocument = MarkdownHelper.RenderMarkdown(
+                    context,
+                    input,
+                    content,
+                    writer,
+                    _prependLinkRoot,
+                    _passThroughRawFence,
+                    _escapeAt,
+                    _configuration,
+                    extensions);
                 if (markdownDocument is null)
                 {
                     return input.Yield();
