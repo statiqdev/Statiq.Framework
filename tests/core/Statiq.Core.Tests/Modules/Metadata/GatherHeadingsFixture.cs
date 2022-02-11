@@ -36,6 +36,52 @@ namespace Statiq.Core.Tests.Modules.Metadata
             }
 
             [Test]
+            public async Task IgnoresNestedElements()
+            {
+                // Given
+                const string input = @"<html>
+                        <head>
+                            <title>Foobar</title>
+                        </head>
+                        <body>
+                            <h1>Foo <small>Fizz</small></h1>
+                            <h1>Bar <span> Bizz</span> Boo</h1>
+                        </body>
+                    </html>";
+                TestDocument document = new TestDocument(input);
+                GatherHeadings headings = new GatherHeadings();
+
+                // When
+                IDocument result = await ExecuteAsync(document, headings).SingleAsync();
+
+                // Then
+                result.GetDocumentList(Keys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo", "Bar  Boo" });
+            }
+
+            [Test]
+            public async Task IncludesNestedElements()
+            {
+                // Given
+                const string input = @"<html>
+                        <head>
+                            <title>Foobar</title>
+                        </head>
+                        <body>
+                            <h1>Foo <small>Fizz</small></h1>
+                            <h1>Bar <span> Bizz</span> Boo</h1>
+                        </body>
+                    </html>";
+                TestDocument document = new TestDocument(input);
+                GatherHeadings headings = new GatherHeadings().WithNestedElements();
+
+                // When
+                IDocument result = await ExecuteAsync(document, headings).SingleAsync();
+
+                // Then
+                result.GetDocumentList(Keys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo Fizz", "Bar  Bizz Boo" });
+            }
+
+            [Test]
             public async Task SetsHeadingMetadata()
             {
                 // Given
@@ -209,7 +255,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
             }
 
             [Test]
-            public async Task GetsTextContent()
+            public async Task GetsTextContentInLink()
             {
                 // Given
                 const string input = @"<html>
@@ -229,6 +275,52 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 // Then
                 result.GetDocumentList(Keys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo Bar" });
                 result.GetDocumentList(Keys.Headings).Select(x => x.GetString("HContent")).ShouldBe(new[] { "Foo Bar" });
+            }
+
+            [Test]
+            public async Task ExcludesNonTextContentInLink()
+            {
+                // Given
+                const string input = @"<html>
+                        <head>
+                            <title>Foobar</title>
+                        </head>
+                        <body>
+                            <h1>Foo <a href=""bar"">Bar <small>Bazz</small></a></h1>
+                        </body>
+                    </html>";
+                TestDocument document = new TestDocument(input);
+                GatherHeadings headings = new GatherHeadings().WithHeadingKey("HContent");
+
+                // When
+                IDocument result = await ExecuteAsync(document, headings).SingleAsync();
+
+                // Then
+                result.GetDocumentList(Keys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo Bar" });
+                result.GetDocumentList(Keys.Headings).Select(x => x.GetString("HContent")).ShouldBe(new[] { "Foo Bar" });
+            }
+
+            [Test]
+            public async Task IncludesNonTextContentInLink()
+            {
+                // Given
+                const string input = @"<html>
+                        <head>
+                            <title>Foobar</title>
+                        </head>
+                        <body>
+                            <h1>Foo <a href=""bar"">Bar <small>Bazz</small></a></h1>
+                        </body>
+                    </html>";
+                TestDocument document = new TestDocument(input);
+                GatherHeadings headings = new GatherHeadings().WithHeadingKey("HContent").WithNestedElements(true);
+
+                // When
+                IDocument result = await ExecuteAsync(document, headings).SingleAsync();
+
+                // Then
+                result.GetDocumentList(Keys.Headings).Cast<TestDocument>().Select(x => x.Content).ShouldBe(new[] { "Foo Bar Bazz" });
+                result.GetDocumentList(Keys.Headings).Select(x => x.GetString("HContent")).ShouldBe(new[] { "Foo Bar Bazz" });
             }
         }
     }

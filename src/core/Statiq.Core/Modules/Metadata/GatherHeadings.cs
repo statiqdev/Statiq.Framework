@@ -29,6 +29,7 @@ namespace Statiq.Core
     public class GatherHeadings : ParallelConfigModule<int>
     {
         private bool _nesting;
+        private bool _withNestedElements;
         private string _metadataKey = Keys.Headings;
         private string _levelKey = Keys.Level;
         private string _idKey = Keys.HeadingId;
@@ -43,6 +44,17 @@ namespace Statiq.Core
         public GatherHeadings(Config<int> level)
             : base(level, true)
         {
+        }
+
+        /// <summary>
+        /// Includes nested HTML elements in the heading content (the default is <c>false</c>).
+        /// </summary>
+        /// <param name="nestedElements"><c>true</c> to include nested elements, <c>false</c> otherwise.</param>
+        /// <returns>The current module instance.</returns>
+        public GatherHeadings WithNestedElements(bool nestedElements = true)
+        {
+            _withNestedElements = true;
+            return this;
         }
 
         /// <summary>
@@ -182,6 +194,27 @@ namespace Statiq.Core
 
                     // Create the document
                     MetadataItems metadata = new MetadataItems();
+                    string content = _withNestedElements
+                        ? heading.Element.TextContent
+                        : string.Join(
+                            string.Empty,
+                            heading.Element.ChildNodes
+                                .Select(x =>
+                                {
+                                    if (x is IText text)
+                                    {
+                                        return text.Text;
+                                    }
+                                    if (x is IHtmlAnchorElement anchor)
+                                    {
+                                        return string.Join(
+                                            string.Empty,
+                                            anchor.ChildNodes.OfType<IText>().Select(t => t.Text));
+                                    }
+                                    return null;
+                                })
+                                .Where(x => !x.IsNullOrEmpty()))
+                            .Trim();
                     if (_levelKey is object)
                     {
                         metadata.Add(_levelKey, heading.Level);
@@ -192,14 +225,14 @@ namespace Statiq.Core
                     }
                     if (_headingKey is object)
                     {
-                        metadata.Add(_headingKey, heading.Element.TextContent);
+                        metadata.Add(_headingKey, content);
                     }
                     if (_childrenKey is object)
                     {
                         metadata.Add(_childrenKey, heading.Children.AsReadOnly());
                     }
 
-                    heading.Document = context.CreateDocument(metadata, heading.Element.TextContent);
+                    heading.Document = context.CreateDocument(metadata, content);
 
                     // Add to parent
                     parent?.Children.Add(heading.Document);
