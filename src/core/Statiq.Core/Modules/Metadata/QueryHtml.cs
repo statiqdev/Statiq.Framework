@@ -86,7 +86,7 @@ namespace Statiq.Core
         {
             if (!string.IsNullOrWhiteSpace(metadataKey))
             {
-                _metadataActions.Add((e, d) => d[metadataKey] = e.OuterHtml);
+                _metadataActions.Add((e, d) => d[metadataKey] = e.FormattedOuterHtml());
             }
             return this;
         }
@@ -101,7 +101,7 @@ namespace Statiq.Core
         {
             if (!string.IsNullOrWhiteSpace(metadataKey))
             {
-                _metadataActions.Add((e, d) => d[metadataKey] = e.InnerHtml);
+                _metadataActions.Add((e, d) => d[metadataKey] = e.FormattedInnerHtml());
             }
             return this;
         }

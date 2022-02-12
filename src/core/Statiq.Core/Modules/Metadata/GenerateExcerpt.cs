@@ -153,7 +153,7 @@ namespace Statiq.Core
             if (!string.IsNullOrEmpty(_querySelector))
             {
                 IElement element = htmlDocument.QuerySelector(_querySelector);
-                return _outerHtml ? element?.OuterHtml : element?.InnerHtml;
+                return _outerHtml ? element?.FormattedOuterHtml() : element?.FormattedInnerHtml();
             }
             return null;
         }
@@ -196,9 +196,9 @@ namespace Statiq.Core
                         // Also remove if it's a top-level element that doesn't match the query selector
                         if (remove
                             || (node.Parent == parent
-                            && node is IElement
+                            && node is IElement element
                             && !string.IsNullOrEmpty(_querySelector)
-                            && !((IElement)node).Matches(_querySelector)))
+                            && !element.Matches(_querySelector)))
                         {
                             removeStack.Push(node);
                         }
@@ -210,7 +210,7 @@ namespace Statiq.Core
                         node.Parent.RemoveChild(node);
                     }
 
-                    return parent.InnerHtml;
+                    return parent.FormattedInnerHtml();
                 }
             }
             return null;

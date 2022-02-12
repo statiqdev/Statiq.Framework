@@ -3,6 +3,7 @@
 - Added support for "raw" code fences to the `RenderMarkdown` module that bypasses markdown processing.
 - Fixed a bug when instantiating a `ShortcodeResult` from the bootstrapper due to lack of availability of an execution context (since the engine hasn't been created yet).
 - Added `WithNestedElements()` to the `GatherHeadings` module to control whether nested HTML element content is included in the heading text (the default is now that it is not, other than links).
+- Fixed a bug with certain modules double-encoding character references (https://github.com/statiqdev/Statiq.Web/issues/981).
 
 # 1.0.0-beta.56
 

@@ -284,6 +284,79 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 // Then
                 result["Excerpt"].ShouldBe("<p>This is some </p>");
             }
+
+            [Test]
+            public async Task IncludesNestedElements()
+            {
+                // Given
+                const string input = @"<html>
+                        <head>
+                            <title>Foobar</title>
+                        </head>
+                        <body>
+                            <h1>Title</h1>
+                            <p>This is some <b>Foobar</b> text</p>
+                            <p>This is some other text</p>
+                        </body>
+                    </html>";
+                TestDocument document = new TestDocument(input);
+                GenerateExcerpt excerpt = new GenerateExcerpt();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
+
+                // Then
+                result["Excerpt"].ShouldBe("<p>This is some <b>Foobar</b> text</p>");
+            }
+
+            [Test]
+            public async Task DoesNotEncodeHtmlEntities()
+            {
+                // Given
+                const string input = @"<html>
+                        <head>
+                            <title>Foobar</title>
+                        </head>
+                        <body>
+                            <h1>Title</h1>
+                            <p>This is some ""Foobar"" text</p>
+                            <p>This is some other text</p>
+                        </body>
+                    </html>";
+                TestDocument document = new TestDocument(input);
+                GenerateExcerpt excerpt = new GenerateExcerpt();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
+
+                // Then
+                result["Excerpt"].ShouldBe("<p>This is some \"Foobar\" text</p>");
+            }
+
+            // https://github.com/statiqdev/Statiq.Web/issues/981
+            [Test]
+            public async Task DoesNotDoubleEncodeHtmlEntitiesOnSerialization()
+            {
+                // Given
+                const string input = @"<html>
+                        <head>
+                            <title>Foobar</title>
+                        </head>
+                        <body>
+                            <h1>Title</h1>
+                            <p>This is some &quot;Foobar&quot; text</p>
+                            <p>This is some other text</p>
+                        </body>
+                    </html>";
+                TestDocument document = new TestDocument(input);
+                GenerateExcerpt excerpt = new GenerateExcerpt();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, excerpt).SingleAsync();
+
+                // Then
+                result["Excerpt"].ShouldBe("<p>This is some &quot;Foobar&quot; text</p>");
+            }
         }
     }
 }

@@ -140,7 +140,7 @@ namespace Statiq.Common
             {
                 using (StreamWriter writer = contentStream.GetWriter())
                 {
-                    markup.ToHtml(writer, StatiqMarkupFormatter.Instance);
+                    markup.ToFormattedHtml(writer);
                     writer.Flush();
                     IContentProvider contentProvider =
                         executionContext.GetContentProvider(contentStream, MediaTypes.Html);
