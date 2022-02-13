@@ -42,11 +42,12 @@ namespace Statiq.Common
             char newChar)
         {
             bool replaced = false;
+            Span<char> span = str.Span;
             for (int c = 0; c < str.Length; c++)
             {
-                if (str.Span[c] == oldChar)
+                if (span[c] == oldChar)
                 {
-                    str.Span[c] = newChar;
+                    span[c] = newChar;
                     replaced = true;
                 }
             }
@@ -59,11 +60,13 @@ namespace Statiq.Common
             char newChar)
         {
             bool replaced = false;
+            Span<char> span = str.Span;
             for (int c = 0; c < str.Length; c++)
             {
+                char currentChar = span[c];
                 foreach (char oldChar in oldChars)
                 {
-                    if (str.Span[c] == oldChar)
+                    if (currentChar == oldChar)
                     {
                         str.Span[c] = newChar;
                         replaced = true;
