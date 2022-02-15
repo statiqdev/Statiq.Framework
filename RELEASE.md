@@ -1,3 +1,7 @@
+# 1.0.0-beta.58
+
+- Updated Buildalyzer in `Statiq.CodeAnalysis` to 4.1.0 which removes some dependencies on .NET Framework and resolves some package resolution problems.
+
 # 1.0.0-beta.57
 
 - Added support for "raw" code fences to the `RenderMarkdown` module that bypasses markdown processing.

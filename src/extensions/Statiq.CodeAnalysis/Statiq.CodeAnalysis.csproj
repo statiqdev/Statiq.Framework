@@ -4,12 +4,8 @@
     <PackageTags>Statiq Static StaticContent StaticSite Blog BlogEngine CodeAnalysis Roslyn XmlDocComments DocComments</PackageTags>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Buildalyzer.Workspaces" Version="3.2.7" />
-    <PackageReference Include="Microsoft.Build" Version="16.10.0">
-      <NoWarn>NU1701</NoWarn>
-    </PackageReference>
+    <PackageReference Include="Buildalyzer.Workspaces" Version="4.1.0" />
     <PackageReference Include="System.Linq.Async" Version="4.0.0" />
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.6.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\core\Statiq.Common\Statiq.Common.csproj" />
