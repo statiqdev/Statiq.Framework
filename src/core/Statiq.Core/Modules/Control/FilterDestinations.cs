@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// "and" conditions, place additional <see cref="FilterDestinations"/> modules
     /// after this one.
     /// </remarks>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class FilterDestinations : SyncConfigModule<IEnumerable<string>>
     {
         /// <summary>

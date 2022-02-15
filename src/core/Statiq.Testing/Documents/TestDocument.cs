@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using Statiq.Common;
@@ -168,8 +169,10 @@ namespace Statiq.Testing
 
         // Test helpers
 
+#pragma warning disable VSTHRD002 // Synchronously waiting on tasks or awaiters may cause deadlocks. Use await or JoinableTaskFactory.Run instead.
         [PropertyMetadata(null)]
         public string Content => this.GetContentStringAsync().GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
 
         [PropertyMetadata(null)]
         public TestMetadata TestMetadata => (TestMetadata)Metadata;

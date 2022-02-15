@@ -23,8 +23,13 @@ namespace Statiq.Common
         /// <returns>A config object.</returns>
         public static Config<TValue> FromValue<TValue>(Task<TValue> value)
         {
+#pragma warning disable VSTHRD110 // Observe the awaitable result of this method call by awaiting it, assigning to a variable, or passing it to another method.
             value.ThrowIfNull(nameof(value));
+#pragma warning restore VSTHRD110
+
+#pragma warning disable VSTHRD003 // Avoid awaiting or returning a Task representing work that was not started within your context as that can lead to deadlocks.
             return new Config<TValue>((_, __) => value, false);
+#pragma warning restore VSTHRD003
         }
 
         /// <summary>

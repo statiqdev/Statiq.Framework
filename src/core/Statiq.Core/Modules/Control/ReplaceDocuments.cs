@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// <summary>
     /// Replaces documents in the current pipeline.
     /// </summary>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class ReplaceDocuments : SyncChildDocumentsModule
     {
         public ReplaceDocuments()

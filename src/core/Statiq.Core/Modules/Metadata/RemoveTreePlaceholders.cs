@@ -10,7 +10,7 @@ namespace Statiq.Core
     /// Removes tree placeholder documents (this module will not flatten a tree).
     /// </summary>
     /// <metadata cref="Keys.TreePlaceholder" usage="Input"/>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class RemoveTreePlaceholders : SyncModule
     {
         private readonly string _treePlaceholderKey;

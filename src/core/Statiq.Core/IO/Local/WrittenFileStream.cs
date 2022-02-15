@@ -82,7 +82,7 @@ namespace Statiq.Core
             if (_wroteData)
             {
                 _file.Refresh();
-                _fileWriteTracker.TrackWrite(_file.Path, _file.GetCacheCode(), true);
+                _fileWriteTracker.TrackWrite(_file.Path, await _file.GetCacheCodeAsync(), true);
             }
         }
     }

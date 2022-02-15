@@ -12,7 +12,7 @@ namespace Statiq.Core
     /// <remarks>
     /// This module has no effect on documents and the input documents are passed through to output documents.
     /// </remarks>
-    /// <category>Extensibility</category>
+    /// <category name="Extensibility" />
     public class LogMessage : SyncConfigModule<string>
     {
         private LogLevel _logLevel = LogLevel.Information;
@@ -21,7 +21,7 @@ namespace Statiq.Core
         /// Logs the string value of the returned object. This allows
         /// you to log different content for each document depending on the input document.
         /// </summary>
-        /// <param name="content">A delegate that returns the content to context.Log</param>
+        /// <param name="content">A delegate that returns the content to context.Log.</param>
         public LogMessage(Config<string> content)
             : base(content, false)
         {
@@ -32,7 +32,7 @@ namespace Statiq.Core
         /// you to log different content for each document depending on the input document.
         /// </summary>
         /// <param name="logLevel">The log level.</param>
-        /// <param name="content">A delegate that returns the content to context.Log</param>
+        /// <param name="content">A delegate that returns the content to context.Log.</param>
         public LogMessage(LogLevel logLevel, Config<string> content)
             : base(content, false)
         {

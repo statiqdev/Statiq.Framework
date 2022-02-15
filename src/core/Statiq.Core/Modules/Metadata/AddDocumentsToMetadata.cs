@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// If more than one result document is produced, it will be added as a
     /// <see cref="IReadOnlyList{IDocument}"/> to the specified metadata key.
     /// </remarks>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class AddDocumentsToMetadata : SyncChildDocumentsModule
     {
         private readonly string _key;

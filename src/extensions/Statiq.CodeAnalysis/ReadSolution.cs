@@ -20,7 +20,7 @@ namespace Statiq.CodeAnalysis
     /// </remarks>
     /// <metadata cref="CodeAnalysisKeys.AssemblyName" usage="Output" />
     /// <metadata cref="CodeAnalysisKeys.OutputBuildLog" usage="Setting"/>
-    /// <category>Input/Output</category>
+    /// <category name="Input/Output" />
     public class ReadSolution : ReadWorkspace
     {
         /// <summary>

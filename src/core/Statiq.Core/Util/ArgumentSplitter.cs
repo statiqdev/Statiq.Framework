@@ -8,7 +8,7 @@ namespace Statiq.Core
     /// Splits a string into quoted arguments delimited by spaces.
     /// </summary>
     /// <remarks>
-    /// From http://stackoverflow.com/a/298990/807064
+    /// From http://stackoverflow.com/a/298990/807064.
     /// </remarks>
     public static class ArgumentSplitter
     {

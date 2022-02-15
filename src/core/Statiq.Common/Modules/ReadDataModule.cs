@@ -26,7 +26,7 @@ namespace Statiq.Common
         private int _limit = int.MaxValue;
 
         /// <summary>
-        /// Specifies which metadata key should be used for the document content
+        /// Specifies which metadata key should be used for the document content.
         /// </summary>
         /// <param name="contentKey">The name of the content property.</param>
         /// <returns>The current module instance.</returns>
@@ -37,7 +37,7 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Allows renaming of keys during document creation: "If you find key X, create it as key Y instead."
+        /// Allows renaming of keys during document creation: "If you find key X, create it as key Y instead".
         /// </summary>
         /// <param name="originalKeyName">The name of the original key to convert.</param>
         /// <param name="newKeyName">The name you want to convert the key to.</param>

@@ -6,9 +6,9 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Extensions
 {
     /// <summary>
-    /// Dublin Core Metadata Element Set, Version 1.1
-    ///     http://dublincore.org/documents/dces/
-    ///     http://web.resource.org/rss/1.0/modules/dc/
+    /// Dublin Core Metadata Element Set, Version 1.1,
+    /// See http://dublincore.org/documents/dces/
+    /// and http://web.resource.org/rss/1.0/modules/dc/.
     /// </summary>
     public class DublinCore : IExtensionAdapter
     {
@@ -20,7 +20,7 @@ namespace Statiq.Feeds.Syndication.Extensions
         private readonly Dictionary<TermName, XmlElement> _dcTerms = new Dictionary<TermName, XmlElement>();
 
         /// <summary>
-        /// Gets and sets the values for DublinCore extensions
+        /// Gets and sets the values for DublinCore extensions.
         /// </summary>
         public string this[TermName term]
         {

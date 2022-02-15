@@ -25,7 +25,7 @@ namespace Statiq.Core
     /// <metadata cref="Keys.Children" usage="Output">
     /// The child heading documents of the current heading document.
     /// </metadata>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class GatherHeadings : ParallelConfigModule<int>
     {
         private bool _nesting;
@@ -115,7 +115,7 @@ namespace Statiq.Core
         /// The rest of the heading documents will only be accessible via the
         /// metadata of the root heading documents.
         /// </summary>
-        /// <param name="nesting"><c>true</c> to turn on nesting</param>
+        /// <param name="nesting"><c>true</c> to turn on nesting.</param>
         /// <returns>The current module instance.</returns>
         public GatherHeadings WithNesting(bool nesting = true)
         {

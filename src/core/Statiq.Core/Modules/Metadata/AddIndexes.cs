@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// Adds a one-based index to every document as metadata.
     /// </summary>
     /// <metadata cref="Keys.Index" usage="Output" />
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class AddIndexes : Module
     {
         /// <inheritdoc />

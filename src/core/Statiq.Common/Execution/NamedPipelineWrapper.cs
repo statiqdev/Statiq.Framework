@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Statiq.Common
 {
     /// <summary>
-    /// Wraps a pipeline in order to provide an alternate name during registration
+    /// Wraps a pipeline in order to provide an alternate name during registration.
     /// </summary>
     public class NamedPipelineWrapper : INamedPipelineWrapper
     {

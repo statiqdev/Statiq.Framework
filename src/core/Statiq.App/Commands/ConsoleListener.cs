@@ -27,11 +27,13 @@ namespace Statiq.App
             _onReadLine = onReadLine;
 
             // Only listen if console input has not been redirected, otherwise it's on the caller
+#pragma warning disable VSTHRD110 // Observe the awaitable result of this method call by awaiting it, assigning to a variable, or passing it to another method.
             if (!Console.IsInputRedirected)
             {
                 Console.TreatControlCAsInput = true;
                 Task.Run(ReadAsync);
             }
+#pragma warning restore VSTHRD110
 
             if (startReadingLines)
             {

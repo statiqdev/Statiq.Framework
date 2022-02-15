@@ -10,7 +10,7 @@ namespace Statiq.Tables
     /// Reads the contents of Excel Open XML documents as a table into metadata.
     /// </summary>
     /// <remarks>The table array is stored in a "Table" key by default as a <c>IReadOnlyList&lt;IReadOnlyList&lt;string&gt;&gt;</c>.</remarks>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class ReadExcel : ParallelSyncMultiConfigModule
     {
         // Config keys

@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Atom
 {
     /// <summary>
-    /// http://www.iana.org/assignments/link-relations.html
+    /// See http://www.iana.org/assignments/link-relations.html.
     /// </summary>
     public enum AtomLinkRelation
     {

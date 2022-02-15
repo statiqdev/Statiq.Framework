@@ -36,7 +36,7 @@ namespace Statiq.Razor
     /// </para>
     /// </remarks>
     /// Used to determine if the source file name contains the ignore prefix.
-    /// <category>Templates</category>
+    /// <category name="Templates" />
     public class RenderRazor : Module
     {
         // Not a valid file name on either Windows or Linux

@@ -24,7 +24,9 @@ namespace Statiq.Sass
         // This is a TryImportDelegate which unfortunately isn't async
         public bool TryImport(string requestedFile, string parentPath, out string scss, out string map)
         {
+#pragma warning disable VSTHRD002 // Synchronously waiting on tasks or awaiters may cause deadlocks. Use await or JoinableTaskFactory.Run instead.
             scss = TryImportAsync(requestedFile, parentPath).GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
             map = null;
             return scss is object;
         }

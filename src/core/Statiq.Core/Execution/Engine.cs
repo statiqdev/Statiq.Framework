@@ -156,7 +156,7 @@ namespace Statiq.Core
         /// <remarks>
         /// Creates a new top-level scope so that transient services can be disposed with the engine
         /// See https://stackoverflow.com/questions/43244316/iserviceprovider-garbage-collection-disposal
-        /// And https://github.com/aspnet/DependencyInjection/issues/456
+        /// and https://github.com/aspnet/DependencyInjection/issues/456.
         /// </remarks>
         /// <param name="serviceCollection">The service collection to create a scope for.</param>
         /// <param name="configuration">An implementation of the configuration interface (I.e. the settings).</param>
@@ -854,7 +854,9 @@ namespace Statiq.Core
                 // If we're running serially, immediately wait for this phase task before getting the next one
                 if (SerialExecution)
                 {
+#pragma warning disable VSTHRD002 // Synchronously waiting on tasks or awaiters may cause deadlocks. Use await or JoinableTaskFactory.Run instead.
                     phaseTask.Wait(CancellationToken);
+#pragma warning restore VSTHRD002
                 }
 
                 phaseTasks.Add(phase, phaseTask);

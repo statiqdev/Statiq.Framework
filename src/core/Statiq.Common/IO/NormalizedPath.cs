@@ -522,7 +522,7 @@ namespace Statiq.Common
         /// Performs an explicit conversion from <see cref="NormalizedPath"/> to <see cref="string"/>.
         /// </summary>
         /// <remarks>
-        /// No implicit conversion to string on purpose, don't want bugs due to choosing string overloads over what should be paths
+        /// No implicit conversion to string on purpose, don't want bugs due to choosing string overloads over what should be paths.
         /// </remarks>
         /// <param name="path">The path.</param>
         /// <returns>The result as a string of the conversion.</returns>

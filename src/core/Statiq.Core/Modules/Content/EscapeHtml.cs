@@ -8,7 +8,7 @@ namespace Statiq.Core
     /// <summary>
     /// Automatically escapes HTML content.
     /// </summary>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class EscapeHtml : ParallelModule
     {
         private readonly Dictionary<char, string> _predefinedEscapeSequences;
@@ -211,16 +211,16 @@ namespace Statiq.Core
                 {
                     if (_standardCharacters.Contains(c))
                     {
-                        outputString.Write(c);
+                        await outputString.WriteAsync(c);
                     }
                     else if (_predefinedEscapeSequences.ContainsKey(c))
                     {
-                        outputString.Write(_predefinedEscapeSequences[c]);
+                        await outputString.WriteAsync(_predefinedEscapeSequences[c]);
                         escaped = true;
                     }
                     else
                     {
-                        outputString.Write(GenerateEscape(c));
+                        await outputString.WriteAsync(GenerateEscape(c));
                         escaped = true;
                     }
                 }
@@ -228,12 +228,12 @@ namespace Statiq.Core
                 {
                     if (_currentlyEscapedCharacters.ContainsKey(c))
                     {
-                        outputString.Write(_currentlyEscapedCharacters[c]);
+                        await outputString.WriteAsync(_currentlyEscapedCharacters[c]);
                         escaped = true;
                     }
                     else
                     {
-                        outputString.Write(c);
+                        await outputString.WriteAsync(c);
                     }
                 }
             }

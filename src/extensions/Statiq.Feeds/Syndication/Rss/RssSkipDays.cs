@@ -6,8 +6,8 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Rss
 {
     /// <summary>
-    /// RSS 2.0 SkipDays
-    /// http://blogs.law.harvard.edu/tech/skipHoursDays
+    /// RSS 2.0 SkipDays,
+    /// see http://blogs.law.harvard.edu/tech/skipHoursDays.
     /// </summary>
     [Serializable]
     public class RssSkipDays : RssBase

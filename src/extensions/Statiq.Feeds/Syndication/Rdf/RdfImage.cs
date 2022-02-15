@@ -5,8 +5,8 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Rdf
 {
     /// <summary>
-    /// RDF 1.0 Image
-    ///     http://web.resource.org/rss/1.0/spec#s5.4
+    /// RDF 1.0 Image,
+    /// see http://web.resource.org/rss/1.0/spec#s5.4.
     /// </summary>
     [Serializable]
     [XmlType("image", Namespace=RdfFeedBase.NamespaceRss10)]
@@ -22,9 +22,6 @@ namespace Statiq.Feeds.Syndication.Rdf
             set { _url = ConvertToUri(value); }
         }
 
-        /// <summary>
-        /// Gets and sets
-        /// </summary>
         [DefaultValue(null)]
         [XmlAttribute("about", Namespace=RdfFeedBase.NamespaceRdf)]
         public override string About

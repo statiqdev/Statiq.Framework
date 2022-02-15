@@ -5,8 +5,8 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Rss
 {
     /// <summary>
-    /// RSS 2.0 Source
-    ///     http://blogs.law.harvard.edu/tech/rss#ltsourcegtSubelementOfLtitemgt
+    /// RSS 2.0 Source,
+    /// see http://blogs.law.harvard.edu/tech/rss#ltsourcegtSubelementOfLtitemgt.
     /// </summary>
     [Serializable]
     public class RssSource : RssBase

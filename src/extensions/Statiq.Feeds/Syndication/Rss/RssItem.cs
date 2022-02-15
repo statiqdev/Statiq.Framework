@@ -7,8 +7,8 @@ using Statiq.Feeds.Syndication.Extensions;
 namespace Statiq.Feeds.Syndication.Rss
 {
     /// <summary>
-    /// RSS 2.0 Item
-    ///     http://blogs.law.harvard.edu/tech/rss#hrelementsOfLtitemgt
+    /// RSS 2.0 Item,
+    /// see http://blogs.law.harvard.edu/tech/rss#hrelementsOfLtitemgt.
     /// </summary>
     [Serializable]
     public class RssItem : RssBase, IFeedItem
@@ -259,14 +259,14 @@ namespace Statiq.Feeds.Syndication.Rss
         public RssSource Source { get; set; } = null;
 
         /// <summary>
-        /// Gets and sets the encoded content for this item
+        /// Gets and sets the encoded content for this item.
         /// </summary>
         [DefaultValue(null)]
         [XmlElement(ContentEncodedElement, Namespace = ContentNamespace)]
         public string ContentEncoded { get; set; } = null;
 
         /// <summary>
-        /// Gets and sets the Uri to which comments can be POSTed
+        /// Gets and sets the Uri to which comments can be POSTed.
         /// </summary>
         [DefaultValue(null)]
         [XmlElement(WfwCommentElement, Namespace=WfwNamespace)]
@@ -277,7 +277,7 @@ namespace Statiq.Feeds.Syndication.Rss
         }
 
         /// <summary>
-        /// Gets and sets the Uri at which a feed of comments can be found
+        /// Gets and sets the Uri at which a feed of comments can be found.
         /// </summary>
         [DefaultValue(null)]
         [XmlElement(WfwCommentRssElement, Namespace=WfwNamespace)]
@@ -288,7 +288,7 @@ namespace Statiq.Feeds.Syndication.Rss
         }
 
         /// <summary>
-        /// Gets and sets the number of comments for this item
+        /// Gets and sets the number of comments for this item.
         /// </summary>
         [DefaultValue(null)]
         [XmlElement(SlashCommentsElement, Namespace=SlashNamespace)]
@@ -306,10 +306,10 @@ namespace Statiq.Feeds.Syndication.Rss
         }
 
         /// <summary>
-        /// Allows IWebFeedItem to access DublinCore
+        /// Allows IWebFeedItem to access DublinCore.
         /// </summary>
         /// <remarks>
-        /// Note this only gets filled on first access
+        /// Note this only gets filled on first access.
         /// </remarks>
         private DublinCore DublinCore
         {

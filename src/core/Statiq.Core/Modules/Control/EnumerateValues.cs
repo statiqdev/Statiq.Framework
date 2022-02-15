@@ -17,7 +17,7 @@ namespace Statiq.Core
     /// a pipeline progresses. Instead you should enumerate some identifier and operate on that
     /// to find the correct documents when the template gets rendered.
     /// </remarks>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class EnumerateValues : ParallelConfigModule<IEnumerable<object>>
     {
         private string _currentKey = Keys.Current;

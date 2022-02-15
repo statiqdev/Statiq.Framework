@@ -7,7 +7,7 @@ namespace Statiq.Core
     /// <summary>
     /// Throws an exception.
     /// </summary>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class ThrowException : SyncConfigModule<Exception>
     {
         /// <summary>

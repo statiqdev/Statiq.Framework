@@ -32,7 +32,9 @@ namespace Statiq.Common
                 if (IScriptHelper.TryGetScriptString(key, out string script))
                 {
                     IExecutionContext context = IExecutionContext.Current;
+#pragma warning disable VSTHRD002 // Synchronously waiting on tasks or awaiters may cause deadlocks. Use await or JoinableTaskFactory.Run instead.
                     object result = context.ScriptHelper.EvaluateAsync(script, metadata).GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
                     return TypeHelper.TryExpandAndConvert(key, result, metadata, out value);
                 }
 

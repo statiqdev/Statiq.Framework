@@ -5,9 +5,9 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Rss
 {
     /// <summary>
-    /// RSS 2.0 Category
-    ///     http://blogs.law.harvard.edu/tech/rss#ltcategorygtSubelementOfLtitemgt
-    ///     http://blogs.law.harvard.edu/tech/rss#syndic8
+    /// RSS 2.0 Category,
+    /// see http://blogs.law.harvard.edu/tech/rss#ltcategorygtSubelementOfLtitemgt
+    /// and http://blogs.law.harvard.edu/tech/rss#syndic8.
     /// </summary>
     [Serializable]
     public class RssCategory : RssBase
@@ -15,9 +15,6 @@ namespace Statiq.Feeds.Syndication.Rss
         private string _domain = null;
         private string _value = null;
 
-        /// <summary>
-        /// Ctor
-        /// </summary>
         public RssCategory()
         {
         }

@@ -20,7 +20,7 @@ namespace Statiq.YouTube
     /// Google.Apis.YouTube.v3 client and requires you to provide functions that fetch whatever data you need. Each request
     /// will be sent for each input document.
     /// </remarks>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class ReadYouTube : ParallelSyncModule, IDisposable
     {
         private readonly YouTubeService _youtube;

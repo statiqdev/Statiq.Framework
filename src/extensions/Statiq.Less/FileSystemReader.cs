@@ -25,7 +25,9 @@ namespace Statiq.Less
             }
         }
 
+#pragma warning disable VSTHRD002 // Synchronously waiting on tasks or awaiters may cause deadlocks. Use await or JoinableTaskFactory.Run instead.
         public string GetFileContents(string fileName) => GetInputFile(fileName).ReadAllTextAsync().GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
 
         public bool DoesFileExist(string fileName) => GetInputFile(fileName).Exists;
 

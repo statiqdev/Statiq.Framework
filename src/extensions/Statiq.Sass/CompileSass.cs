@@ -28,7 +28,7 @@ namespace Statiq.Sass
     /// Sass file is one technique for working with metadata-defined Sass variables.
     /// </para>
     /// </remarks>
-    /// <category>Templates</category>
+    /// <category name="Templates" />
     public class CompileSass : ParallelModule
     {
         private readonly List<NormalizedPath> _includePaths = new List<NormalizedPath>();

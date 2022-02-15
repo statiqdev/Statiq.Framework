@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// "and" conditions, place additional <see cref="FilterDocuments"/> modules
     /// after this one.
     /// </remarks>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class FilterDocuments : Module
     {
         private readonly List<Config<bool>> _predicates = new List<Config<bool>>();

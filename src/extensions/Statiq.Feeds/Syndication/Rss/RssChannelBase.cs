@@ -7,8 +7,8 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Rss
 {
     /// <summary>
-    /// RSS 2.0 Channel
-    ///     http://blogs.law.harvard.edu/tech/rss
+    /// RSS 2.0 Channel,
+    /// see http://blogs.law.harvard.edu/tech/rss.
     /// </summary>
     [Serializable]
     public abstract class RssChannelBase : RssBase, IUriProvider

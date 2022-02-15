@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Atom
 {
     /// <summary>
-    /// http://tools.ietf.org/html/rfc4287#section-4.1.3
+    /// See http://tools.ietf.org/html/rfc4287#section-4.1.3.
     /// </summary>
     [Serializable]
     public class AtomContent : AtomText, IUriProvider

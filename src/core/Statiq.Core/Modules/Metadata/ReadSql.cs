@@ -13,7 +13,7 @@ namespace Statiq.Core
     /// as a new document and every column is used as the metadata (or content) of
     /// the new document. Input documents are ignored.
     /// </summary>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class ReadSql : ReadDataModule<ReadSql, DataRow>
     {
         private readonly string _connectionString;

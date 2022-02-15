@@ -249,7 +249,7 @@ namespace Statiq.Common
         /// </summary>
         /// <param name="index">The index where the path should be inserted.</param>
         /// <param name="path">The path to insert.</param>
-        /// <returns><c>true</c> if the collection did not contain the path and it was inserted, otherwise <c>false</c></returns>
+        /// <returns><c>true</c> if the collection did not contain the path and it was inserted, otherwise <c>false</c>.</returns>
         public bool Insert(int index, NormalizedPath path) => Insert(index, path, true);
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace Statiq.Common
         /// <param name="index">The index where the path should be inserted.</param>
         /// <param name="path">The path to insert.</param>
         /// <param name="removable">Indicates if this path can be removed from the collection.</param>
-        /// <returns><c>true</c> if the collection did not contain the path and it was inserted, otherwise <c>false</c></returns>
+        /// <returns><c>true</c> if the collection did not contain the path and it was inserted, otherwise <c>false</c>.</returns>
         public bool Insert(int index, NormalizedPath path, bool removable)
         {
             path.ThrowIfNull(nameof(path));

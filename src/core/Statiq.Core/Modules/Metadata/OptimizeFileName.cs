@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// This module takes the destination file name (or the value of a specified
     /// metadata key) and optimizes it by removing reserved characters, white-listing characters, etc.
     /// </remarks>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class OptimizeFileName : ParallelSyncMultiConfigModule
     {
         // Config keys

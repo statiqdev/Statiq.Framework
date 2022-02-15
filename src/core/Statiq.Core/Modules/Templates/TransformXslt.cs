@@ -16,7 +16,7 @@ namespace Statiq.Core
     /// XSLT <c>document()</c> function and embedded scripts are disabled. For more information
     /// see the <a href="https://msdn.microsoft.com/en-us/library/system.xml.xsl.xslcompiledtransform.aspx">MSDN documentation</a>.
     /// </remarks>
-    /// <category>Templates</category>
+    /// <category name="Templates" />
     public class TransformXslt : ParallelModule
     {
         private readonly Config<NormalizedPath> _xsltPath;

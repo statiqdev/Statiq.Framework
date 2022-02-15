@@ -23,7 +23,7 @@ namespace Statiq.Common
         /// Gets the parent directory.
         /// </summary>
         /// <value>
-        /// The parent directory or <c>null</c> if the directory is a root
+        /// The parent directory or <c>null</c> if the directory is a root.
         /// </value>
         IDirectory Parent { get; }
 

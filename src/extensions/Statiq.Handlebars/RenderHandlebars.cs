@@ -23,7 +23,7 @@ namespace Statiq.Handlebars
     /// It also mimics the JS library's API as closely as possible.
     /// </para>
     /// </remarks>
-    /// <category>Templates</category>
+    /// <category name="Templates" />
     public class RenderHandlebars : ParallelModule
     {
         private readonly string _sourceKey;

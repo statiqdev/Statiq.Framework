@@ -21,7 +21,7 @@ namespace Statiq.Core
     /// </remarks>
     /// <metadata cref="Keys.Children" usage="Output" />
     /// <metadata cref="Keys.GroupKey" usage="Output" />
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class GroupDocuments : Module
     {
         private readonly Config<IEnumerable<object>> _key;

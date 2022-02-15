@@ -16,7 +16,7 @@ namespace Statiq.Core
     /// in more than one output document, multiple clones of the input document will be made for each one.
     /// The output document content is set to the original input document content.
     /// </remarks>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class ProcessSidecarFile : ParentModule
     {
         private readonly Config<NormalizedPath> _sidecarPath;

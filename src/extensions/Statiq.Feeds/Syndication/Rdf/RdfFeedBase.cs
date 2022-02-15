@@ -5,8 +5,8 @@ using Statiq.Feeds.Syndication.Extensions;
 namespace Statiq.Feeds.Syndication.Rdf
 {
     /// <summary>
-    /// RDF 1.0 Root
-    ///     http://web.resource.org/rss/1.0/spec#s5.2
+    /// RDF 1.0 Root,
+    /// see http://web.resource.org/rss/1.0/spec#s5.2.
     /// </summary>
     public abstract class RdfFeedBase : ExtensibleBase
     {

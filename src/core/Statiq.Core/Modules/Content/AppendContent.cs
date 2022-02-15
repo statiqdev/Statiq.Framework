@@ -7,7 +7,7 @@ namespace Statiq.Core
     /// <summary>
     /// Appends the specified content to the existing content of each document.
     /// </summary>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class AppendContent : ParallelConfigModule<string>
     {
         /// <summary>

@@ -15,7 +15,7 @@ namespace Statiq.Core
     /// keys don't exist in the following documents is retained). A single output document with
     /// the combined content and metadata is output.
     /// </remarks>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class CombineDocuments : Module
     {
         /// <inheritdoc />

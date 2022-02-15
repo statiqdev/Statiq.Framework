@@ -6,8 +6,8 @@ using Statiq.Feeds.Syndication.Extensions;
 namespace Statiq.Feeds.Syndication.Rdf
 {
     /// <summary>
-    /// RDF 1.0 Item
-    ///     http://web.resource.org/rss/1.0/spec#s5.5
+    /// RDF 1.0 Item,
+    /// see http://web.resource.org/rss/1.0/spec#s5.5.
     /// </summary>
     public class RdfItem : RdfBase, IFeedItem
     {
@@ -124,7 +124,7 @@ namespace Statiq.Feeds.Syndication.Rdf
         }
 
         /// <summary>
-        /// Gets and sets the encoded content for this item
+        /// Gets and sets the encoded content for this item.
         /// </summary>
         [DefaultValue(null)]
         [XmlElement(ContentEncodedElement, Namespace=ContentNamespace)]
@@ -135,7 +135,7 @@ namespace Statiq.Feeds.Syndication.Rdf
         }
 
         /// <summary>
-        /// Gets and sets the Uri to which comments can be POSTed
+        /// Gets and sets the Uri to which comments can be POSTed.
         /// </summary>
         [DefaultValue(null)]
         [XmlElement(WfwCommentElement, Namespace=WfwNamespace)]
@@ -146,7 +146,7 @@ namespace Statiq.Feeds.Syndication.Rdf
         }
 
         /// <summary>
-        /// Gets and sets the Uri at which a feed of comments can be found
+        /// Gets and sets the Uri at which a feed of comments can be found.
         /// </summary>
         [DefaultValue(null)]
         [XmlElement(WfwCommentRssElement, Namespace=WfwNamespace)]
@@ -157,7 +157,7 @@ namespace Statiq.Feeds.Syndication.Rdf
         }
 
         /// <summary>
-        /// Gets and sets the number of comments for this item
+        /// Gets and sets the number of comments for this item.
         /// </summary>
         [DefaultValue(null)]
         [XmlElement(SlashCommentsElement, Namespace=SlashNamespace)]
@@ -186,10 +186,10 @@ namespace Statiq.Feeds.Syndication.Rdf
         }
 
         /// <summary>
-        /// Allows IWebFeedItem to access DublinCore
+        /// Allows IWebFeedItem to access DublinCore.
         /// </summary>
         /// <remarks>
-        /// Note this only gets filled on first access
+        /// Note this only gets filled on first access.
         /// </remarks>
         internal DublinCore DublinCore
         {

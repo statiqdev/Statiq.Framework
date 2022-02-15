@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// <summary>
     /// Sets the specified metadata in each input document.
     /// </summary>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class SetMetadata : ParallelConfigModule<object>
     {
         private readonly string _key;

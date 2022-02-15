@@ -12,7 +12,7 @@ namespace Statiq.Core
     /// <summary>
     /// Renders shortcodes in the input documents.
     /// </summary>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class ProcessShortcodes : ParallelModule
     {
         private readonly string _startDelimiter;

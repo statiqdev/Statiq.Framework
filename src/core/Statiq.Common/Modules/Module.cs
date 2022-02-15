@@ -20,21 +20,28 @@ namespace Statiq.Common
         /// <inheritdoc />
         public async Task<IEnumerable<IDocument>> ExecuteAsync(IExecutionContext context)
         {
+#pragma warning disable VSTHRD103 // Method synchronously blocks. Await BeforeExecutionAsync instead.
+            // ReSharper disable once MethodHasAsyncOverload
             BeforeExecution(context);
             await BeforeExecutionAsync(context);
             try
             {
                 IEnumerable<IDocument> outputs = await ExecuteContextAsync(context);
                 ExecutionOutputs executionOutputs = new ExecutionOutputs(outputs);
+
+                // ReSharper disable once MethodHasAsyncOverload
                 AfterExecution(context, executionOutputs);
                 await AfterExecutionAsync(context, executionOutputs);
+
                 return executionOutputs.Outputs;
             }
             finally
             {
+                // ReSharper disable once MethodHasAsyncOverload
                 Finally(context);
                 await FinallyAsync(context);
             }
+#pragma warning restore VSTHRD103
         }
 
         /// <summary>

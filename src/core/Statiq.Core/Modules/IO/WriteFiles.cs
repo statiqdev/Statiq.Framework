@@ -19,7 +19,7 @@ namespace Statiq.Core
     /// will be written to the absolute location. Use the <see cref="SetDestination"/> module
     /// to set the document destination prior to using this module.
     /// </remarks>
-    /// <category>Input/Output</category>
+    /// <category name="Input/Output" />
     public class WriteFiles : Module
     {
         private bool _ignoreEmptyContent = true;
@@ -62,7 +62,7 @@ namespace Statiq.Core
         /// <summary>
         /// Checks whether the input document should be processed.
         /// </summary>
-        /// <param name="input">The input document to check/</param>
+        /// <param name="input">The input document to check.</param>
         /// <param name="context">The execution context.</param>
         /// <returns><c>true</c> if the input document should be processed, <c>false</c> otherwise.</returns>
         protected Task<bool> ShouldProcessAsync(IDocument input, IExecutionContext context) => _predicate.GetValueAsync(input, context);

@@ -18,7 +18,7 @@ namespace Statiq.Core
     /// in more than one output document, multiple clones of the input document will be made for each one.
     /// The output document content is set to the original content without the front matter.
     /// </remarks>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class ExtractFrontMatter : ParentModule
     {
         private readonly string _endDelimiter;

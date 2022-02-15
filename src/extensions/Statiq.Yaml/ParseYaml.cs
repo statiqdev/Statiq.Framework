@@ -18,7 +18,7 @@ namespace Statiq.Yaml
     /// then the dynamic object is not added. You can also flatten the YAML to add top-level pairs directly
     /// to the document metadata.
     /// </remarks>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class ParseYaml : ParallelSyncModule
     {
         private readonly bool _flatten;

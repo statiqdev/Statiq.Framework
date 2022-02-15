@@ -1080,7 +1080,7 @@ namespace Statiq.Common
             };
 
         /// <summary>
-        /// Given a file path, determine the media type
+        /// Given a file path, determine the media type.
         /// </summary>
         /// <param name="path">A file path.</param>
         /// <param name="mediaType">The media type.</param>
@@ -1112,7 +1112,7 @@ namespace Statiq.Common
         }
 
         /// <summary>
-        /// Given a file path, determine the media type
+        /// Given a file path, determine the media type.
         /// </summary>
         /// <param name="path">A file path.</param>
         /// <param name="defaultIfNotFound">Will return a "text/x-[extension]" default media type if a mapping is not found.</param>

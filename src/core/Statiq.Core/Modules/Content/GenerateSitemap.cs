@@ -18,7 +18,7 @@ namespace Statiq.Core
     /// <c>Hostname</c> metadata key (as a <c>string</c>) for each input document, which will be prepended to all locations.
     /// </remarks>
     /// <metadata cref="Keys.SitemapItem" usage="Input" />
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class GenerateSitemap : Module
     {
         private static readonly string[] ChangeFrequencies = { "always", "hourly", "daily", "weekly", "monthly", "yearly", "never" };

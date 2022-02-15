@@ -6,19 +6,8 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Atom
 {
     /// <summary>
-    /// Commonly shared Atom base
+    /// Commonly shared Atom base class.
     /// </summary>
-    /// <remarks>
-    /// atomBase
-    ///     atomAuthor*
-    ///     atomCategory*
-    ///     atomContributor*
-    ///     atomId
-    ///     atomLink*
-    ///     atomRights?
-    ///     atomTitle
-    ///     atomUpdated
-    /// </remarks>
     public abstract class AtomBase : AtomCommonAttributes, IUriProvider
     {
         private Uri _id = null;

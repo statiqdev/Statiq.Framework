@@ -13,7 +13,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
         public class ExecuteTests : ValidateMetadataFixture
         {
             [Test]
-            public void ExistenceOfKeyDoesNotThrow()
+            public async Task ExistenceOfKeyDoesNotThrow()
             {
                 // Given
                 TestDocument document = new TestDocument(
@@ -24,8 +24,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 ValidateMetadata<string> validateMeta = new ValidateMetadata<string>("Title");
 
                 // When, Then
-                // Convert this to Should.NotThrowAsync when https://github.com/shouldly/shouldly/pull/430 is merged
-                Should.NotThrow(() => ExecuteAsync(document, validateMeta).GetAwaiter().GetResult());
+                await Should.NotThrowAsync(async () => await ExecuteAsync(document, validateMeta));
             }
 
             [Test]
@@ -55,7 +54,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
             }
 
             [Test]
-            public void PassedAssertionDoesNotThrow()
+            public async Task PassedAssertionDoesNotThrow()
             {
                 // Given
                 TestDocument document = new TestDocument(
@@ -66,8 +65,7 @@ namespace Statiq.Core.Tests.Modules.Metadata
                 ValidateMetadata<string> validateMeta = new ValidateMetadata<string>("Title").WithAssertion(x => x == "Foo");
 
                 // When, Then
-                // Convert this to Should.NotThrowAsync when https://github.com/shouldly/shouldly/pull/430 is merged
-                Should.NotThrow(() => ExecuteAsync(document, validateMeta).GetAwaiter().GetResult());
+                await Should.NotThrowAsync(async () => await ExecuteAsync(document, validateMeta));
             }
         }
     }

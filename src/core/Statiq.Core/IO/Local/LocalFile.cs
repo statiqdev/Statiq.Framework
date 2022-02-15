@@ -68,7 +68,9 @@ namespace Statiq.Core
                 CreateDirectory();
             }
             Refresh();
+#pragma warning disable VSTHRD103 // GetCacheCode synchronously blocks. Await GetCacheCodeAsync instead.
             _fileProvider.FileSystem.WriteTracker.TrackWrite(Path, GetCacheCode(), true);
+#pragma warning restore VSTHRD103
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllTextAsync(_file.FullName, contents, cancellationToken));
         }
 
@@ -84,7 +86,9 @@ namespace Statiq.Core
                 CreateDirectory();
             }
             Refresh();
+#pragma warning disable VSTHRD103 // GetCacheCode synchronously blocks. Await GetCacheCodeAsync instead.
             _fileProvider.FileSystem.WriteTracker.TrackWrite(Path, GetCacheCode(), true);
+#pragma warning restore VSTHRD103
             await LocalFileProvider.AsyncRetryPolicy.ExecuteAsync(() => File.WriteAllBytesAsync(_file.FullName, bytes, cancellationToken));
         }
 

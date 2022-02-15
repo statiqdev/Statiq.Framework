@@ -12,14 +12,14 @@ namespace Statiq.Core
     /// <summary>
     /// Joins documents together with an optional delimiter to form one document.
     /// </summary>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class JoinDocuments : Module
     {
         private readonly string _delimiter;
         private readonly JoinedMetadata _metaDataMode;
 
         /// <summary>
-        /// Concatenates multiple documents together to form a single document without a delimiter and with the default metadata only
+        /// Concatenates multiple documents together to form a single document without a delimiter and with the default metadata only.
         /// </summary>
         public JoinDocuments()
             : this(string.Empty)
@@ -27,19 +27,19 @@ namespace Statiq.Core
         }
 
         /// <summary>
-        /// Concatenates multiple documents together to form a single document without a delimiter using the specified meta data mode
+        /// Concatenates multiple documents together to form a single document without a delimiter using the specified meta data mode.
         /// </summary>
-        /// <param name="metaDataMode">The specified metadata mode</param>
+        /// <param name="metaDataMode">The specified metadata mode.</param>
         public JoinDocuments(JoinedMetadata metaDataMode)
             : this(string.Empty, metaDataMode)
         {
         }
 
         /// <summary>
-        /// Concatenates multiple documents together to form a single document with a specified delimiter using the specified meta data mode
+        /// Concatenates multiple documents together to form a single document with a specified delimiter using the specified meta data mode.
         /// </summary>
-        /// <param name="delimiter">The string to use as a separator between documents</param>
-        /// <param name="metaDataMode">The specified metadata mode</param>
+        /// <param name="delimiter">The string to use as a separator between documents.</param>
+        /// <param name="metaDataMode">The specified metadata mode.</param>
         public JoinDocuments(string delimiter, JoinedMetadata metaDataMode = JoinedMetadata.DefaultOnly)
         {
             _delimiter = delimiter;
@@ -48,9 +48,9 @@ namespace Statiq.Core
 
         /// <inheritdoc />
         /// <summary>
-        /// Returns a single document containing the concatenated content of all input documents with an optional delimiter and configurable metadata options
+        /// Returns a single document containing the concatenated content of all input documents with an optional delimiter and configurable metadata options.
         /// </summary>
-        /// <returns>A single document in a list</returns>
+        /// <returns>A single document in a list.</returns>
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
             if (context.Inputs.Length < 1)

@@ -27,7 +27,7 @@ namespace Statiq.Less
     /// );
     /// </code>
     /// </example>
-    /// <category>Templates</category>
+    /// <category name="Templates" />
     public class CompileLess : Module
     {
         private Config<NormalizedPath> _inputPath = Config.FromDocument(doc => doc.Source);

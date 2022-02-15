@@ -6,8 +6,8 @@ using Statiq.Feeds.Syndication.Extensions;
 namespace Statiq.Feeds.Syndication.Rdf
 {
     /// <summary>
-    /// RDF 1.0 Base
-    ///     http://web.resource.org/rss/1.0/spec#s5.3
+    /// RDF 1.0 Base,
+    /// see http://web.resource.org/rss/1.0/spec#s5.3.
     /// </summary>
     [Serializable]
     public abstract class RdfBase : ExtensibleBase, IUriProvider
@@ -54,7 +54,7 @@ namespace Statiq.Feeds.Syndication.Rdf
         }
 
         /// <summary>
-        /// Gets and sets a URL link to the described resource
+        /// Gets and sets a URL link to the described resource.
         /// </summary>
         [XmlAttribute("about", Namespace=RdfFeedBase.NamespaceRdf)]
         public virtual string About

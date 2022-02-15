@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Atom
 {
     /// <summary>
-    /// http://tools.ietf.org/html/rfc4287#section-4.2.2
+    /// See http://tools.ietf.org/html/rfc4287#section-4.2.2.
     /// </summary>
     [Serializable]
     public class AtomCategory : AtomCommonAttributes
@@ -15,16 +15,10 @@ namespace Statiq.Feeds.Syndication.Atom
         private string _label = null;
         private string _value = null;
 
-        /// <summary>
-        /// Ctor
-        /// </summary>
         public AtomCategory()
         {
         }
 
-        /// <summary>
-        /// Ctor
-        /// </summary>
         public AtomCategory(string term)
         {
             _term = term;

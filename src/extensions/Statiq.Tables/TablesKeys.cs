@@ -13,7 +13,7 @@ namespace Statiq.Tables
         /// <summary>
         /// Contains the content of the table in a two-dimensional array as [rows, columns].
         /// </summary>
-        /// <type><see cref="T:string[,]"/></type>
+        /// <type cref="T:string[,]"/>
         public const string Table = nameof(Table);
     }
 }

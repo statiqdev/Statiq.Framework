@@ -37,7 +37,7 @@ namespace Statiq.Common
     /// );
     /// </code>
     /// </example>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class ForEachDocument : ParentModule
     {
         /// <summary>

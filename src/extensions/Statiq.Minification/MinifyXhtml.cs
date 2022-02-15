@@ -24,7 +24,7 @@ namespace Statiq.Minification
     /// );
     /// </code>
     /// </example>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class MinifyXhtml : MinifierBase, IModule
     {
         private readonly XhtmlMinificationSettings _minificationSettings;

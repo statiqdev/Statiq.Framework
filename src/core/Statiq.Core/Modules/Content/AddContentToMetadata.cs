@@ -15,7 +15,7 @@ namespace Statiq.Core
     /// If more than one result document is produced, the content of each will be added as an array
     /// to the specified metadata key.
     /// </remarks>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class AddContentToMetadata : ChildDocumentsModule
     {
         private readonly string _key;

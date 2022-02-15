@@ -28,7 +28,7 @@ namespace Statiq.Core
     /// </remarks>
     /// <metadata cref="Keys.Children" usage="Output"/>
     /// <metadata cref="Keys.TreePath" usage="Output"/>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class CreateTree : Module
     {
         private static readonly ReadOnlyMemory<char> IndexFileName = "index.".AsMemory();

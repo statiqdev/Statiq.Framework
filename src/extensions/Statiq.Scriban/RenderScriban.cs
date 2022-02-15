@@ -23,7 +23,7 @@ namespace Statiq.Scriban
     /// This module user <a href="https://github.com/lunet-io/scriban">Scriban</a> to render Scriban and liquid templates.
     /// </para>
     /// </remarks>
-    /// <category>Templates</category>
+    /// <category name="Templates" />
     public class RenderScriban : ParallelModule
     {
         private readonly string _sourceKey;
@@ -104,7 +104,7 @@ namespace Statiq.Scriban
 
         /// <summary>
         /// Specifies that templates should be treated as Liquid templates instead of Scriban.
-        /// Short for doing <code>WithLexerOptions(new LexerOptions { Mode = ScriptMode.Liquid })</code>
+        /// Short for doing <c>WithLexerOptions(new LexerOptions { Mode = ScriptMode.Liquid })</c>.
         /// </summary>
         /// <returns>The current module instance.</returns>
         public RenderScriban AsLiquid()

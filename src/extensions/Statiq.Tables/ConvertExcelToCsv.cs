@@ -13,7 +13,7 @@ namespace Statiq.Tables
     /// This module reads the content of each input document as Excel OOXML and outputs CSV content.
     /// The output CSV content uses <c>,</c> as separator and encloses every value in <c>"</c>.
     /// </remarks>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class ConvertExcelToCsv : ParallelSyncModule
     {
         protected override IEnumerable<IDocument> ExecuteInput(IDocument input, IExecutionContext context)

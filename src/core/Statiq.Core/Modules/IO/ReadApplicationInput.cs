@@ -12,7 +12,7 @@ namespace Statiq.Core
     /// This modules creates a single document from text provided to Statiq on startup. In most cases, this will be text or file contents
     /// "piped" to the Statiq.exe via the command line from a file or prior chained executable. Also known as "Standard Input" or "STDIN".
     /// </remarks>
-    /// <category>Input/Output</category>
+    /// <category name="Input/Output" />
     public class ReadApplicationInput : SyncModule
     {
         /// <inheritdoc />

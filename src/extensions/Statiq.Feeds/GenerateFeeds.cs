@@ -35,7 +35,7 @@ namespace Statiq.Feeds
     /// <metadata cref="FeedKeys.Published" usage="Input"/>
     /// <metadata cref="FeedKeys.Updated" usage="Input"/>
     /// <metadata cref="FeedKeys.Content" usage="Input"/>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class GenerateFeeds : Module
     {
         /// <summary>

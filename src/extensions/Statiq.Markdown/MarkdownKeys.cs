@@ -5,7 +5,8 @@
         /// <summary>
         /// Specifies additional Markdown extensions to use by name, either per-document or through settings.
         /// </summary>
-        /// <type><see cref="string"/> or <see cref="T:string[]"/></type>
+        /// <type cref="string" />
+        /// <type cref="T:string[]" />
         public const string MarkdownExtensions = nameof(MarkdownExtensions);
     }
 }

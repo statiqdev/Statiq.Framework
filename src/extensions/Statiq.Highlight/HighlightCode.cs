@@ -12,7 +12,7 @@ using Statiq.Common;
 namespace Statiq.Highlight
 {
     /// <summary>
-    /// Applies syntax highlighting to code blocks
+    /// Applies syntax highlighting to code blocks.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -33,7 +33,7 @@ namespace Statiq.Highlight
     /// );
     /// </code>
     /// </example>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class HighlightCode : Module
     {
         private string _codeQuerySelector = "pre code";
@@ -44,7 +44,9 @@ namespace Statiq.Highlight
         /// <summary>
         /// Sets the query selector to use to find code blocks.
         /// </summary>
-        /// <param name="querySelector">The query selector to use to select code blocks. The default value is pre code</param>
+        /// <param name="querySelector">
+        /// The query selector to use to select code blocks. The default value is pre code.
+        /// </param>
         /// <returns>The current instance.</returns>
         public HighlightCode WithCodeQuerySelector(string querySelector)
         {

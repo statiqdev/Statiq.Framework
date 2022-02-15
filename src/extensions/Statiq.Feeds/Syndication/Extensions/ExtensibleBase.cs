@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Extensions
 {
     /// <summary>
-    /// Allows any generic extensions expressed as XmlElements and XmlAttributes
+    /// Allows any generic extensions expressed as XmlElements and XmlAttributes.
     /// </summary>
     public abstract class ExtensibleBase : INamespaceProvider
     {
@@ -44,7 +44,7 @@ namespace Statiq.Feeds.Syndication.Extensions
         }
 
         /// <summary>
-        /// Applies the extensions in adapter to ExtensibleBase
+        /// Applies the extensions in adapter to ExtensibleBase.
         /// </summary>
         public void AddExtensions(IExtensionAdapter adapter)
         {
@@ -67,7 +67,7 @@ namespace Statiq.Feeds.Syndication.Extensions
         }
 
         /// <summary>
-        /// Extracts the extensions in this ExtensibleBase into adapter
+        /// Extracts the extensions in this ExtensibleBase into adapter.
         /// </summary>
         protected void FillExtensions(IExtensionAdapter adapter)
         {

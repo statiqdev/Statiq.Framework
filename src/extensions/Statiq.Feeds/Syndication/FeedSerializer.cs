@@ -10,7 +10,7 @@ using Statiq.Feeds.Syndication.Rss;
 namespace Statiq.Feeds.Syndication
 {
     /// <summary>
-    /// Utility for serialization
+    /// Utility for serialization.
     /// </summary>
     public static class FeedSerializer
     {

@@ -10,7 +10,7 @@ namespace Statiq.Core
     /// <summary>
     /// Executes modules and outputs the original input documents.
     /// </summary>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class ExecuteModules : SyncChildDocumentsModule
     {
         public ExecuteModules()

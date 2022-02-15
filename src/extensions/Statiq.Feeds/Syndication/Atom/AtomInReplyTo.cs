@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Atom
 {
     /// <summary>
-    /// http://tools.ietf.org/html/rfc4685#section-3
+    /// See http://tools.ietf.org/html/rfc4685#section-3.
     /// </summary>
     [Serializable]
     [XmlType(TypeName="in-reply-to", Namespace=ThreadingNamespace)]

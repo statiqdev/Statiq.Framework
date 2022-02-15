@@ -16,7 +16,7 @@ namespace Statiq.Core
     /// between input documents and child module results, wrap with a <see cref="ForEachDocument"/> module
     /// or use the <see cref="IModuleExtensions.ForEachDocument(IModule)"/> extension.
     /// </remarks>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class MergeMetadata : SyncChildDocumentsModule
     {
         private bool _reverse;

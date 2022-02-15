@@ -28,7 +28,7 @@ namespace Statiq.Core
     /// you specify. It does not output the original input files.</para>
     /// </remarks>
     /// <metadata cref="Keys.RedirectFrom" usage="Input" />
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class GenerateRedirects : Module
     {
         private readonly Dictionary<NormalizedPath, Func<IDictionary<NormalizedPath, string>, string>> _additionalOutputs =

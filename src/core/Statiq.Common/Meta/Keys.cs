@@ -14,48 +14,48 @@ namespace Statiq.Common
         /// <summary>
         /// The host to use when generating links.
         /// </summary>
-        /// <type><see cref="string"/></type>
+        /// <type cref="string" />
         public const string Host = nameof(Host);
 
         /// <summary>
         /// Indicates if generated links should use HTTPS instead of HTTP as the scheme.
         /// </summary>
-        /// <type><see cref="bool"/></type>
+        /// <type cref="bool" />
         public const string LinksUseHttps = nameof(LinksUseHttps);
 
         /// <summary>
         /// The default root path to use when generating links
-        /// (for example, <code>"/virtual/directory"</code>).
-        /// Note that you may also want to use the <code>--virtual-dir</code>
+        /// (for example, <c>"/virtual/directory"</c>).
+        /// Note that you may also want to use the <c>--virtual-dir</c>
         /// argument on the command line when using this setting so that
         /// the preview server serves the site at the same path as the generated links
-        /// (for example, <code>--virtual-dir "/virtual/directory"</code>).
+        /// (for example, <c>--virtual-dir "/virtual/directory"</c>).
         /// </summary>
-        /// <type><see cref="string"/></type>
+        /// <type cref="string" />
         public const string LinkRoot = nameof(LinkRoot);
 
         /// <summary>
         /// Indicates whether to hide index pages (as defined by <see cref="IndexFileName"/>) by default when generating links.
         /// </summary>
-        /// <type><see cref="bool"/></type>
+        /// <type cref="bool" />
         public const string LinkHideIndexPages = nameof(LinkHideIndexPages);
 
         /// <summary>
         /// Indicates whether to hide <see cref="PageFileExtensions"/> (usually ".html" and ".htm" extensions) by default when generating links.
         /// </summary>
-        /// <type><see cref="bool"/></type>
+        /// <type cref="bool" />
         public const string LinkHideExtensions = nameof(LinkHideExtensions);
 
         /// <summary>
         /// Indicates that links should always be rendered in lowercase.
         /// </summary>
-        /// <type><see cref="bool"/></type>
+        /// <type cref="bool" />
         public const string LinkLowercase = nameof(LinkLowercase);
 
         /// <summary>
         /// Indicates that a trailing slash should be appended when hiding a page due to <see cref="LinkHideIndexPages"/>.
         /// </summary>
-        /// <type><see cref="bool"/></type>
+        /// <type cref="bool" />
         public const string LinkHiddenPageTrailingSlash = nameof(LinkHiddenPageTrailingSlash);
 
         /// <summary>
@@ -67,60 +67,65 @@ namespace Statiq.Common
         /// <summary>
         /// Indicates whether caching should be used.
         /// </summary>
-        /// <type><see cref="bool"/></type>
+        /// <type cref="bool" />
         public const string UseCache = nameof(UseCache);
 
         /// <summary>
         /// The index file name to use for link generation, tree creation, etc. (defaults to "index.html").
         /// </summary>
-        /// <type><see cref="string"/></type>
+        /// <type cref="string" />
         public const string IndexFileName = nameof(IndexFileName);
 
         /// <summary>
         /// The file extensions of "pages" (used by <see cref="IExecutionState.OutputPages"/>
         /// to filter output documents (defaults to "htm" and "html").
         /// </summary>
-        /// <type>string[]</type>
+        /// <type cref="T:byte[]" />
         public const string PageFileExtensions = nameof(PageFileExtensions);
 
         /// <summary>
         /// Indicates whether to clean the output path on each execution.
         /// </summary>
-        /// <type><see cref="bool"/></type>
+        /// <type cref="bool" />
         [Obsolete("Use CleanMode instead")]
         public const string CleanOutputPath = nameof(CleanOutputPath);
 
         /// <summary>
         /// Indicates how to clean the output path on each execution.
         /// </summary>
-        /// <type><see cref="CleanMode"/></type>
+        /// <type cref="CleanMode" />
         public const string CleanMode = nameof(CleanMode);
 
         /// <summary>
         /// Indicates the culture to use for reading and interpreting dates as input.
         /// </summary>
-        /// <type><see cref="string"/> or <see cref="CultureInfo"/></type>
+        /// <type cref="string" />
+        /// <type cref="CultureInfo" />
         public const string DateTimeInputCulture = nameof(DateTimeInputCulture);
 
         /// <summary>
         /// Indicates the culture to use for displaying dates in output.
         /// </summary>
-        /// <type><see cref="string"/> or <see cref="CultureInfo"/></type>
+        /// <type cref="string" />
+        /// <type cref="CultureInfo" />
         public const string DateTimeDisplayCulture = nameof(DateTimeDisplayCulture);
 
         /// <summary>
         /// Sets a semantic version range of Statiq Framework that must be used.
         /// </summary>
+        /// <type cref="string" />
         public const string MinimumStatiqFrameworkVersion = nameof(MinimumStatiqFrameworkVersion);
 
         /// <summary>
         /// Specifies analyzers and log levels as "[analyzer]=[log level]" (log level is optional, "All" to set all analyzers).
         /// </summary>
+        /// <type cref="string" />
         public const string Analyzers = nameof(Analyzers);
 
         /// <summary>
         /// The log level at which failures should occur (defaults to LogLevel.Error).
         /// </summary>
+        /// <type cref="string" />
         public const string FailureLogLevel = nameof(FailureLogLevel);
 
         // Document
@@ -128,7 +133,7 @@ namespace Statiq.Common
         /// <summary>
         /// All the children of this node.
         /// </summary>
-        /// <type><see cref="IReadOnlyCollection{IDocument}"/></type>
+        /// <type cref="T:IReadOnlyCollection{IDocument}" />
         public const string Children = nameof(Children);
 
         // SetDestination
@@ -136,7 +141,7 @@ namespace Statiq.Common
         /// <summary>
         /// The extension to use when setting the destination of a document.
         /// </summary>
-        /// <type><see cref="string"/></type>
+        /// <type cref="string" />
         public const string DestinationExtension = nameof(DestinationExtension);
 
         /// <summary>
@@ -144,14 +149,14 @@ namespace Statiq.Common
         /// The destination will be set to the given file name at the same
         /// relative path.
         /// </summary>
-        /// <type><see cref="NormalizedPath"/></type>
+        /// <type cref="NormalizedPath" />
         public const string DestinationFileName = nameof(DestinationFileName);
 
         /// <summary>
         /// The path to use when setting the destination of a document.
         /// The specified path can be either relative to the output path or absolute.
         /// </summary>
-        /// <type><see cref="NormalizedPath"/></type>
+        /// <type cref="NormalizedPath" />
         public const string DestinationPath = nameof(DestinationPath);
 
         // GroupDocuments
@@ -159,15 +164,15 @@ namespace Statiq.Common
         /// <summary>
         /// The key for the current group.
         /// </summary>
-        /// <type><see cref="object"/></type>
+        /// <type cref="object" />
         public const string GroupKey = nameof(GroupKey);
 
-        // AddIndexs
+        // AddIndexes
 
         /// <summary>
         /// The one-based index of the current document relative to other documents in the pipeline.
         /// </summary>
-        /// <type><see cref="int"/></type>
+        /// <type cref="int" />
         public const string Index = nameof(Index);
 
         // OrderDocuments
@@ -175,7 +180,7 @@ namespace Statiq.Common
         /// <summary>
         /// A loose ordering key used by <c>OrderDocuments</c>.
         /// </summary>
-        /// <type><see cref="int"/></type>
+        /// <type cref="int" />
         public const string Order = nameof(Order);
 
         // GenerateSitemap
@@ -183,7 +188,7 @@ namespace Statiq.Common
         /// <summary>
         /// Contains a document-specific sitemap item for use when generating a sitemap.
         /// </summary>
-        /// <type><see cref="SitemapItem"/></type>
+        /// <type cref="SitemapItem" />
         public const string SitemapItem = nameof(SitemapItem);
 
         // ReadWeb
@@ -191,13 +196,13 @@ namespace Statiq.Common
         /// <summary>
         /// The URI where the document was downloaded from.
         /// </summary>
-        /// <type><see cref="Uri"/></type>
+        /// <type cref="Uri" />
         public const string SourceUri = nameof(SourceUri);
 
         /// <summary>
         /// The web headers of the document.
         /// </summary>
-        /// <type><c>Dictionary&lt;string, string&gt;</c></type>
+        /// <type cref="T:Dictionary{string, string}" />
         public const string SourceHeaders = nameof(SourceHeaders);
 
         // CreateTree
@@ -205,13 +210,13 @@ namespace Statiq.Common
         /// <summary>
         /// The path that represents this node in the tree.
         /// </summary>
-        /// <type><see cref="Array"/></type>
+        /// <type cref="Array" />
         public const string TreePath = nameof(TreePath);
 
         /// <summary>
         /// Gets set on documents that were created as a placeholder for tree roots.
         /// </summary>
-        /// <type><see cref="bool"/></type>
+        /// <type cref="bool" />
         public const string TreePlaceholder = nameof(TreePlaceholder);
 
         // AddTitle
@@ -219,7 +224,7 @@ namespace Statiq.Common
         /// <summary>
         /// The calculated title of the document.
         /// </summary>
-        /// <type><see cref="string"/></type>
+        /// <type cref="string" />
         public const string Title = nameof(Title);
 
         // PaginateDocuments
@@ -237,14 +242,14 @@ namespace Statiq.Common
         /// <summary>
         /// The path(s) where the document should be redirected from.
         /// </summary>
-        /// <type><see cref="NormalizedPath"/></type>
+        /// <type cref="NormalizedPath" />
         public const string RedirectFrom = nameof(RedirectFrom);
 
         /// <summary>
         /// Added to a document created as the source of redirection and contains the path where the redirection is to.
         /// You can check if a document contains this key to see if it's the source of a redirection.
         /// </summary>
-        /// <type><see cref="NormalizedPath"/></type>
+        /// <type cref="NormalizedPath" />
         public const string RedirectTo = nameof(RedirectTo);
 
         /// <summary>
@@ -296,44 +301,44 @@ namespace Statiq.Common
         /// Contains the content of the first result from the query
         /// selector (unless an alternate metadata key is specified).
         /// </summary>
-        /// <type><see cref="string"/></type>
+        /// <type cref="string" />
         public const string Excerpt = nameof(Excerpt);
 
         /// <summary>
         /// Contains the outer HTML of the query result (unless an alternate metadata key is specified).
         /// </summary>
-        /// <type><see cref="string"/></type>
+        /// <type cref="string" />
         public const string OuterHtml = nameof(OuterHtml);
 
         /// <summary>
         /// Contains the inner HTML of the query result (unless an alternate metadata key is specified).
         /// </summary>
-        /// <type><see cref="string"/></type>
+        /// <type cref="string" />
         public const string InnerHtml = nameof(InnerHtml);
 
         /// <summary>
         /// Contains the text content of the query result (unless an alternate metadata key is specified).
         /// </summary>
-        /// <type><see cref="string"/></type>
+        /// <type cref="string" />
         public const string TextContent = nameof(TextContent);
 
         /// <summary>
         /// Documents that represent the headings in each input document.
         /// </summary>
-        /// <type><c>IReadOnlyList&lt;IDocument&gt;</c></type>
+        /// <type cref="T:IReadOnlyList{IDocument}" />
         public const string Headings = nameof(Headings);
 
         /// <summary>
         /// The value of the <c>id</c> attribute of the current heading document
         /// if the heading contains one.
         /// </summary>
-        /// <type><see cref="string"/></type>
+        /// <type cref="string" />
         public const string HeadingId = nameof(HeadingId);
 
         /// <summary>
         /// The level of the heading of the current heading document.
         /// </summary>
-        /// <type><see cref="int"/></type>
+        /// <type cref="int" />
         public const string Level = nameof(Level);
     }
 }

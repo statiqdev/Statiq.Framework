@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// <summary>
     /// Copies the specified meta key to a new meta key, with an optional format argument.
     /// </summary>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class CopyMetadata : ParallelModule
     {
         private readonly string _fromKey;

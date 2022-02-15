@@ -24,7 +24,7 @@ namespace Statiq.Markdown
     /// <c>\@</c>. Use the <c>EscapeAt()</c> fluent method to modify this behavior.
     /// </remarks>
     /// <metadata cref="MarkdownKeys.MarkdownExtensions" usage="Input" />
-    /// <category>Templates</category>
+    /// <category name="Templates" />
     public class RenderMarkdown : ParallelModule
     {
         // Used to cache extensions from the metadata key
@@ -48,10 +48,12 @@ namespace Statiq.Markdown
         }
 
         /// <summary>
-        /// Processes Markdown in the metadata of the document. The rendered HTML will be placed
+        /// Processes Markdown in the metadata of the document.
         /// </summary>
         /// <param name="sourceKey">The metadata key of the Markdown to process.</param>
-        /// <param name="destinationKey">The metadata key to store the rendered HTML (if null, it gets placed back in the source metadata key).</param>
+        /// <param name="destinationKey">
+        /// The metadata key to store the rendered HTML (if null, it gets placed back in the source metadata key).
+        /// </param>
         public RenderMarkdown(string sourceKey, string destinationKey = null)
         {
             _sourceKey = sourceKey;

@@ -16,7 +16,7 @@ namespace Statiq.Core
     /// of the target elements as well as the values of each attribute
     /// will be placed into the metadata of the generated documents.
     /// </summary>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class ReadXml : ReadDataModule<ReadXml, Dictionary<string, object>>
     {
         private readonly string _data;

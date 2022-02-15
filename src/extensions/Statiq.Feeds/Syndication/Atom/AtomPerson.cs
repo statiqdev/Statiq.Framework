@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Atom
 {
     /// <summary>
-    /// http://tools.ietf.org/html/rfc4287#section-3.2
+    /// See http://tools.ietf.org/html/rfc4287#section-3.2.
     /// </summary>
     [Serializable]
     public class AtomPerson : AtomCommonAttributes

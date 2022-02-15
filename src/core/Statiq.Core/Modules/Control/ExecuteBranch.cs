@@ -10,7 +10,7 @@ namespace Statiq.Core
     /// <summary>
     /// Executes "branches" of modules with the input documents and concatenates their outputs.
     /// </summary>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class ExecuteBranch : Module, IList<ModuleList>
     {
         private readonly List<ModuleList> _branches = new List<ModuleList>();

@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// Generates JSON for a specified object (which can come from document metadata or elsewhere)
     /// and stores it as new content for each input document or in each document's metadata.
     /// </remarks>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class GenerateJson : ParallelSyncConfigModule<object>
     {
         private readonly string _destinationKey;

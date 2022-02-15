@@ -226,7 +226,7 @@ namespace Statiq.Yaml.Dynamic
 
         /// <summary>
         /// Determines if a node is null.
-        /// Adapted from <c>YamlDotNet.Serialization.NodeDeserializers.NullNodeDeserializer</c>
+        /// Adapted from <c>YamlDotNet.Serialization.NodeDeserializers.NullNodeDeserializer</c>.
         /// </summary>
         private bool NodeIsNull(YamlScalarNode node)
         {

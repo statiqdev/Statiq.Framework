@@ -40,7 +40,7 @@ namespace Statiq.Highlight
     /// <parameter name="HighlightJsFile">Sets the file path to a custom highlight.js file. If not set the embedded version will be used.</parameter>
     /// <parameter name="AddPre">
     /// Indicates whether a <c>&lt;pre&gt;</c> element should be added around the entire result. The default behavior is to add one
-    /// if the content contains new lines and not if it doesn't
+    /// if the content contains new lines and not if it doesn't.
     /// </parameter>
     public class HighlightShortcode : SyncShortcode
     {

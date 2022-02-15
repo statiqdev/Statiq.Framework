@@ -4,7 +4,7 @@ using System.Xml;
 namespace Statiq.Feeds.Syndication.Extensions
 {
     /// <summary>
-    /// Interface that adapters implement to apply / extract additional elements and attributes
+    /// Interface that adapters implement to apply / extract additional elements and attributes.
     /// </summary>
     public interface IExtensionAdapter
     {

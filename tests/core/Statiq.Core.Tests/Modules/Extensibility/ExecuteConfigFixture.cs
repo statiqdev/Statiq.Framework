@@ -16,13 +16,13 @@ namespace Statiq.Core.Tests.Modules.Extensibility
         public class ExecuteTests : ExecuteConfigFixture
         {
             [Test]
-            public void ContextConfigDoesNotThrowForNullResult()
+            public async Task ContextConfigDoesNotThrowForNullResult()
             {
                 // Given
                 ExecuteConfig execute = new ExecuteConfig(Config.FromContext(_ => (object)null));
 
                 // When, Then
-                Should.NotThrow(() => ExecuteAsync(Array.Empty<TestDocument>(), execute).GetAwaiter().GetResult());
+                await Should.NotThrowAsync(async () => await ExecuteAsync(Array.Empty<TestDocument>(), execute));
             }
 
             [Test]

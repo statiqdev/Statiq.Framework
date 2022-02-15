@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// The resulting documents of this module are concatenated after the
     /// input documents and both are output.
     /// </remarks>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class ConcatDocuments : SyncChildDocumentsModule
     {
         public ConcatDocuments()

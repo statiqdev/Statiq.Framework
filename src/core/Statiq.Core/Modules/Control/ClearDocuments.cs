@@ -11,7 +11,7 @@ namespace Statiq.Core
     /// This module is useful as the first of a collection of child modules if the input documents should not be passed
     /// to subsequent child modules.
     /// </remarks>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class ClearDocuments : Module
     {
         protected override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context) =>

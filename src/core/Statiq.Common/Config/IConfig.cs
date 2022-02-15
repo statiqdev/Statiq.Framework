@@ -9,6 +9,7 @@ namespace Statiq.Common
         Task<object> GetValueAsync(IDocument document, IExecutionContext context);
 
         // IConfig values can be used as metadata
+#pragma warning disable VSTHRD002 // Synchronously waiting on tasks or awaiters may cause deadlocks. Use await or JoinableTaskFactory.Run instead.
         object IMetadataValue.Get(string key, IMetadata metadata)
         {
             IExecutionContext context = IExecutionContext.Current;
@@ -24,5 +25,6 @@ namespace Statiq.Common
             }
             return GetValueAsync(null, context).GetAwaiter().GetResult();
         }
+#pragma warning restore VSTHRD002
     }
 }

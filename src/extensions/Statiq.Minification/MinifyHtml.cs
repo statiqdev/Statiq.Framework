@@ -24,7 +24,7 @@ namespace Statiq.Minification
     /// );
     /// </code>
     /// </example>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class MinifyHtml : MinifierBase, IModule
     {
         private readonly HtmlMinificationSettings _minificationSettings;
@@ -50,7 +50,7 @@ namespace Statiq.Minification
         /// <item><description><c>SpaceAndSlash</c>.With space and slash(for example, <c>&lt;br /&gt;</c>).</description></item>
         /// </list>
         /// </summary>
-        /// <param name="emptyTagRenderMode">Enum type <see cref="WebMarkupMin.Core.HtmlEmptyTagRenderMode"/>; default value is <c>HtmlEmptyTagRenderMode.NoSlash</c></param>
+        /// <param name="emptyTagRenderMode">Enum type <see cref="WebMarkupMin.Core.HtmlEmptyTagRenderMode"/>; default value is <c>HtmlEmptyTagRenderMode.NoSlash</c>.</param>
         /// <returns>The current instance.</returns>
         public MinifyHtml EmptyTagRenderMode(HtmlEmptyTagRenderMode emptyTagRenderMode = HtmlEmptyTagRenderMode.NoSlash)
         {

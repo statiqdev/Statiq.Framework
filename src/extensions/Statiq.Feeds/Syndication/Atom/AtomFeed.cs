@@ -6,14 +6,9 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Atom
 {
     /// <summary>
-    /// The Atom Syndication Format
-    ///     http://tools.ietf.org/html/rfc4287#section-4.1.1
+    /// The Atom Syndication Format,
+    /// see http://tools.ietf.org/html/rfc4287#section-4.1.1.
     /// </summary>
-    /// <remarks>
-    /// atomFeed : atomSource
-    ///     atomLogo?
-    ///     atomEntry*
-    /// </remarks>
     [Serializable]
     [XmlRoot(RootElement, Namespace=Namespace)]
     public class AtomFeed : AtomSource, IFeed

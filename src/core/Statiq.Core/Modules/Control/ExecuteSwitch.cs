@@ -18,7 +18,7 @@ namespace Statiq.Core
     /// documents matching each case. If a document does not match a defined case, it is executed against the default case (if defined)
     /// or output without modification (if no default is defined).
     /// </remarks>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class ExecuteSwitch : Module
     {
         private readonly List<Tuple<object, IEnumerable<IModule>>> _cases

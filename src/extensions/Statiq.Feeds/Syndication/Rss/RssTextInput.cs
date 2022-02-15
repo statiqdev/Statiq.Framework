@@ -5,8 +5,8 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Rss
 {
     /// <summary>
-    /// RSS 2.0 TextInput
-    ///     http://blogs.law.harvard.edu/tech/rss#lttextinputgtSubelementOfLtchannelgt
+    /// RSS 2.0 TextInput,
+    /// see http://blogs.law.harvard.edu/tech/rss#lttextinputgtSubelementOfLtchannelgt.
     /// </summary>
     [Serializable]
     public class RssTextInput : RssBase

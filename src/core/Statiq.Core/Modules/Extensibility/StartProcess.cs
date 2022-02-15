@@ -24,7 +24,7 @@ namespace Statiq.Core
     /// If the process is a background process, the module will fork it and let it run,
     /// but no output document will be generated and it will log with a debug level.
     /// </remarks>
-    /// <category>Extensibility</category>
+    /// <category name="Extensibility" />
     public class StartProcess : ParallelSyncMultiConfigModule, IDisposable
     {
         /// <summary>

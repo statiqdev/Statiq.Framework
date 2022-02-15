@@ -13,16 +13,18 @@ namespace Statiq.Tables
     /// </summary>
     /// <remarks>
     /// This module reads the content of each input document as CSV and outputs an Markdown table
-    /// containing the CSV content. The input CSV content must use <c>,</c> as separator and enclose
-    /// every value in <c>"</c>. The output table has the format
+    /// containing the CSV content. The output table has the format
     ///
     /// +--------------+-------------+
     /// | Test value 1 | TestValue 2 |
     /// +--------------+-------------+
     /// | Test value 2 | TestValue 3 |
     /// +--------------+-------------+
+    ///
+    /// The input CSV content must use <c>,</c> as separator and enclose
+    /// every value in <c>"</c>.
     /// </remarks>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class RenderCsvAsMarkdown : ParallelSyncModule
     {
         private bool _firstLineHeader = false;

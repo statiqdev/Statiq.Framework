@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// this module. Any input documents that don't match a predicate will be returned as
     /// outputs without modification.
     /// </remarks>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class ExecuteIf : Module, IList<IfCondition>
     {
         private readonly List<IfCondition> _conditions = new List<IfCondition>();

@@ -290,6 +290,7 @@ namespace Statiq.Razor
             return tagBuilder;
         }
 
+#pragma warning disable VSTHRD002 // Synchronously waiting on tasks or awaiters may cause deadlocks. Use await or JoinableTaskFactory.Run instead.
         public static void RenderCachedPartial(
             this IHtmlHelper htmlHelper,
             string partialViewName) =>
@@ -307,6 +308,7 @@ namespace Statiq.Razor
             object model,
             object cacheKey) =>
             RenderCachedPartialAsync(htmlHelper, partialViewName, model, cacheKey).GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
 
         public static async Task RenderCachedPartialAsync(
             this IHtmlHelper htmlHelper,
@@ -329,6 +331,7 @@ namespace Statiq.Razor
             content.WriteTo(htmlHelper.ViewContext.Writer, null); // We know this call doesn't use the HtmlEncoder
         }
 
+#pragma warning disable VSTHRD002 // Synchronously waiting on tasks or awaiters may cause deadlocks. Use await or JoinableTaskFactory.Run instead.
         public static IHtmlContent CachedPartial(
             this IHtmlHelper htmlHelper,
             string partialViewName) =>
@@ -346,6 +349,7 @@ namespace Statiq.Razor
             object model,
             object cacheKey) =>
             CachedPartialAsync(htmlHelper, partialViewName, model, cacheKey).GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
 
         public static async Task<IHtmlContent> CachedPartialAsync(
             this IHtmlHelper htmlHelper,

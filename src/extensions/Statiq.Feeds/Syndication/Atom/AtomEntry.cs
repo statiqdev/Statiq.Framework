@@ -6,15 +6,8 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Atom
 {
     /// <summary>
-    /// http://tools.ietf.org/html/rfc4287#section-4.1.2
+    /// See http://tools.ietf.org/html/rfc4287#section-4.1.2.
     /// </summary>
-    /// <remarks>
-    /// atomEntry : atomBase
-    ///     atomContent?
-    ///     atomPublished?
-    ///     atomSource?
-    ///     atomSummary?
-    /// </remarks>
     [Serializable]
     public class AtomEntry : AtomBase, IFeedItem
     {
@@ -179,7 +172,7 @@ namespace Statiq.Feeds.Syndication.Atom
         }
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc4685#section-5
+        /// See http://tools.ietf.org/html/rfc4685#section-5.
         /// </summary>
         [XmlElement(ElementName="total", Namespace=ThreadingNamespace)]
         public int ThreadTotal

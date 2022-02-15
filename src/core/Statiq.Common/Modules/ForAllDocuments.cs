@@ -7,7 +7,7 @@ namespace Statiq.Common
     /// Executes the input documents against the specified child modules. This module
     /// is useful for grouping child modules into a single parent module.
     /// </summary>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class ForAllDocuments : ParentModule
     {
         /// <summary>

@@ -19,7 +19,7 @@ namespace Statiq.Core
     /// <see cref="IDocument.Destination"/> will be set to the relative path of the file (so that <see cref="WriteFiles"/> will write it
     /// to the same relative path in the output folder).
     /// </remarks>
-    /// <category>Input/Output</category>
+    /// <category name="Input/Output" />
     public class ReadFiles : ParallelConfigModule<IEnumerable<string>>
     {
         private Func<IFile, Task<bool>> _predicate = null;

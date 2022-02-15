@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// This will split the title at special characters, capitalize first letters, remove extensions, etc.
     /// </remarks>
     /// <metadata cref="Keys.Title" usage="Output" />
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class AddTitle : ParallelModule
     {
         private readonly Config<string> _title = Config.FromDocument(doc => doc.GetTitle());

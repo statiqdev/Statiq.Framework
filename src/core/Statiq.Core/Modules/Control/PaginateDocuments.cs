@@ -18,7 +18,7 @@ namespace Statiq.Core
     /// <metadata cref="Keys.Next" usage="Output" />
     /// <metadata cref="Keys.Previous" usage="Output" />
     /// <metadata cref="Keys.Index" usage="Output" />
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class PaginateDocuments : SyncModule
     {
         private readonly int _pageSize;

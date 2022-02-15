@@ -36,7 +36,9 @@ namespace Statiq.Common
             }
 
             // Evaluate the script
+#pragma warning disable VSTHRD002 // Synchronously waiting on tasks or awaiters may cause deadlocks. Use await or JoinableTaskFactory.Run instead.
             return _executionState.ScriptHelper.EvaluateAsync(_script, metadata).GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
         }
 
         public static bool TryGetScriptMetadataValue(string key, object value, IExecutionState executionState, out ScriptMetadataValue scriptMetadataValue)

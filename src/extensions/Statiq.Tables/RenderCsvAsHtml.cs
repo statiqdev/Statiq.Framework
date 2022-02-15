@@ -15,7 +15,7 @@ namespace Statiq.Tables
     /// containing the CSV content. No <c>&lt;html&gt;</c> or <c>&lt;body&gt;</c> tags are output. The input CSV
     /// content must use <c>,</c> as separator and enclose every value in <c>"</c>.
     /// </remarks>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class RenderCsvAsHtml : ParallelSyncModule
     {
         private bool _firstLineHeader = false;

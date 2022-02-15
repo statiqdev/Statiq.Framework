@@ -20,7 +20,7 @@ namespace Statiq.Xmp
     /// The <see cref="IDocument.Source"/> of each input document will be used to
     /// locate any sidecar files.
     /// </remarks>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class ReadXmp : Module
     {
         private readonly bool _skipElementOnMissingData;

@@ -14,7 +14,7 @@ namespace Statiq.Core
     /// "and" conditions, place additional <see cref="FilterSources"/> modules
     /// after this one.
     /// </remarks>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class FilterSources : SyncConfigModule<IEnumerable<string>>
     {
         /// <summary>

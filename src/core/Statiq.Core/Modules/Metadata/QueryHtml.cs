@@ -29,7 +29,7 @@ namespace Statiq.Core
     /// <metadata cref="Keys.OuterHtml" usage="Output"/>
     /// <metadata cref="Keys.InnerHtml" usage="Output"/>
     /// <metadata cref="Keys.TextContent" usage="Output"/>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class QueryHtml : ParallelModule
     {
         private readonly List<Action<IElement, Dictionary<string, object>>> _metadataActions

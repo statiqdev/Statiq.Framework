@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Statiq.Feeds.Syndication
 {
     /// <summary>
-    /// Feed interface
+    /// Feed interface.
     /// </summary>
     public interface IFeed : IFeedMetadata, INamespaceProvider
     {
@@ -13,17 +13,17 @@ namespace Statiq.Feeds.Syndication
         FeedType FeedType { get; }
 
         /// <summary>
-        /// Gets the MIME Type designation for the feed
+        /// Gets the MIME Type designation for the feed.
         /// </summary>
         string MimeType { get; }
 
         /// <summary>
-        /// Gets the copyright
+        /// Gets the copyright.
         /// </summary>
         string Copyright { get; }
 
         /// <summary>
-        /// Gets a list of feed items
+        /// Gets a list of feed items.
         /// </summary>
         IList<IFeedItem> Items { get; }
     }

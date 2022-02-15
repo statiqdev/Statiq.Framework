@@ -3,7 +3,7 @@ using System;
 namespace Statiq.Feeds.Syndication
 {
     /// <summary>
-    /// Metadata about a feed or feed item
+    /// Metadata about a feed or feed item.
     /// </summary>
     public interface IFeedMetadata
     {

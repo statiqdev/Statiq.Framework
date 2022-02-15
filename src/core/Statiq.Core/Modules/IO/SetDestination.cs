@@ -25,7 +25,7 @@ namespace Statiq.Core
     /// <metadata cref="Keys.DestinationPath" usage="Input" />
     /// <metadata cref="Keys.DestinationFileName" usage="Input" />
     /// <metadata cref="Keys.DestinationExtension" usage="Input" />
-    /// <category>Input/Output</category>
+    /// <category name="Input/Output" />
     public class SetDestination : ParallelConfigModule<NormalizedPath>
     {
         /// <summary>

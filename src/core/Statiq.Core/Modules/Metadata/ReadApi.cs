@@ -18,7 +18,7 @@ namespace Statiq.Core
     /// API client and requires you to provide functions that fetch whatever data you need. Each request
     /// will be sent for each input document.
     /// </remarks>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class ReadApi<TClient> : ParallelModule, IDisposable
         where TClient : class
     {
@@ -306,14 +306,16 @@ namespace Statiq.Core
 
                     // Get a task to execute the request with a delay after
                     Task<IEnumerable<KeyValuePair<string, object>>> requestTask = ExecuteRequestAsync(request, input, context, client);
-                    _ = requestTask.ContinueWith(async _ =>
-                    {
-                        if (_requestDelay > 0)
+                    _ = requestTask.ContinueWith(
+                        async _ =>
                         {
-                            await Task.Delay(_requestDelay);
-                        }
-                        _throttler?.Release();
-                    });
+                            if (_requestDelay > 0)
+                            {
+                                await Task.Delay(_requestDelay);
+                            }
+                            _throttler?.Release();
+                        },
+                        TaskScheduler.Current);
 
                     // Execute the request and return the result (null results will be filtered out)
                     return await requestTask;

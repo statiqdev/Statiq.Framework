@@ -20,7 +20,7 @@ namespace Statiq.Core
     /// </remarks>
     /// <metadata cref="Keys.SourceUri" usage="Output" />
     /// <metadata cref="Keys.SourceHeaders" usage="Output" />
-    /// <category>Input/Output</category>
+    /// <category name="Input/Output" />
     public class ReadWeb : Module
     {
         private readonly List<WebRequest> _requests = new List<WebRequest>();

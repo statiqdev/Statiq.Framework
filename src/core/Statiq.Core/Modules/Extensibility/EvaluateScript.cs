@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// <summary>
     /// Evaluates a C# based script contained in document content.
     /// </summary>
-    /// <category>Extensibility</category>
+    /// <category name="Extensibility" />
     public class EvaluateScript : ParallelModule
     {
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)

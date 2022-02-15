@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// <summary>
     /// Sets the content of each document.
     /// </summary>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class SetContent : ParallelSyncConfigModule<IContentProvider>
     {
         /// <summary>

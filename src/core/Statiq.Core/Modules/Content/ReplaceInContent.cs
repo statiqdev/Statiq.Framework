@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// <summary>
     /// Replaces a search string in the content of each input document with new content.
     /// </summary>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class ReplaceInContent : ParallelConfigModule<string>
     {
         private readonly string _search;

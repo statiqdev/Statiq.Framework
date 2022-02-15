@@ -38,7 +38,7 @@ namespace Statiq.Core
     /// <see cref="Config.FromDocument(string, object)"/> factory method) then if will be invoked once for each input document.
     /// </para>
     /// </remarks>
-    /// <category>Extensibility</category>
+    /// <category name="Extensibility" />
     public class ExecuteConfig : ParallelConfigModule<object>
     {
         public ExecuteConfig(Config<object> config)

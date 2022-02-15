@@ -4,9 +4,9 @@ namespace Statiq.Common
 {
     /// <summary>Defines options for a conversion.</summary>
     /// <remarks>
-    /// Originally based on code from UniversalTypeConverter by Thorsten Bruning
-    /// Licensed under MS-PL
-    /// https://www.codeproject.com/articles/248440/universal-type-converter
+    /// Originally based on code from UniversalTypeConverter by Thorsten Bruning.
+    /// Licensed under MS-PL.
+    /// See https://www.codeproject.com/articles/248440/universal-type-converter.
     /// </remarks>
     [Flags]
     internal enum ConversionOptions

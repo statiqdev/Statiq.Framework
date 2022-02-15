@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Atom
 {
     /// <summary>
-    /// http://tools.ietf.org/html/rfc4287#section-4.2.7
+    /// See http://tools.ietf.org/html/rfc4287#section-4.2.7.
     /// </summary>
     [Serializable]
     public class AtomLink : AtomCommonAttributes, IUriProvider
@@ -152,7 +152,7 @@ namespace Statiq.Feeds.Syndication.Atom
         }
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc4685#section-4
+        /// See http://tools.ietf.org/html/rfc4685#section-4.
         /// </summary>
         [XmlAttribute("count", Namespace=ThreadingNamespace)]
         public int ThreadCount
@@ -169,7 +169,7 @@ namespace Statiq.Feeds.Syndication.Atom
         }
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc4685#section-4
+        /// See http://tools.ietf.org/html/rfc4685#section-4.
         /// </summary>
         [XmlIgnore]
         public AtomDate ThreadUpdated

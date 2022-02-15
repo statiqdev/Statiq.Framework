@@ -12,7 +12,7 @@ namespace Statiq.Minification
     /// <remarks>
     /// This module takes the XML content and uses minification to reduce the output.
     /// </remarks>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class MinifyXml : MinifierBase, IModule
     {
         private readonly XmlMinificationSettings _minificationSettings;

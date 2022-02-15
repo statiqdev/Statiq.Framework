@@ -21,7 +21,7 @@ namespace Statiq.Core
     /// child of more than one parent, it will only appear once in the result set).
     /// </remarks>
     /// <metadata cref="Keys.Children" usage="Input"/>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class FlattenTree : SyncModule
     {
         private readonly string _childrenKey = Keys.Children;

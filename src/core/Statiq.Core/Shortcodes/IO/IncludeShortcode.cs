@@ -16,7 +16,7 @@ namespace Statiq.Core
     /// If the file does not exist nothing will be rendered.
     /// </remarks>
     /// <example>
-    /// <para>Example usage to show the contents of test-include.html in the output</para>
+    /// <para>Example usage to show the contents of test-include.html in the output.</para>
     /// <para>
     /// <code>
     /// &lt;?# Include "test-include.html" /?&gt;
@@ -30,7 +30,7 @@ namespace Statiq.Core
     /// &lt;?! Include "test-include.md" /?&gt;?
     /// </code>
     /// </para>
-    /// <para>You can also include HTTP/HTTPS resources</para>
+    /// <para>You can also include HTTP/HTTPS resources.</para>
     /// <para>
     /// <code>
     /// &lt;?# Include "https://raw.githubusercontent.com/statiqdev/Statiq.Framework/master/README.md" /?&gt;

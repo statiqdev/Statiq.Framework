@@ -41,7 +41,7 @@ namespace Statiq.Core
     ///    .WithAssertion(a =&gt; a &lt;= 120, "You are way, way too old.")
     /// </code>
     /// </example>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class ValidateMetadata<T> : Module
     {
         private readonly string _key;

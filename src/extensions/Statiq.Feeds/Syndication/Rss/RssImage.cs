@@ -5,8 +5,8 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Rss
 {
     /// <summary>
-    /// RSS 2.0 Image
-    ///     http://blogs.law.harvard.edu/tech/rss#ltimagegtSubelementOfLtchannelgt
+    /// RSS 2.0 Image,
+    /// see http://blogs.law.harvard.edu/tech/rss#ltimagegtSubelementOfLtchannelgt.
     /// </summary>
     [Serializable]
     public class RssImage : RssBase, IUriProvider

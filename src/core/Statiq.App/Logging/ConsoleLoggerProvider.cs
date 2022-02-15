@@ -32,7 +32,10 @@ namespace Statiq.App
             _buildServerLogHelper = new BuildServerLogHelper(fileSystem);
             _filterOptions = filterOptions.Value ?? new LoggerFilterOptions();
             Instances.Add(this);
+
+#pragma warning disable VSTHRD110 // Observe the awaitable result of this method call by awaiting it, assigning to a variable, or passing it to another method.
             Task.Run(MessagePumpAsync);
+#pragma warning restore VSTHRD110
         }
 
         private Task MessagePumpAsync()

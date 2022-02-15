@@ -51,7 +51,7 @@ namespace Statiq.Images
     /// with a "-medium" suffix.
     /// </para>
     /// </remarks>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class MutateImage : ParallelSyncModule
     {
         private readonly Stack<ImageOperations> _operations = new Stack<ImageOperations>();

@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// <summary>
     /// Sets the media type of each document.
     /// </summary>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class SetMediaType : ParallelSyncConfigModule<string>
     {
         public SetMediaType(Config<string> mediaType)

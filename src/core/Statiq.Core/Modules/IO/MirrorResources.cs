@@ -28,7 +28,7 @@ namespace Statiq.Core
     /// only place this module after all other template processing has been performed.
     /// </para>
     /// </remarks>
-    /// <category>Input/Output</category>
+    /// <category name="Input/Output" />
     public class MirrorResources : Module
     {
         /// <summary>

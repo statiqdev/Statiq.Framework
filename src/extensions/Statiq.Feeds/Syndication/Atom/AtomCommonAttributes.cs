@@ -7,14 +7,9 @@ using Statiq.Feeds.Syndication.Extensions;
 namespace Statiq.Feeds.Syndication.Atom
 {
     /// <summary>
-    /// Common shared Atom attributes
-    ///     http://tools.ietf.org/html/rfc4287#section-2
+    /// Common shared Atom attributes,
+    /// see http://tools.ietf.org/html/rfc4287#section-2.
     /// </summary>
-    /// <remarks>
-    /// atomCommonAttributes
-    ///     attribute xml:base?
-    ///     attribute xml:lang?
-    /// </remarks>
     public abstract class AtomCommonAttributes : ExtensibleBase
     {
         public const string XmlPrefix = "xml";

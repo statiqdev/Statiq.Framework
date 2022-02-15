@@ -80,7 +80,7 @@ namespace Statiq.CodeAnalysis
     /// <metadata cref="CodeAnalysisKeys.SeeAlso" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.Syntax" usage="Output"/>
     /// <metadata cref="CodeAnalysisKeys.OutputBuildLog" usage="Setting"/>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class AnalyzeCSharp : Module
     {
         // Use an intermediate Dictionary to initialize with defaults
@@ -289,7 +289,7 @@ namespace Statiq.CodeAnalysis
         }
 
         /// <summary>
-        /// Limits symbols in the initial result set to those that are public (and optionally protected)
+        /// Limits symbols in the initial result set to those that are public (and optionally protected).
         /// </summary>
         /// <param name="includeProtected">If set to <c>true</c>, protected symbols are also included.</param>
         /// <returns>The current module instance.</returns>

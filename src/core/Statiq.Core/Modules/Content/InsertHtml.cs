@@ -22,7 +22,7 @@ namespace Statiq.Core
     /// only place this module after all other template processing has been performed.
     /// </para>
     /// </remarks>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class InsertHtml : ParallelModule
     {
         private readonly string _querySelector;

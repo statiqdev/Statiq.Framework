@@ -125,7 +125,7 @@ namespace Statiq.Core
         /// The Method.
         /// </param>
         /// <param name="callable">
-        /// Return as an callable string(public void a(string b) would return a(b))
+        /// Return as an callable string(public void a(string b) would return a(b)).
         /// </param>
         /// <param name="convertExtensionsToInstance">
         /// Converts extension methods to an instance signature as if they were defined on the extended class.

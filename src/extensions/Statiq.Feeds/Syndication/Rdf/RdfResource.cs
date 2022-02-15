@@ -8,24 +8,18 @@ namespace Statiq.Feeds.Syndication.Rdf
     {
         private RdfBase _target = null;
 
-        /// <summary>
-        /// Ctor
-        /// </summary>
         public RdfResource()
         {
             _target = null;
         }
 
-        /// <summary>
-        /// Ctor
-        /// </summary>
         public RdfResource(RdfBase target)
         {
             _target = target;
         }
 
         /// <summary>
-        /// Gets the RDF association for the target
+        /// Gets the RDF association for the target.
         /// </summary>
         [DefaultValue(null)]
         [XmlAttribute("resource", Namespace=RdfFeedBase.NamespaceRdf)]

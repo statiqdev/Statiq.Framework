@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// <summary>
     /// Throws an exception if a condition is <c>true</c>.
     /// </summary>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class ThrowExceptionIf : ThrowException
     {
         public ThrowExceptionIf(Config<bool> condition)

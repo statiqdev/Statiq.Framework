@@ -20,7 +20,7 @@ namespace Statiq.Minification
     /// );
     /// </code>
     /// </example>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class MinifyCss : MinifierBase, IModule
     {
         private bool _isInlineCode;

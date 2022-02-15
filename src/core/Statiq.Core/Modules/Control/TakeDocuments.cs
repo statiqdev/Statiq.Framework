@@ -8,7 +8,7 @@ namespace Statiq.Core
     /// <summary>
     /// Takes the first X documents from the current pipeline and discards the rest.
     /// </summary>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class TakeDocuments : SyncModule
     {
         private readonly int _x;

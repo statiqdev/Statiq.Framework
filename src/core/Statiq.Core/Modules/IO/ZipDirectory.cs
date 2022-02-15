@@ -12,7 +12,7 @@ namespace Statiq.Core
     /// <summary>
     /// Zips the contents of a given directory.
     /// </summary>
-    /// <category>Input/Output</category>
+    /// <category name="Input/Output" />
     public class ZipDirectory : SyncConfigModule<NormalizedPath>
     {
         /// <summary>

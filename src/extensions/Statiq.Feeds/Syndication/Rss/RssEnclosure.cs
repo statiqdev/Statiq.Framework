@@ -5,10 +5,10 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Rss
 {
     /// <summary>
-    /// RSS 2.0 Enclosure
-    ///     http://blogs.law.harvard.edu/tech/rss#ltenclosuregtSubelementOfLtitemgt
-    ///     http://www.thetwowayweb.com/payloadsforrss
-    ///     http://www.reallysimplesyndication.com/discuss/msgReader$221
+    /// RSS 2.0 Enclosure,
+    /// see http://blogs.law.harvard.edu/tech/rss#ltenclosuregtSubelementOfLtitemgt
+    /// and http://www.thetwowayweb.com/payloadsforrss
+    /// and http://www.reallysimplesyndication.com/discuss/msgReader$221.
     /// </summary>
     [Serializable]
     public class RssEnclosure : RssBase, IUriProvider

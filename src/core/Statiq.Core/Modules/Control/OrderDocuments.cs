@@ -13,7 +13,7 @@ namespace Statiq.Core
     /// <remarks>
     /// The ordered documents are output as the result of this module.
     /// </remarks>
-    /// <category>Control</category>
+    /// <category name="Control" />
     public class OrderDocuments : Module
     {
         private readonly Stack<Order> _orders = new Stack<Order>();
@@ -188,8 +188,10 @@ namespace Statiq.Core
                 Value = value;
             }
 
+#pragma warning disable VSTHRD002 // Synchronously waiting on tasks or awaiters may cause deadlocks. Use await or JoinableTaskFactory.Run instead.
             public object GetValue(IDocument document, IExecutionContext context) =>
                 Value.GetValueAsync(document, context).GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
         }
 
         // Compares all objects using the first type seen

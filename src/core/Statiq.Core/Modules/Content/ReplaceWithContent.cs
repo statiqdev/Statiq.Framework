@@ -12,7 +12,7 @@ namespace Statiq.Core
     /// This is sort of like the inverse of the Replace module and is very useful for simple
     /// template substitution.
     /// </remarks>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class ReplaceWithContent : ParallelConfigModule<string>
     {
         private readonly string _search;

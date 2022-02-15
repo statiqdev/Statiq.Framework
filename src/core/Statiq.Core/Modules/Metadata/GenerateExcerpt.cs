@@ -21,7 +21,7 @@ namespace Statiq.Core
     /// The content of the original input document is left unchanged.
     /// </remarks>
     /// <metadata cref="Keys.Excerpt" usage="Output"/>
-    /// <category>Metadata</category>
+    /// <category name="Metadata" />
     public class GenerateExcerpt : ParallelModule
     {
         private bool _keepExisting = true;

@@ -9,7 +9,7 @@ namespace Statiq.Core
     /// <summary>
     /// Converts all relative links to root-relative using the destination path of the containing document.
     /// </summary>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class MakeLinksRootRelative : ParallelModule
     {
         protected override Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context) =>

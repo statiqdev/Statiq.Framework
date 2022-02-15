@@ -5,8 +5,8 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Rdf
 {
     /// <summary>
-    /// RDF 1.0 TextInput
-    ///     http://web.resource.org/rss/1.0/spec#s5.6
+    /// RDF 1.0 TextInput,
+    /// see http://web.resource.org/rss/1.0/spec#s5.6.
     /// </summary>
     [Serializable]
     [XmlType("input", Namespace=RdfFeedBase.NamespaceRss10)]

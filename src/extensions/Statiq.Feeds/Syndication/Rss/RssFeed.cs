@@ -6,9 +6,9 @@ using System.Xml.Serialization;
 namespace Statiq.Feeds.Syndication.Rss
 {
     /// <summary>
-    /// Really Simple Syndication (RSS 2.0)
-    ///     http://www.rssboard.org/rss-specification
-    ///     http://blogs.law.harvard.edu/tech/rss
+    /// Really Simple Syndication (RSS 2.0),
+    /// see http://www.rssboard.org/rss-specification
+    /// and http://blogs.law.harvard.edu/tech/rss.
     /// </summary>
     [XmlRoot(RootElement, Namespace=Namespace)]
     public class RssFeed : RssBase, IFeed

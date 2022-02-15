@@ -13,7 +13,7 @@ namespace Statiq.Core
     /// This module is particularly useful when presenting content for external consumption such
     /// as with the <c>GenerateFeeds</c> module or for use in an API.
     /// </remarks>
-    /// <category>Content</category>
+    /// <category name="Content" />
     public class MakeLinksAbsolute : ParallelModule
     {
         protected override Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context) =>
