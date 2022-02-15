@@ -117,6 +117,51 @@ namespace Statiq.Core
             }));
 
         /// <summary>
+        /// Appends an argument to the command.
+        /// </summary>
+        /// <param name="argument">The argument to append including any prefixes like a dash or slash.</param>
+        /// <returns>The current module instance.</returns>
+        public StartProcess WithArgument(Config<StartProcessArgument> argument) =>
+            WithArgument(argument.Transform(arg =>
+            {
+                if (arg is null)
+                {
+                    return string.Empty;
+                }
+                string space = arg.Name is null || arg.Value is null ? string.Empty : " ";
+                arg.Name ??= string.Empty;
+                arg.Value = arg.Value is null ? string.Empty : (arg.Quoted ? "\"" + arg.Value + "\"" : arg.Value);
+                return arg.Name + space + arg.Value;
+            }));
+
+        /// <summary>
+        /// Appends arguments to the command.
+        /// </summary>
+        /// <param name="arguments">The arguments to append including any prefixes like a dash or slash.</param>
+        /// <returns>The current module instance.</returns>
+        public StartProcess WithArguments(Config<IReadOnlyList<StartProcessArgument>> arguments) =>
+            WithArgument(arguments.Transform(args =>
+            {
+                if (args is null)
+                {
+                    return string.Empty;
+                }
+                string combined = string.Empty;
+                foreach (StartProcessArgument arg in args)
+                {
+                    if (arg is object)
+                    {
+                        string space = arg.Name is null || arg.Value is null ? string.Empty : " ";
+                        arg.Name ??= string.Empty;
+                        arg.Value = arg.Value is null ? string.Empty : (arg.Quoted ? "\"" + arg.Value + "\"" : arg.Value);
+                        string prefix = combined.Length > 0 ? " " : string.Empty;
+                        combined = combined + prefix + arg.Name + space + arg.Value;
+                    }
+                }
+                return combined;
+            }));
+
+        /// <summary>
         /// Sets the working directory to use for the process relative to the root path.
         /// </summary>
         /// <param name="workingDirectory">The working directory.</param>
