@@ -20,5 +20,7 @@ namespace Statiq.Common
         new int Count { get; }
 
         new bool ContainsKey(string key);
+
+        new bool TryGetValue(string key, out object value);
     }
 }
