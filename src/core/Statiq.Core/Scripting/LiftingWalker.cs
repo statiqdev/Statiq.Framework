@@ -43,17 +43,17 @@ namespace Statiq.Core
                 // Type declaration
                 Add(node.ToFullString(), _typeDeclarations);
             }
-            else if (node is MethodDeclarationSyntax)
+            else if (node is MethodDeclarationSyntax methodDeclaration)
             {
                 // Method (standard or extension)
-                ParameterSyntax firstParameter = ((MethodDeclarationSyntax)node).ParameterList.Parameters.FirstOrDefault();
-                if (firstParameter?.GetFirstToken().Kind() == SyntaxKind.ThisKeyword)
+                ParameterSyntax firstParameter = methodDeclaration.ParameterList.Parameters.FirstOrDefault();
+                if (firstParameter?.GetFirstToken().IsKind(SyntaxKind.ThisKeyword) ?? false)
                 {
-                    Add(node.ToFullString(), _extensionMethodDeclarations);
+                    Add(methodDeclaration.ToFullString(), _extensionMethodDeclarations);
                 }
                 else
                 {
-                    Add(node.ToFullString(), _methodDeclarations);
+                    Add(methodDeclaration.ToFullString(), _methodDeclarations);
                 }
             }
             else
