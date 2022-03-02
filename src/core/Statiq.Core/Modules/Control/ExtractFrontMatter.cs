@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Statiq.Common;
 
@@ -112,81 +114,135 @@ namespace Statiq.Core
             return this;
         }
 
-        /// <inheritdoc />
-        protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
+        // Execute at the context level so we can compile the RegEx pattern(s) once.
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            List<Regex> regexes = new List<Regex>();
+
+            // Get the explicit delimiter regex
+            string delimiterRegexString = GetExplicitDelimiterRegex();
+            if (delimiterRegexString is object)
+            {
+                // Singleline mode instructs . to match newlines and is different than multiline mode
+                regexes.Add(new Regex(delimiterRegexString, RegexOptions.Compiled | RegexOptions.Singleline));
+            }
+
+            // TODO: Get other regexes
+
+            // Iterate the documents
+            IEnumerable<IDocument> aggregateResults = null;
+            foreach (IDocument input in context.Inputs)
+            {
+                IEnumerable<IDocument> results = await ExecuteInputFuncAsync(
+                    input, context, (i, c) => ExecuteInputAsync(i, c, regexes));
+                if (results is object)
+                {
+                    aggregateResults = aggregateResults?.Concat(results) ?? results;
+                }
+            }
+            return aggregateResults;
+        }
+
+        private async Task<IEnumerable<IDocument>> ExecuteInputAsync(
+            IDocument input, IExecutionContext context, List<Regex> regexes)
+        {
+            // Really wish we could scan for matches over a stream but oh well
             string inputContent = await input.GetContentStringAsync();
-            List<string> inputLines = inputContent.Split(new[] { '\n' }, StringSplitOptions.None).ToList();
-            if (inputLines.Count == 0)
+            if (inputContent.IsNullOrWhiteSpace())
             {
                 return input.Yield();
             }
 
-            // Find the start delimiter if one is required
-            int delimiterLine = -1;
-            int startLine = 0;
+            // Find the first regex that matches
+            foreach (Regex regex in regexes)
+            {
+                Match match = regex.Match(inputContent);
+                if (match.Success)
+                {
+                    // If we have a match, get the capture group named "matter" or group 1 if name not found
+                    Group group = match.Groups["matter"];
+                    if (!group.Success)
+                    {
+                        group = match.Groups[1];
+                    }
+                    if (!group.Success || group.Value.IsNullOrWhiteSpace())
+                    {
+                        continue;
+                    }
+
+                    // Extract the front matter
+                    IContentProvider frontMatterContent = context.GetContentProvider(group.Value);
+                    IContentProvider outputContent = input.ContentProvider;
+                    if (!_preserveFrontMatter)
+                    {
+                        outputContent = context.GetContentProvider(
+                            inputContent.Remove(match.Index, match.Length),
+                            input.ContentProvider.MediaType);
+                    }
+
+                    // Execute the child modules and clone the input document
+                    foreach (IDocument result in await context.ExecuteModulesAsync(Children, input.Clone(frontMatterContent).Yield()))
+                    {
+                        return result.Clone(outputContent).Yield();
+                    }
+                }
+            }
+
+            // No front matter found
+            return input.Yield();
+        }
+
+        // If explicit delimiters are specified (as indicated by an end delimiter), convert them to a RegEx pattern
+        // With Jekyll-style front matter, this ends up being (?:(?:^[^\S\r\n]*-+[^\S\r\n]*\n)?)(.*)(?:\n[^\S\r\n]*-+[^\S\r\n]*\n)
+        private string GetExplicitDelimiterRegex()
+        {
+            if (_endDelimiter is null)
+            {
+                return null;
+            }
+
+            // Start delimiter
+            StringBuilder regExBuilder = new StringBuilder();
+            if (_startDelimiter is null && _ignoreEndDelimiterOnFirstLine)
+            {
+                regExBuilder.Append("(?:");
+            }
+            regExBuilder.Append("(?:^[^\\S\\r\\n]*");
             if (_startDelimiter is object)
             {
-                // We require a start delimiter so verify the first line
-                string trimmed = inputLines[0].TrimEnd();
-                if (trimmed.Length > 0 && (_startRepeated ? trimmed.All(y => y == _startDelimiter[0]) : trimmed == _startDelimiter))
+                regExBuilder.Append(Regex.Escape(_startDelimiter));
+                if (_startRepeated)
                 {
-                    // Found the start delimiter, skip to the next line and look for the end delimiter
-                    startLine = 1;
-                    delimiterLine = inputLines.FindIndex(1, x =>
-                    {
-                        string trimmed = x.TrimEnd();
-                        return trimmed.Length > 0 && (_endRepeated ? trimmed.All(y => y == _endDelimiter[0]) : trimmed == _endDelimiter);
-                    });
-                }
-                else
-                {
-                    // No start delimiter to return the document as-is
-                    return input.Yield();
+                    regExBuilder.Append("+");
                 }
             }
             else
             {
-                // Find the end delimiter
-                delimiterLine = inputLines.FindIndex(x =>
+                regExBuilder.Append(Regex.Escape(_endDelimiter));
+                if (_endRepeated)
                 {
-                    string trimmed = x.TrimEnd();
-                    return trimmed.Length > 0 && (_endRepeated ? trimmed.All(y => y == _endDelimiter[0]) : trimmed == _endDelimiter);
-                });
-                startLine = 0;
-
-                // If we found it on the first line and are ignoring, start search again on the next line
-                if (delimiterLine == 0 && _ignoreEndDelimiterOnFirstLine)
-                {
-                    startLine = 1;
-                    delimiterLine = inputLines.FindIndex(1, x =>
-                    {
-                        string trimmed = x.TrimEnd();
-                        return trimmed.Length > 0 && (_endRepeated ? trimmed.All(y => y == _endDelimiter[0]) : trimmed == _endDelimiter);
-                    });
+                    regExBuilder.Append("+");
                 }
+            }
+            regExBuilder.Append("[^\\S\\r\\n]*\\r?\\n)");
+            if (_startDelimiter is null && _ignoreEndDelimiterOnFirstLine)
+            {
+                regExBuilder.Append("?)");
             }
 
-            // If a delimiter was found, extract the front matter
-            if (delimiterLine != -1)
+            // Capture group
+            regExBuilder.Append("(.*\\r?\\n)");
+
+            // End delimiter
+            regExBuilder.Append("(?:[^\\S\\r\\n]*");
+            regExBuilder.Append(Regex.Escape(_endDelimiter));
+            if (_endRepeated)
             {
-                string frontMatter = string.Join("\n", inputLines.Skip(startLine).Take(delimiterLine - startLine)) + "\n";
-                if (!_preserveFrontMatter)
-                {
-                    inputLines.RemoveRange(0, delimiterLine + 1);
-                }
-                foreach (IDocument result in await context.ExecuteModulesAsync(Children, input.Clone(context.GetContentProvider(frontMatter)).Yield()))
-                {
-                    return result.Clone(
-                        _preserveFrontMatter ? input.ContentProvider : context.GetContentProvider(string.Join("\n", inputLines), input.ContentProvider.MediaType))
-                        .Yield();
-                }
+                regExBuilder.Append("+");
             }
-            else
-            {
-                return input.Yield();
-            }
-            return null;
+            regExBuilder.Append("[^\\S\\r\\n]*\\r?\\n)");
+
+            return regExBuilder.ToString();
         }
     }
 }
