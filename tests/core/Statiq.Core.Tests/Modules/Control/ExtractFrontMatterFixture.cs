@@ -431,6 +431,78 @@ Content2");
             }
 
             [Test]
+            public async Task DoesNotMatchDelimiterAtEndOfLine()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"---
+FM1---
+FM2
+---
+Content1
+Content2")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
+                {
+                    frontMatterContent = await x.GetContentStringAsync();
+                    return new[] { x };
+                })));
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"FM1---
+FM2
+", frontMatterContent);
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"Content1
+Content2");
+            }
+
+            [Test]
+            public async Task MatchIsLazy()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"---
+FM1
+FM2
+---
+Content1
+---
+Content2")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
+                {
+                    frontMatterContent = await x.GetContentStringAsync();
+                    return new[] { x };
+                })));
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"FM1
+FM2
+", frontMatterContent);
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"Content1
+---
+Content2");
+            }
+
+            [Test]
             public async Task NoIgnoreDelimiterOnFirstLine()
             {
                 // Given
@@ -456,12 +528,46 @@ Content2")
 
                 // Then
                 documents.Count().ShouldBe(1);
-                frontMatterContent.ShouldBe("\n");
+                frontMatterContent.ShouldBe(string.Empty);
                 (await documents.First().GetContentStringAsync()).ShouldBe(
                     @"FM1
 FM2
 ---
 Content1
+Content2");
+            }
+
+            [Test]
+            public async Task MatchesWhenNoIgnoreDelimiterOnFirstLine()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"FM1
+FM2
+---
+Content1
+Content2")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
+                {
+                    frontMatterContent = await x.GetContentStringAsync();
+                    return new[] { x };
+                }))).IgnoreDelimiterOnFirstLine(false);
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"FM1
+FM2
+", frontMatterContent);
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"Content1
 Content2");
             }
 
@@ -485,7 +591,6 @@ Content2")
                     executed = true;
                     return new[] { x };
                 })))
-                    .IgnoreDelimiterOnFirstLine(true)
                     .RequireStartDelimiter('+');
 
                 // When
@@ -523,7 +628,6 @@ Content2")
                     executed = true;
                     return new[] { x };
                 })))
-                    .IgnoreDelimiterOnFirstLine(true)
                     .RequireStartDelimiter('+');
 
                 // When

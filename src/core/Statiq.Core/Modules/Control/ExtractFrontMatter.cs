@@ -123,8 +123,10 @@ namespace Statiq.Core
             string delimiterRegexString = GetExplicitDelimiterRegex();
             if (delimiterRegexString is object)
             {
-                // Singleline mode instructs . to match newlines and is different than multiline mode
-                regexes.Add(new Regex(delimiterRegexString, RegexOptions.Compiled | RegexOptions.Singleline));
+                // Single line mode instructs . to match newlines and is different than multiline mode
+                regexes.Add(new Regex(
+                    delimiterRegexString,
+                    RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.Multiline));
             }
 
             // TODO: Get other regexes
@@ -165,7 +167,7 @@ namespace Statiq.Core
                     {
                         group = match.Groups[1];
                     }
-                    if (!group.Success || group.Value.IsNullOrWhiteSpace())
+                    if (!group.Success)
                     {
                         continue;
                     }
@@ -193,7 +195,8 @@ namespace Statiq.Core
         }
 
         // If explicit delimiters are specified (as indicated by an end delimiter), convert them to a RegEx pattern
-        // With Jekyll-style front matter, this ends up being (?:(?:^[^\S\r\n]*-+[^\S\r\n]*\n)?)(.*)(?:\n[^\S\r\n]*-+[^\S\r\n]*\n)
+        // With Jekyll-style front matter (the default constructor), this ends up being
+        // \A(?:^\r*-+[^\S\n]*$\r?\n)?(.*?)(?:^\r*-+[^\S\n]*$\r?\n)
         private string GetExplicitDelimiterRegex()
         {
             if (_endDelimiter is null)
@@ -202,47 +205,47 @@ namespace Statiq.Core
             }
 
             // Start delimiter
-            StringBuilder regExBuilder = new StringBuilder();
-            if (_startDelimiter is null && _ignoreEndDelimiterOnFirstLine)
+            StringBuilder regexBuilder = new StringBuilder();
+            if (_startDelimiter is object || _ignoreEndDelimiterOnFirstLine)
             {
-                regExBuilder.Append("(?:");
-            }
-            regExBuilder.Append("(?:^[^\\S\\r\\n]*");
-            if (_startDelimiter is object)
-            {
-                regExBuilder.Append(Regex.Escape(_startDelimiter));
-                if (_startRepeated)
+                regexBuilder.Append("\\A(?:^\\r*");
+                if (_startDelimiter is object)
                 {
-                    regExBuilder.Append("+");
+                    regexBuilder.Append(Regex.Escape(_startDelimiter));
+                    if (_startRepeated)
+                    {
+                        regexBuilder.Append("+");
+                    }
                 }
-            }
-            else
-            {
-                regExBuilder.Append(Regex.Escape(_endDelimiter));
-                if (_endRepeated)
+                else
                 {
-                    regExBuilder.Append("+");
+                    regexBuilder.Append(Regex.Escape(_endDelimiter));
+                    if (_endRepeated)
+                    {
+                        regexBuilder.Append("+");
+                    }
                 }
-            }
-            regExBuilder.Append("[^\\S\\r\\n]*\\r?\\n)");
-            if (_startDelimiter is null && _ignoreEndDelimiterOnFirstLine)
-            {
-                regExBuilder.Append("?)");
+                regexBuilder.Append("[^\\S\\n]*$\\r?\\n)");
+                if (_startDelimiter is null)
+                {
+                    // Only make the start delimiter optional if it's the end delimiter and ignore is toggled
+                    regexBuilder.Append("?");
+                }
             }
 
-            // Capture group
-            regExBuilder.Append("(.*\\r?\\n)");
+            // Capture group (use .*? since it's lazy and will stop at the first instance of the next group)
+            regexBuilder.Append("(.*?)");
 
             // End delimiter
-            regExBuilder.Append("(?:[^\\S\\r\\n]*");
-            regExBuilder.Append(Regex.Escape(_endDelimiter));
+            regexBuilder.Append("(?:^\\r*");
+            regexBuilder.Append(Regex.Escape(_endDelimiter));
             if (_endRepeated)
             {
-                regExBuilder.Append("+");
+                regexBuilder.Append("+");
             }
-            regExBuilder.Append("[^\\S\\r\\n]*\\r?\\n)");
+            regexBuilder.Append("[^\\S\\n]*$\\r?\\n)");
 
-            return regExBuilder.ToString();
+            return regexBuilder.ToString();
         }
     }
 }
