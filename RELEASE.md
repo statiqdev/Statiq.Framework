@@ -1,3 +1,7 @@
+# 1.0.0-beta.59
+
+- Added support for regular expressions to the `ExtractFrontMatter` module (#231).
+
 # 1.0.0-beta.58
 
 - Updated Buildalyzer in `Statiq.CodeAnalysis` to 4.1.0 which removes some dependencies on .NET Framework and resolves some package resolution problems.

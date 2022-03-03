@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
@@ -931,6 +933,252 @@ FM2
 ---
 Content1
 Content2");
+            }
+
+            [Test]
+            public async Task ProvidedRegexDoesNotUseDefaultDelimiter()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"FM1
+FM2
+---
+Content1
+Content2")
+                };
+                bool executed = false;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(
+                    new string[] { "\\A(?:^\\r*\\!+[^\\S\\n]*$\\r?\\n)?(.*?)(?:^\\r*\\!+[^\\S\\n]*$\\r?\\n)" },
+                    new ExecuteConfig(Config.FromDocument(x =>
+                    {
+                        executed = true;
+                        return new[] { x };
+                    })));
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                executed.ShouldBeFalse();
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"FM1
+FM2
+---
+Content1
+Content2");
+            }
+
+            [Test]
+            public async Task ProvidedRegexStringMatches()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"FM1
+FM2
+!!!
+Content1
+Content2")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(
+                    new string[] { @"\A(?:^\r*\!+[^\S\n]*$\r?\n)?(.*?)(?:^\r*\!+[^\S\n]*$\r?\n)" },
+                    new ExecuteConfig(Config.FromDocument(async x =>
+                    {
+                        frontMatterContent = await x.GetContentStringAsync();
+                        return new[] { x };
+                    })));
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"FM1
+FM2
+", frontMatterContent);
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"Content1
+Content2");
+            }
+
+            [Test]
+            public async Task ProvidedRegexMatches()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"FM1
+FM2
+!!!
+Content1
+Content2")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(
+                    new Regex[]
+                    {
+                        new Regex(
+                            @"\A(?:^\r*\!+[^\S\n]*$\r?\n)?(.*?)(?:^\r*\!+[^\S\n]*$\r?\n)",
+                            RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.Multiline)
+                    },
+                    new ExecuteConfig(Config.FromDocument(async x =>
+                    {
+                        frontMatterContent = await x.GetContentStringAsync();
+                        return new[] { x };
+                    })));
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"FM1
+FM2
+", frontMatterContent);
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"Content1
+Content2");
+            }
+
+            [Test]
+            public async Task RegexUsesGroupName()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"FM1
+FM2
+!!!
+Content1
+Content2")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(
+                    new string[] { @"\A(?:^\r*\!+[^\S\n]*$\r?\n)?(.*?)(?'frontmatter'^\r*\!+[^\S\n]*$\r?\n)" },
+                    new ExecuteConfig(Config.FromDocument(async x =>
+                    {
+                        frontMatterContent = await x.GetContentStringAsync();
+                        return new[] { x };
+                    })));
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"!!!
+", frontMatterContent);
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"Content1
+Content2");
+            }
+
+            [Test]
+            public async Task MulipleRegexStringMatches()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"FM1
+FM2
++++
+Content1
+Content2")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(
+                    new string[]
+                    {
+                        @"\A(?:^\r*\!+[^\S\n]*$\r?\n)?(.*?)(?:^\r*\!+[^\S\n]*$\r?\n)",
+                        @"\A(?:^\r*\++[^\S\n]*$\r?\n)?(.*?)(?:^\r*\++[^\S\n]*$\r?\n)"
+                    },
+                    new ExecuteConfig(Config.FromDocument(async x =>
+                    {
+                        frontMatterContent = await x.GetContentStringAsync();
+                        return new[] { x };
+                    })));
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"FM1
+FM2
+", frontMatterContent);
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"Content1
+Content2");
+            }
+
+            [Test]
+            public async Task FirstRegexStringMatches()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"FM1
+FM2
+!!!
++++
+Content1
+Content2")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(
+                    new string[]
+                    {
+                        @"\A(?:^\r*\!+[^\S\n]*$\r?\n)?(.*?)(?:^\r*\!+[^\S\n]*$\r?\n)",
+                        @"\A(?:^\r*\++[^\S\n]*$\r?\n)?(.*?)(?:^\r*\++[^\S\n]*$\r?\n)"
+                    },
+                    new ExecuteConfig(Config.FromDocument(async x =>
+                    {
+                        frontMatterContent = await x.GetContentStringAsync();
+                        return new[] { x };
+                    })));
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"FM1
+FM2
+", frontMatterContent);
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"+++
+Content1
+Content2");
+            }
+
+            [Test]
+            public void ThrowsForDocumentConfigStringRegex()
+            {
+                // Given, When, Then
+                Should.Throw<ArgumentException>(() => new ExtractFrontMatter(
+                    Config.FromDocument<IEnumerable<string>>((doc, ctx) => new string[] { "abc" })));
+            }
+
+            [Test]
+            public void ThrowsForDocumentConfigRegex()
+            {
+                // Given, When, Then
+                Should.Throw<ArgumentException>(() => new ExtractFrontMatter(
+                    Config.FromDocument<IEnumerable<Regex>>((doc, ctx) => new Regex[] { new Regex("abc") })));
             }
         }
     }

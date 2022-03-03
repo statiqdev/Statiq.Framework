@@ -23,11 +23,15 @@ namespace Statiq.Core
     /// <category name="Control" />
     public class ExtractFrontMatter : ParentModule
     {
+        private readonly Config<IEnumerable<Regex>> _regexes;
+
+        // Explicit front matter definition
         private readonly string _endDelimiter;
         private readonly bool _endRepeated;
         private bool _ignoreEndDelimiterOnFirstLine = true;
         private string _startDelimiter;
         private bool _startRepeated;
+
         private bool _preserveFrontMatter;
 
         /// <summary>
@@ -39,6 +43,48 @@ namespace Statiq.Core
         {
             _endDelimiter = "-";
             _endRepeated = true;
+        }
+
+        /// <summary>
+        /// Identifies front matter using one or more regular expressions
+        /// and passes any front matter to the specified child modules for processing.
+        /// </summary>
+        /// <remarks>
+        /// If a group named "frontmatter" is returned from the regex, it will be used for front matter
+        /// content. Otherwise, the first group will be used.
+        /// The provided regular expressions are evaluated with both the
+        /// <see cref="RegexOptions.Singleline"/> and <see cref="RegexOptions.Multiline"/> options.
+        /// To use different options, supply <see cref="Regex"/> instances using the alternate constructor.
+        /// </remarks>
+        /// <param name="regexes">The regular expressions to use to find the front matter.</param>
+        /// <param name="modules">The modules to execute against the front matter.</param>
+        public ExtractFrontMatter(Config<IEnumerable<string>> regexes, params IModule[] modules)
+            : this(
+                regexes.Transform(x =>
+                    x.Select(r =>
+                        new Regex(r, RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.Multiline))),
+                modules)
+        {
+        }
+
+        /// <summary>
+        /// Identifies front matter using one or more regular expressions
+        /// and passes any front matter to the specified child modules for processing.
+        /// </summary>
+        /// <remarks>
+        /// If a group named "frontmatter" is returned from the regex, it will be used for front matter
+        /// content. Otherwise, the first group will be used.
+        /// </remarks>
+        /// <param name="regexes">The regular expressions to use to find the front matter.</param>
+        /// <param name="modules">The modules to execute against the front matter.</param>
+        public ExtractFrontMatter(Config<IEnumerable<Regex>> regexes, params IModule[] modules)
+            : base(modules)
+        {
+            if (regexes.RequiresDocument)
+            {
+                throw new ArgumentException("Front matter regexes cannot be dependent on a document", nameof(regexes));
+            }
+            _regexes = regexes;
         }
 
         /// <summary>
@@ -129,7 +175,15 @@ namespace Statiq.Core
                     RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.Multiline));
             }
 
-            // TODO: Get other regexes
+            // Get other regexes
+            if (_regexes is object)
+            {
+                IEnumerable<Regex> configRegexes = await _regexes.GetValueAsync(null, context);
+                if (configRegexes is object)
+                {
+                    regexes.AddRange(configRegexes);
+                }
+            }
 
             // Iterate the documents
             IEnumerable<IDocument> aggregateResults = null;
@@ -162,7 +216,7 @@ namespace Statiq.Core
                 if (match.Success)
                 {
                     // If we have a match, get the capture group named "matter" or group 1 if name not found
-                    Group group = match.Groups["matter"];
+                    Group group = match.Groups["frontmatter"];
                     if (!group.Success)
                     {
                         group = match.Groups[1];
@@ -208,7 +262,7 @@ namespace Statiq.Core
             StringBuilder regexBuilder = new StringBuilder();
             if (_startDelimiter is object || _ignoreEndDelimiterOnFirstLine)
             {
-                regexBuilder.Append("\\A(?:^\\r*");
+                regexBuilder.Append(@"\A(?:^\r*");
                 if (_startDelimiter is object)
                 {
                     regexBuilder.Append(Regex.Escape(_startDelimiter));
@@ -225,7 +279,7 @@ namespace Statiq.Core
                         regexBuilder.Append("+");
                     }
                 }
-                regexBuilder.Append("[^\\S\\n]*$\\r?\\n)");
+                regexBuilder.Append(@"[^\S\n]*$\r?\n)");
                 if (_startDelimiter is null)
                 {
                     // Only make the start delimiter optional if it's the end delimiter and ignore is toggled
@@ -237,13 +291,13 @@ namespace Statiq.Core
             regexBuilder.Append("(.*?)");
 
             // End delimiter
-            regexBuilder.Append("(?:^\\r*");
+            regexBuilder.Append(@"(?:^\r*");
             regexBuilder.Append(Regex.Escape(_endDelimiter));
             if (_endRepeated)
             {
                 regexBuilder.Append("+");
             }
-            regexBuilder.Append("[^\\S\\n]*$\\r?\\n)");
+            regexBuilder.Append(@"[^\S\n]*$\r?\n)");
 
             return regexBuilder.ToString();
         }
