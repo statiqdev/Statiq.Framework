@@ -23,6 +23,10 @@ namespace Statiq.Core
     /// <category name="Control" />
     public class ExtractFrontMatter : ParentModule
     {
+        // Cache compiled string-based regular expressions so we don't have to recompile them every time
+        private static readonly ConcurrentCache<string, Regex> StringRegexCache =
+            new ConcurrentCache<string, Regex>(false);
+
         private readonly Config<IEnumerable<Regex>> _regexes;
 
         // Explicit front matter definition
@@ -62,7 +66,9 @@ namespace Statiq.Core
             : this(
                 regexes.Transform(x =>
                     x.Select(r =>
-                        new Regex(r, RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.Multiline))),
+                        StringRegexCache.GetOrAdd(
+                            r,
+                            k => new Regex(k, RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.Multiline)))),
                 modules)
         {
         }
@@ -166,7 +172,8 @@ namespace Statiq.Core
             List<Regex> regexes = new List<Regex>();
 
             // Get the explicit delimiter regex
-            string delimiterRegexString = GetExplicitDelimiterRegex();
+            string delimiterRegexString = GetDelimiterRegex(
+                _startDelimiter, _startRepeated, _endDelimiter, _endRepeated, _ignoreEndDelimiterOnFirstLine);
             if (delimiterRegexString is object)
             {
                 // Single line mode instructs . to match newlines and is different than multiline mode
@@ -248,39 +255,87 @@ namespace Statiq.Core
             return input.Yield();
         }
 
-        // If explicit delimiters are specified (as indicated by an end delimiter), convert them to a RegEx pattern
-        // With Jekyll-style front matter (the default constructor), this ends up being
-        // \A(?:^\r*-+[^\S\n]*$\r?\n)?(.*?)(?:^\r*-+[^\S\n]*$\r?\n)
-        private string GetExplicitDelimiterRegex()
+        /// <summary>
+        /// Gets a regex pattern for front matter using the specified delimiters.
+        /// </summary>
+        /// <param name="endDelimiter">
+        /// The front matter end delimiter. If this is null then a null value is returned.
+        /// </param>
+        /// <param name="endRepeated">
+        /// <c>true</c> to allow the end delimiter to repeat, <c>false</c> to require it verbatim.
+        /// </param>
+        /// <param name="ignoreEndDelimiterOnFirstLine">
+        /// Ignores the delimiter if it appears on the first line. This is useful when processing
+        /// Jekyll style front matter that has the delimiter both above and below the front matter
+        /// content. This has no effect if a start delimiter is specified.
+        /// </param>
+        /// <returns>A regular expression that finds front matter using the specified delimiters.</returns>
+        public static string GetDelimiterRegex(
+            string endDelimiter,
+            bool endRepeated,
+            bool ignoreEndDelimiterOnFirstLine = true) =>
+            GetDelimiterRegex(null, false, endDelimiter, endRepeated, ignoreEndDelimiterOnFirstLine);
+
+        /// <summary>
+        /// Gets a regex pattern for front matter using the specified delimiters.
+        /// </summary>
+        /// <remarks>
+        /// With Jekyll style delimiters ("-" for the end delimiter allowing repeating and no start delimiter),
+        /// this returns <c>\A(?:^\r*-+[^\S\n]*$\r?\n)?(.*?)(?:^\r*-+[^\S\n]*$\r?\n)</c>.
+        /// </remarks>
+        /// <param name="startDelimiter">
+        /// The front matter start delimiter, or null to use the end delimiter as the start delimiter.
+        /// </param>
+        /// <param name="startRepeated">
+        /// <c>true</c> to allow the start delimiter to repeat, <c>false</c> to require it verbatim.
+        /// </param>
+        /// <param name="endDelimiter">
+        /// The front matter end delimiter. If this is null then a null value is returned.
+        /// </param>
+        /// <param name="endRepeated">
+        /// <c>true</c> to allow the end delimiter to repeat, <c>false</c> to require it verbatim.
+        /// </param>
+        /// <param name="ignoreEndDelimiterOnFirstLine">
+        /// Ignores the delimiter if it appears on the first line. This is useful when processing
+        /// Jekyll style front matter that has the delimiter both above and below the front matter
+        /// content. This has no effect if a start delimiter is specified.
+        /// </param>
+        /// <returns>A regular expression that finds front matter using the specified delimiters.</returns>
+        public static string GetDelimiterRegex(
+            string startDelimiter,
+            bool startRepeated,
+            string endDelimiter,
+            bool endRepeated,
+            bool ignoreEndDelimiterOnFirstLine = true)
         {
-            if (_endDelimiter is null)
+            if (endDelimiter is null)
             {
                 return null;
             }
 
             // Start delimiter
             StringBuilder regexBuilder = new StringBuilder();
-            if (_startDelimiter is object || _ignoreEndDelimiterOnFirstLine)
+            if (startDelimiter is object || ignoreEndDelimiterOnFirstLine)
             {
                 regexBuilder.Append(@"\A(?:^\r*");
-                if (_startDelimiter is object)
+                if (startDelimiter is object)
                 {
-                    regexBuilder.Append(Regex.Escape(_startDelimiter));
-                    if (_startRepeated)
+                    regexBuilder.Append(Regex.Escape(startDelimiter));
+                    if (startRepeated)
                     {
                         regexBuilder.Append("+");
                     }
                 }
                 else
                 {
-                    regexBuilder.Append(Regex.Escape(_endDelimiter));
-                    if (_endRepeated)
+                    regexBuilder.Append(Regex.Escape(endDelimiter));
+                    if (endRepeated)
                     {
                         regexBuilder.Append("+");
                     }
                 }
                 regexBuilder.Append(@"[^\S\n]*$\r?\n)");
-                if (_startDelimiter is null)
+                if (startDelimiter is null)
                 {
                     // Only make the start delimiter optional if it's the end delimiter and ignore is toggled
                     regexBuilder.Append("?");
@@ -292,8 +347,8 @@ namespace Statiq.Core
 
             // End delimiter
             regexBuilder.Append(@"(?:^\r*");
-            regexBuilder.Append(Regex.Escape(_endDelimiter));
-            if (_endRepeated)
+            regexBuilder.Append(Regex.Escape(endDelimiter));
+            if (endRepeated)
             {
                 regexBuilder.Append("+");
             }
