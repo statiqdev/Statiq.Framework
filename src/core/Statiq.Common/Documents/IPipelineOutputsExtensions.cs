@@ -18,7 +18,37 @@ namespace Statiq.Common
             params string[] pipelines)
         {
             pipelineOutputs.ThrowIfNull(nameof(pipelineOutputs));
-            return (pipelines ?? Array.Empty<string>()).SelectMany(x => pipelineOutputs.FromPipeline(x)).ToDocumentList();
+            return (pipelines ?? Array.Empty<string>())
+                .SelectMany(pipelineOutputs.FromPipeline)
+                .OrderByDescending(x => x.Timestamp)
+                .ToDocumentList();
+        }
+
+        /// <summary>
+        /// Gets and concatenates all documents from multiple pipelines.
+        /// Note that if a document exists in more than one pipeline it
+        /// may appear multiple times in the result.
+        /// </summary>
+        /// <param name="pipelineOutputs">The pipeline outputs.</param>
+        /// <param name="pipelines">The pipeline(s) to exclude.</param>
+        /// <returns>All documents from all pipeline(s) except those specified.</returns>
+        public static DocumentList<IDocument> ExceptPipelines(
+            this IPipelineOutputs pipelineOutputs,
+            params string[] pipelines)
+        {
+            pipelineOutputs.ThrowIfNull(nameof(pipelineOutputs));
+            if (pipelines is object && pipelines.Length > 0)
+            {
+                return pipelineOutputs
+                    .ByPipeline()
+                    .Where(x => pipelines.Contains(x.Key))
+                    .SelectMany(x => x.Value)
+                    .OrderByDescending(x => x.Timestamp)
+                    .ToDocumentList();
+            }
+            return pipelineOutputs
+                .OrderByDescending(x => x.Timestamp)
+                .ToDocumentList();
         }
     }
 }
