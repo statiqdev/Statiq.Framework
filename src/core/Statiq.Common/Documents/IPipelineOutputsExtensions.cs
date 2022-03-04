@@ -20,7 +20,6 @@ namespace Statiq.Common
             pipelineOutputs.ThrowIfNull(nameof(pipelineOutputs));
             return (pipelines ?? Array.Empty<string>())
                 .SelectMany(pipelineOutputs.FromPipeline)
-                .OrderByDescending(x => x.Timestamp)
                 .ToDocumentList();
         }
 
@@ -43,12 +42,9 @@ namespace Statiq.Common
                     .ByPipeline()
                     .Where(x => pipelines.Contains(x.Key))
                     .SelectMany(x => x.Value)
-                    .OrderByDescending(x => x.Timestamp)
                     .ToDocumentList();
             }
-            return pipelineOutputs
-                .OrderByDescending(x => x.Timestamp)
-                .ToDocumentList();
+            return pipelineOutputs.ToDocumentList();
         }
     }
 }

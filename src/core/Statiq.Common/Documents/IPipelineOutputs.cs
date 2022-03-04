@@ -23,9 +23,8 @@ namespace Statiq.Common
         DocumentList<IDocument> FromPipeline(string pipelineName);
 
         /// <summary>
-        /// Gets all documents output by every pipeline except those from the specified pipeline,
-        /// ordering documents in descending order of their timestamp
-        /// (I.e. the most recently created documents are returned first).
+        /// Gets all documents output by every pipeline except those from the
+        /// specified pipeline in their natural output order.
         /// </summary>
         /// <param name="pipelineName">The pipeline.</param>
         /// <returns>All documents output by every pipeline except the specified one.</returns>

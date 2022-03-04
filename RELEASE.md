@@ -2,6 +2,7 @@
 
 - Added support for regular expressions to the `ExtractFrontMatter` module (#231).
 - Added `IPipelineOutputs.ExceptPipelines()` extension method to get outputs from all but a set of specified pipelines.
+- `IPipelineOutputs.ExceptPipeline()` now returns documents in natural order like `IPipelineOutputs.FromPipeline()` does.
 
 # 1.0.0-beta.58
 

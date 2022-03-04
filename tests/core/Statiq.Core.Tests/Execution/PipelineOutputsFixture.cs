@@ -38,7 +38,7 @@ namespace Statiq.Core.Tests.Documents
         public class ExceptPipelineTests : PipelineOutputsFixture
         {
             [Test]
-            public void OrderedDescendingByTimestamp()
+            public void ReturnsPipelineOutputsInNaturalOrder()
             {
                 // Given
                 PipelineOutputs outputs = new PipelineOutputs(GetPhaseResults());
@@ -47,7 +47,7 @@ namespace Statiq.Core.Tests.Documents
                 DocumentList<IDocument> results = outputs.ExceptPipeline("Pipeline A");
 
                 // Then
-                results.ToArray().ShouldBe(new[] { _f, _a });
+                results.ToArray().ShouldBe(new[] { _a, _f });
             }
 
             [Test]
@@ -60,7 +60,7 @@ namespace Statiq.Core.Tests.Documents
                 DocumentList<IDocument> results = outputs.ExceptPipeline("Pipeline C");
 
                 // Then
-                results.ToArray().ShouldBe(new[] { _f, _e, _a });
+                results.ToArray().ShouldBe(new[] { _e, _a, _f });
             }
         }
 

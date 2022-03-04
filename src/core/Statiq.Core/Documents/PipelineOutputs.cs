@@ -29,7 +29,6 @@ namespace Statiq.Core
             return _phaseResults
                 .Where(x => !x.Key.Equals(pipelineName, StringComparison.OrdinalIgnoreCase))
                 .SelectMany(x => x.Value.Last(x => x is object).Outputs)
-                .OrderByDescending(x => x.Timestamp)
                 .ToDocumentList();
         }
 
