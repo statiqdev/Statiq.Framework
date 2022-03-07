@@ -129,36 +129,15 @@ namespace Statiq.CodeAnalysis.Analysis
 
         public override void VisitNamespace(INamespaceSymbol symbol)
         {
-            // Exclude this namespace if it doesn't contain any nested symbols
-            if (!_includeEmptyNamespaces && !HasNestedMembers(symbol))
-            {
-                return;
-            }
-
-            bool HasNestedMembers(INamespaceSymbol nestedNamespace)
-            {
-                if (nestedNamespace.GetTypeMembers().Length > 0)
-                {
-                    return true;
-                }
-                foreach (INamespaceSymbol childNestedNamespace in nestedNamespace.GetNamespaceMembers())
-                {
-                    if (HasNestedMembers(childNestedNamespace))
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
             // Add to the namespace symbol cache
             string displayName = symbol.GetDisplayName();
             ConcurrentHashSet<INamespaceSymbol> symbols = _namespaceDisplayNameToSymbols.GetOrAdd(displayName, _ => new ConcurrentHashSet<INamespaceSymbol>());
             symbols.Add(symbol);
 
-            // Create the document (but not if none of the members would be included)
-            if (ShouldIncludeSymbol(symbol, x => _symbolPredicate is null || x.GetMembers().Any(m => _symbolPredicate(m, _compilation))))
+            // Exclude this namespace if it doesn't contain any included nested symbols
+            if (ShouldIncludeSymbol(symbol) && (HasIncludedMembers(symbol) || _includeEmptyNamespaces))
             {
+                // Create the document
                 _namespaceDisplayNameToDocument.AddOrUpdate(
                     displayName,
                     _ => AddNamespaceDocument(symbol, true),
@@ -168,6 +147,24 @@ namespace Statiq.CodeAnalysis.Analysis
                         _symbolToDocument.TryAdd(symbol, () => existing);
                         return existing;
                     });
+            }
+
+            bool HasIncludedMembers(INamespaceSymbol nestedNamespace)
+            {
+                if (nestedNamespace.GetTypeMembers().Any(ShouldIncludeSymbol))
+                {
+                    return true;
+                }
+
+                foreach (INamespaceSymbol childNestedNamespace in nestedNamespace.GetNamespaceMembers())
+                {
+                    if (HasIncludedMembers(childNestedNamespace))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
 
             // Descend if not finished, regardless if this namespace was included
@@ -328,15 +325,24 @@ namespace Statiq.CodeAnalysis.Analysis
 
         // Helpers below...
 
-        private bool ShouldIncludeSymbol<TSymbol>(TSymbol symbol, Func<TSymbol, bool> additionalCondition = null)
+        private bool ShouldIncludeSymbol<TSymbol>(TSymbol symbol)
             where TSymbol : ISymbol
         {
+            // Exclude implicit symbols
+            // but always include the global namespace (might be excluded in the predicate though)
+            if (symbol.IsImplicitlyDeclared
+                && (!(symbol is INamespaceSymbol namespaceSymbol) || !namespaceSymbol.IsGlobalNamespace))
+            {
+                return false;
+            }
+
             // Exclude the global auto-generated F# namespace (need to use .ToString() instead of .Name because it can have dots which act as nested namespaces)
             if (symbol.ToString().Contains("StartupCode$") || (symbol.ContainingNamespace?.ToString().Contains("StartupCode$") ?? false))
             {
                 return false;
             }
-            return _finished || ((_symbolPredicate is null || _symbolPredicate(symbol, _compilation)) && (additionalCondition is null || additionalCondition(symbol)));
+
+            return _finished || (_symbolPredicate is null || _symbolPredicate(symbol, _compilation));
         }
 
         // This was helpful: http://stackoverflow.com/a/30445814/807064
