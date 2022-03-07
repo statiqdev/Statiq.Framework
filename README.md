@@ -4,11 +4,13 @@
 
 Statiq Framework is a flexible and extensible static content generation framework for .NET. This project is an evolution of [Wyam](https://wyam.io).
 
-📖 Visit [the Statiq Framework guide](https://statiq.dev/framework) for updated quick start instructions as well as more detailed documentation.
+[📖 Read the documentation](https://statiq.dev/framework) for updated quick start instructions as well as a more detailed guide.
 
-💬 Visit [the Discussions repo](https://github.com/statiqdev/Discussions/discussions) for general discussion about all Statiq projects.
+[💬 Use the Discussions repo](https://github.com/statiqdev/Discussions/discussions) for assistance, questions, and general discussion about all Statiq projects.
 
-💙 If you find Statiq useful, please consider [supporting the project](https://www.statiq.dev/support/).
+[🐞 File an issue](https://github.com/statiqdev/Statiq.Framework/issues) if you find a bug or have a feature request related to Statiq Framework.
+
+[💙 Support the project](https://www.statiq.dev/support/) if you find Statiq useful.
 
 ## Licensing
 
