@@ -75,6 +75,8 @@ namespace Statiq.CodeAnalysis
             symbol.ThrowIfNull(nameof(symbol));
 
             return symbol.ToDisplayString(new SymbolDisplayFormat(
+                memberOptions: SymbolDisplayMemberOptions.IncludeContainingType | SymbolDisplayMemberOptions.IncludeParameters,
+                parameterOptions: SymbolDisplayParameterOptions.IncludeType,
                 typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
                 genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters));
         }
