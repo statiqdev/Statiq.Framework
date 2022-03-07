@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Shouldly;
 using Statiq.Common;
 using Statiq.Testing;
 
@@ -27,13 +28,73 @@ namespace Statiq.CodeAnalysis.Tests
                 ";
                 TestDocument document = GetDocument(code);
                 TestExecutionContext context = GetContext();
+                IModule module = new AnalyzeCSharp().IncludeEmptyNamespaces();
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
+
+                // Then
+                results.Select(x => x["Name"]).ShouldBe(new[] { string.Empty, "Foo", "Bar" }, true);
+            }
+
+            [Test]
+            public async Task DoesNotIncludeEmptyNamespace()
+            {
+                // Given
+                const string code = @"
+                    namespace Foo
+                    {
+                    }
+
+                    namespace Bar
+                    {
+                        public class Red
+                        {
+                        }
+                    }
+                ";
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
                 IModule module = new AnalyzeCSharp();
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Bar" }, results.Select(x => x["Name"]));
+                results.Select(x => x["Name"]).ShouldBe(new[] { string.Empty, "Bar", "Red" }, true);
+            }
+
+            [Test]
+            public async Task DoesNotIncludeEmptyNestedNamespaces()
+            {
+                // Given
+                const string code = @"
+                    namespace Foo
+                    {
+                        namespace Fizz
+                        {
+                        }
+                    }
+
+                    namespace Bar
+                    {
+                        namespace Buzz
+                        {
+                            public class Red
+                            {
+                            }
+                        }
+                    }
+                ";
+                TestDocument document = GetDocument(code);
+                TestExecutionContext context = GetContext();
+                IModule module = new AnalyzeCSharp();
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
+
+                // Then
+                results.Select(x => x["Name"]).ShouldBe(new[] { string.Empty, "Bar", "Buzz", "Red" }, true);
             }
 
             [Test]
@@ -55,16 +116,18 @@ namespace Statiq.CodeAnalysis.Tests
                 ";
                 TestDocument document = GetDocument(code);
                 TestExecutionContext context = GetContext();
-                IModule module = new AnalyzeCSharp();
+                IModule module = new AnalyzeCSharp().IncludeEmptyNamespaces();
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Baz", "Bar" }, results.Select(x => x["Name"]));
-                CollectionAssert.AreEquivalent(
-                    new[] { "Foo", "Bar" },
-                    results.Single(x => x["Name"].Equals(string.Empty)).Get<IEnumerable<IDocument>>("MemberNamespaces").Select(x => x["Name"]));
+                results.Select(x => x["Name"]).ShouldBe(new[] { string.Empty, "Foo", "Baz", "Bar" }, true);
+                results
+                    .Single(x => x["Name"].Equals(string.Empty))
+                    .Get<IEnumerable<IDocument>>("MemberNamespaces")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "Foo", "Bar" }, true);
             }
 
             [Test]
@@ -86,16 +149,18 @@ namespace Statiq.CodeAnalysis.Tests
                 ";
                 TestDocument document = GetDocument(code);
                 TestExecutionContext context = GetContext();
-                IModule module = new AnalyzeCSharp();
+                IModule module = new AnalyzeCSharp().IncludeEmptyNamespaces();
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Baz", "Bar" }, results.Select(x => x["Name"]));
-                CollectionAssert.AreEquivalent(
-                    new[] { "Baz", "Bar" },
-                    results.Single(x => x["Name"].Equals("Foo")).Get<IEnumerable<IDocument>>("MemberNamespaces").Select(x => x["Name"]));
+                results.Select(x => x["Name"]).ShouldBe(new[] { string.Empty, "Foo", "Baz", "Bar" }, true);
+                results
+                    .Single(x => x["Name"].Equals("Foo"))
+                    .Get<IEnumerable<IDocument>>("MemberNamespaces")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "Baz", "Bar" }, true);
             }
 
             [Test]
@@ -113,13 +178,13 @@ namespace Statiq.CodeAnalysis.Tests
                 ";
                 TestDocument document = GetDocument(code);
                 TestExecutionContext context = GetContext();
-                IModule module = new AnalyzeCSharp();
+                IModule module = new AnalyzeCSharp().IncludeEmptyNamespaces();
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Bar" }, results.Select(x => x["FullName"]));
+                results.Select(x => x["FullName"]).ShouldBe(new[] { string.Empty, "Foo", "Bar" }, true);
             }
 
             [Test]
@@ -137,13 +202,13 @@ namespace Statiq.CodeAnalysis.Tests
                 ";
                 TestDocument document = GetDocument(code);
                 TestExecutionContext context = GetContext();
-                IModule module = new AnalyzeCSharp();
+                IModule module = new AnalyzeCSharp().IncludeEmptyNamespaces();
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Foo.Bar" }, results.Select(x => x["QualifiedName"]));
+                results.Select(x => x["QualifiedName"]).ShouldBe(new[] { string.Empty, "Foo", "Foo.Bar" }, true);
             }
 
             [Test]
@@ -161,13 +226,13 @@ namespace Statiq.CodeAnalysis.Tests
                 ";
                 TestDocument document = GetDocument(code);
                 TestExecutionContext context = GetContext();
-                IModule module = new AnalyzeCSharp();
+                IModule module = new AnalyzeCSharp().IncludeEmptyNamespaces();
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { "global", "Foo", "Foo.Bar" }, results.Select(x => x["DisplayName"]));
+                results.Select(x => x["DisplayName"]).ShouldBe(new[] { "global", "Foo", "Foo.Bar" }, true);
             }
 
             [Test]
@@ -185,13 +250,13 @@ namespace Statiq.CodeAnalysis.Tests
                 ";
                 TestDocument document = GetDocument(code);
                 TestExecutionContext context = GetContext();
-                IModule module = new AnalyzeCSharp();
+                IModule module = new AnalyzeCSharp().IncludeEmptyNamespaces();
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { "Namespace", "Namespace", "Namespace" }, results.Select(x => x["Kind"]));
+                results.Select(x => x["Kind"]).ShouldBe(new[] { "Namespace", "Namespace", "Namespace" }, true);
             }
 
             [Test]
@@ -209,14 +274,20 @@ namespace Statiq.CodeAnalysis.Tests
                 ";
                 TestDocument document = GetDocument(code);
                 TestExecutionContext context = GetContext();
-                IModule module = new AnalyzeCSharp();
+                IModule module = new AnalyzeCSharp().IncludeEmptyNamespaces();
 
                 // When
                 IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Foo", results.Single(x => x["Name"].Equals("Bar")).Get<IDocument>("ContainingNamespace")["Name"]);
-                Assert.AreEqual(string.Empty, results.Single(x => x["Name"].Equals("Foo")).Get<IDocument>("ContainingNamespace")["Name"]);
+                results
+                    .Single(x => x["Name"].Equals("Bar"))
+                    .Get<IDocument>("ContainingNamespace")["Name"]
+                    .ShouldBe("Foo");
+                results
+                    .Single(x => x["Name"].Equals("Foo"))
+                    .Get<IDocument>("ContainingNamespace")["Name"]
+                    .ShouldBe(string.Empty);
             }
 
             [Test]
@@ -250,12 +321,16 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(
-                    new[] { "Red" },
-                    results.Single(x => x["Name"].Equals("Foo")).Get<IEnumerable<IDocument>>("MemberTypes").Select(x => x["Name"]));
-                CollectionAssert.AreEquivalent(
-                    new[] { "Blue", "Green" },
-                    results.Single(x => x["Name"].Equals("Bar")).Get<IEnumerable<IDocument>>("MemberTypes").Select(x => x["Name"]));
+                results
+                    .Single(x => x["Name"].Equals("Foo"))
+                    .Get<IEnumerable<IDocument>>("MemberTypes")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "Red" }, true);
+                results
+                    .Single(x => x["Name"].Equals("Bar"))
+                    .Get<IEnumerable<IDocument>>("MemberTypes")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "Blue", "Green" }, true);
             }
 
             [Test]
@@ -281,9 +356,11 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(
-                    new[] { "Blue" },
-                    results.Single(x => x["Name"].Equals("Foo")).Get<IEnumerable<IDocument>>("MemberTypes").Select(x => x["Name"]));
+                results
+                    .Single(x => x["Name"].Equals("Foo"))
+                    .Get<IEnumerable<IDocument>>("MemberTypes")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "Blue" }, true);
             }
 
             [Test]
@@ -300,15 +377,16 @@ namespace Statiq.CodeAnalysis.Tests
                 ";
                 TestDocument document = GetDocument(code);
                 TestExecutionContext context = GetContext();
-                IModule module = new AnalyzeCSharp();
+                IModule module = new AnalyzeCSharp().IncludeEmptyNamespaces();
 
                 // When
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(
-                    new[] { "global/index.html", "Foo/index.html", "Foo.Bar/index.html" },
-                    results.Where(x => x["Kind"].Equals("Namespace")).Select(x => x.Destination.FullPath));
+                results
+                    .Where(x => x["Kind"].Equals("Namespace"))
+                    .Select(x => x.Destination.FullPath)
+                    .ShouldBe(new[] { "global/index.html", "Foo/index.html", "Foo.Bar/index.html" }, true);
             }
         }
     }

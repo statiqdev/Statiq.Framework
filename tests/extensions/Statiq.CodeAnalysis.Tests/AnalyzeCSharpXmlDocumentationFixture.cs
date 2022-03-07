@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using NUnit.Framework;
 using Statiq.Common;
 using Statiq.Testing;
+using Shouldly;
 
 namespace Statiq.CodeAnalysis.Tests
 {
@@ -38,8 +39,8 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("This is a summary.", GetResult(results, "Green")["Summary"]);
-                Assert.AreEqual("This is another summary.", GetResult(results, "Red")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("This is a summary.");
+                GetResult(results, "Red")["Summary"].ShouldBe("This is another summary.");
             }
 
             [Test]
@@ -73,8 +74,8 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("\n    This is a summary.\n    ", GetResult(results, "Green")["Summary"]);
-                Assert.AreEqual("\n    This is\n    another summary.\n    ", GetResult(results, "Red")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("\n    This is a summary.\n    ");
+                GetResult(results, "Red")["Summary"].ShouldBe("\n    This is\n    another summary.\n    ");
             }
 
             [Test]
@@ -99,7 +100,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("This is a summary.\nThis is another summary.", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("This is a summary.\nThis is another summary.");
             }
 
             [Test]
@@ -122,7 +123,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(string.Empty, GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe(string.Empty);
             }
 
             [Test]
@@ -148,7 +149,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("\n    This is <code>some code</code> in a summary.\n    ", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("\n    This is <code>some code</code> in a summary.\n    ");
             }
 
             [Test]
@@ -174,7 +175,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("\n    This is <code class=\"code\">some code</code> in a summary.\n    ", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("\n    This is <code class=\"code\">some code</code> in a summary.\n    ");
             }
 
             [Test]
@@ -200,7 +201,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("\n    This is <code class=\"code\">some code</code> in a summary.\n    ", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("\n    This is <code class=\"code\">some code</code> in a summary.\n    ");
             }
 
             [Test]
@@ -226,7 +227,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("\n    This is <code class=\"code more-code\">some code</code> in a summary.\n    ", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("\n    This is <code class=\"code more-code\">some code</code> in a summary.\n    ");
             }
 
             [Test]
@@ -252,7 +253,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("\n    This is <code>some code</code> in <code>a</code> summary.\n    ", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("\n    This is <code>some code</code> in <code>a</code> summary.\n    ");
             }
 
             [Test]
@@ -282,7 +283,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("\n    This is\n    <pre><code>with some code</code></pre>\n    a summary\n    ", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("\n    This is\n    <pre><code>with some code</code></pre>\n    a summary\n    ");
             }
 
             [Test]
@@ -312,9 +313,8 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(
-                    "\n    This is <code>some code</code> and\n    <pre><code>with some code</code></pre>\n    a summary\n    ",
-                    GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"]
+                    .ShouldBe("\n    This is <code>some code</code> and\n    <pre><code>with some code</code></pre>\n    a summary\n    ");
             }
 
             [Test]
@@ -347,7 +347,8 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("\n    This is\n    <pre><code>with some code</code></pre>\n    a summary\n    <pre><code>more code</code></pre>\n    ", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"]
+                    .ShouldBe("\n    This is\n    <pre><code>with some code</code></pre>\n    a summary\n    <pre><code>more code</code></pre>\n    ");
             }
 
             [Test]
@@ -387,7 +388,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("\n    This is a summary repeated for each partial class\n    ", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("\n    This is a summary repeated for each partial class\n    ");
             }
 
             [Test]
@@ -414,12 +415,8 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(
-                    "bar",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Params")[0].Name);
-                Assert.AreEqual(
-                    "comment",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Params")[0].Html);
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Params")[0].Name.ShouldBe("bar");
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Params")[0].Html.ShouldBe("comment");
             }
 
             [Test]
@@ -446,7 +443,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.IsEmpty(GetMember(results, "Green", "Go").GetList<ReferenceComment>("Params"));
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Params").ShouldBeEmpty();
             }
 
             [Test]
@@ -477,15 +474,12 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(
-                    "FooException",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Name);
-                Assert.AreEqual(
-                    "<code><a href=\"/Foo/FooException/index.html\">FooException</a></code>",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Link);
-                Assert.AreEqual(
-                    "Throws when null",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Html);
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Name
+                    .ShouldBe("FooException");
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Link
+                    .ShouldBe("<code><a href=\"/Foo/FooException/index.html\">FooException</a></code>");
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Html
+                    .ShouldBe("Throws when null");
             }
 
             [Test]
@@ -512,15 +506,12 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(
-                    "FooException",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Name);
-                Assert.AreEqual(
-                    "FooException",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Link);
-                Assert.AreEqual(
-                    "Throws when null",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Html);
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Name
+                    .ShouldBe("FooException");
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Link
+                    .ShouldBe("FooException");
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Html
+                    .ShouldBe("Throws when null");
             }
 
             [Test]
@@ -547,12 +538,10 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(
-                    string.Empty,
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Name);
-                Assert.AreEqual(
-                    "Throws when null",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Html);
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Name
+                    .ShouldBeEmpty();
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Html
+                    .ShouldBe("Throws when null");
             }
 
             [Test]
@@ -584,25 +573,19 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(2, GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions").Count);
-                Assert.AreEqual(
-                    "<code><a href=\"/Foo/FooException/index.html\">FooException</a></code>",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Link);
-                Assert.AreEqual(
-                    "FooException",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Name);
-                Assert.AreEqual(
-                    "Throws when null",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Html);
-                Assert.AreEqual(
-                    "BarException",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[1].Link);
-                Assert.AreEqual(
-                    "BarException",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[1].Name);
-                Assert.AreEqual(
-                    "Throws for another reason",
-                    GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[1].Html);
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions").Count.ShouldBe(2);
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Link
+                    .ShouldBe("<code><a href=\"/Foo/FooException/index.html\">FooException</a></code>");
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Name
+                    .ShouldBe("FooException");
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[0].Html
+                    .ShouldBe("Throws when null");
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[1].Link
+                    .ShouldBe("BarException");
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[1].Name
+                    .ShouldBe("BarException");
+                GetMember(results, "Green", "Go").GetList<ReferenceComment>("Exceptions")[1].Html
+                    .ShouldBe("Throws for another reason");
             }
 
             [Test]
@@ -642,7 +625,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(
+                GetResult(results, "Green")["Summary"].ShouldBe(
                     @"
                 This is a summary.
                 <ul>
@@ -659,8 +642,7 @@ namespace Statiq.CodeAnalysis.Tests
                 <span class=""description"">y</span>
                 </li>
                 </ul>
-                ".Replace("\r\n", "\n").Replace("                ", "    "),
-                    GetResult(results, "Green")["Summary"]);
+                ".Replace("\r\n", "\n").Replace("                ", "    "));
             }
 
             [Test]
@@ -700,7 +682,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(
+                GetResult(results, "Green")["Summary"].ShouldBe(
                     @"
                 This is a summary.
                 <ol>
@@ -717,8 +699,7 @@ namespace Statiq.CodeAnalysis.Tests
                 <span class=""description"">y</span>
                 </li>
                 </ol>
-                ".Replace("\r\n", "\n").Replace("                ", "    "),
-                    GetResult(results, "Green")["Summary"]);
+                ".Replace("\r\n", "\n").Replace("                ", "    "));
             }
 
             [Test]
@@ -758,7 +739,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(
+                GetResult(results, "Green")["Summary"].ShouldBe(
                     @"
                 This is a summary.
                 <table class=""table"">
@@ -775,8 +756,7 @@ namespace Statiq.CodeAnalysis.Tests
                 <td>y</td>
                 </tr>
                 </table>
-                ".Replace("\r\n", "\n").Replace("                ", "    "),
-                    GetResult(results, "Green")["Summary"]);
+                ".Replace("\r\n", "\n").Replace("                ", "    "));
             }
 
             [Test]
@@ -803,7 +783,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("\n    <p>ABC</p>\n    <p>XYZ</p>\n    ", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("\n    <p>ABC</p>\n    <p>XYZ</p>\n    ");
             }
 
             [Test]
@@ -830,7 +810,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("\n    <p>ABC</p>\n    <p>X<code>Y</code>Z</p>\n    ", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("\n    <p>ABC</p>\n    <p>X<code>Y</code>Z</p>\n    ");
             }
 
             [Test]
@@ -858,7 +838,8 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Check <code><a href=\"/Foo/Red/index.html\">Red</a></code> class", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"]
+                    .ShouldBe("Check <code><a href=\"/Foo/Red/index.html\">Red</a></code> class");
             }
 
             [Test]
@@ -886,7 +867,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Check <code>Blue</code> class", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("Check <code>Blue</code> class");
             }
 
             [Test]
@@ -914,7 +895,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Check <code>IEnumerable&lt;string&gt;</code> class", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("Check <code>IEnumerable&lt;string&gt;</code> class");
             }
 
             [Test]
@@ -945,7 +926,8 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Check <code><a href=\"/Foo/Red/00F22A50.html\">Blue()</a></code> method", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"]
+                    .ShouldBe("Check <code><a href=\"/Foo/Red/00F22A50.html\">Blue()</a></code> method");
             }
 
             [Test]
@@ -969,7 +951,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Check <code>Red</code> class", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("Check <code>Red</code> class");
             }
 
             [Test]
@@ -998,8 +980,9 @@ namespace Statiq.CodeAnalysis.Tests
 
                 // Then
                 // <seealso> should be removed from the summary and instead placed in the SeeAlso metadata
-                Assert.AreEqual("Check this out ", GetResult(results, "Green")["Summary"]);
-                Assert.AreEqual("<code><a href=\"/Foo/Red/index.html\">Red</a></code>", GetResult(results, "Green").Get<IReadOnlyList<string>>("SeeAlso")[0]);
+                GetResult(results, "Green")["Summary"].ShouldBe("Check this out ");
+                GetResult(results, "Green").Get<IReadOnlyList<string>>("SeeAlso")[0]
+                    .ShouldBe("<code><a href=\"/Foo/Red/index.html\">Red</a></code>");
             }
 
             [Test]
@@ -1027,7 +1010,8 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("<code><a href=\"/Foo/Red/index.html\">Red</a></code>", GetResult(results, "Green").Get<IReadOnlyList<string>>("SeeAlso")[0]);
+                GetResult(results, "Green").Get<IReadOnlyList<string>>("SeeAlso")[0]
+                    .ShouldBe("<code><a href=\"/Foo/Red/index.html\">Red</a></code>");
             }
 
             [Test]
@@ -1055,9 +1039,8 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(
-                    "Check <code><a href=\"/Foo/Red/index.html\">Red</a></code> class",
-                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[0].Html);
+                GetResult(results, "Green").GetList<OtherComment>("BarComments")[0].Html
+                    .ShouldBe("Check <code><a href=\"/Foo/Red/index.html\">Red</a></code> class");
             }
 
             [Test]
@@ -1087,18 +1070,10 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(
-                    3,
-                    GetResult(results, "Green").GetList<OtherComment>("BarComments").Count);
-                Assert.AreEqual(
-                    "Circle",
-                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[0].Html);
-                Assert.AreEqual(
-                    "Square",
-                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[1].Html);
-                Assert.AreEqual(
-                    "Rectangle",
-                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[2].Html);
+                GetResult(results, "Green").GetList<OtherComment>("BarComments").Count.ShouldBe(3);
+                GetResult(results, "Green").GetList<OtherComment>("BarComments")[0].Html.ShouldBe("Circle");
+                GetResult(results, "Green").GetList<OtherComment>("BarComments")[1].Html.ShouldBe("Square");
+                GetResult(results, "Green").GetList<OtherComment>("BarComments")[2].Html.ShouldBe("Rectangle");
             }
 
             [Test]
@@ -1127,21 +1102,11 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(
-                    1,
-                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[0].Attributes.Count);
-                Assert.AreEqual(
-                    "x",
-                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[0].Attributes["a"]);
-                Assert.AreEqual(
-                    2,
-                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[1].Attributes.Count);
-                Assert.AreEqual(
-                    "y",
-                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[1].Attributes["a"]);
-                Assert.AreEqual(
-                    "z",
-                    GetResult(results, "Green").GetList<OtherComment>("BarComments")[1].Attributes["b"]);
+                GetResult(results, "Green").GetList<OtherComment>("BarComments")[0].Attributes.Count.ShouldBe(1);
+                GetResult(results, "Green").GetList<OtherComment>("BarComments")[0].Attributes["a"].ShouldBe("x");
+                GetResult(results, "Green").GetList<OtherComment>("BarComments")[1].Attributes.Count.ShouldBe(2);
+                GetResult(results, "Green").GetList<OtherComment>("BarComments")[1].Attributes["a"].ShouldBe("y");
+                GetResult(results, "Green").GetList<OtherComment>("BarComments")[1].Attributes["b"].ShouldBe("z");
             }
 
             [Test]
@@ -1167,7 +1132,8 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.IsFalse(GetResult(results, "Green").Get<IReadOnlyList<IDocument>>("Constructors")[0].ContainsKey("Summary"));
+                GetResult(results, "Green").Get<IReadOnlyList<IDocument>>("Constructors")[0].ContainsKey("Summary")
+                    .ShouldBeFalse();
             }
 
             [Test]
@@ -1194,7 +1160,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("This is a summary.", GetResult(results, "Green").Get<IReadOnlyList<IDocument>>("Constructors")[0]["Summary"]);
+                GetResult(results, "Green").Get<IReadOnlyList<IDocument>>("Constructors")[0]["Summary"].ShouldBe("This is a summary.");
             }
 
             [Test]
@@ -1218,7 +1184,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("This is a included summary.", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("This is a included summary.");
             }
 
             [Test]
@@ -1242,7 +1208,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("This is a summary.", GetResult(results, "Foo")["Summary"]);
+                GetResult(results, "Foo")["Summary"].ShouldBe("This is a summary.");
             }
 
             [Test]
@@ -1270,7 +1236,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("This is a summary.", GetResult(results, "Foo")["Summary"]);
+                GetResult(results, "Foo")["Summary"].ShouldBe("This is a summary.");
             }
 
             [Test]
@@ -1299,7 +1265,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
+                GetResult(results, "Blue")["Summary"].ShouldBe("This is a summary.");
             }
 
             [Test]
@@ -1327,7 +1293,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
+                GetResult(results, "Blue")["Summary"].ShouldBe("This is a summary.");
             }
 
             [Test]
@@ -1356,7 +1322,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
+                GetResult(results, "Blue")["Summary"].ShouldBe("This is a summary.");
             }
 
             [Test]
@@ -1386,7 +1352,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
+                GetResult(results, "Blue")["Summary"].ShouldBe("This is a summary.");
             }
 
             [Test]
@@ -1420,7 +1386,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("This is a summary.", GetResult(results, "Blue")["Summary"]);
+                GetResult(results, "Blue")["Summary"].ShouldBe("This is a summary.");
             }
 
             [Test]
@@ -1450,7 +1416,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Blue summary.", GetResult(results, "Blue")["Summary"]);
+                GetResult(results, "Blue")["Summary"].ShouldBe("Blue summary.");
             }
 
             [Test]
@@ -1483,7 +1449,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Base summary.", GetMember(results, "Blue", "Foo")["Summary"]);
+                GetMember(results, "Blue", "Foo")["Summary"].ShouldBe("Base summary.");
             }
 
             [Test]
@@ -1518,18 +1484,11 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(
-                    "b",
-                    GetMember(results, "Blue", "Foo").GetList<ReferenceComment>("Params")[0].Name);
-                Assert.AreEqual(
-                    "XXX",
-                    GetMember(results, "Blue", "Foo").GetList<ReferenceComment>("Params")[0].Html);
-                Assert.AreEqual(
-                    "a",
-                    GetMember(results, "Blue", "Foo").GetList<ReferenceComment>("Params")[1].Name);
-                Assert.AreEqual(
-                    "AAA",
-                    GetMember(results, "Blue", "Foo").GetList<ReferenceComment>("Params")[1].Html);
+                GetMember(results, "Blue", "Foo").GetList<ReferenceComment>("Params")[0].Name.ShouldBe("b");
+                GetMember(results, "Blue", "Foo").GetList<ReferenceComment>("Params")[0].Html.ShouldBe("XXX");
+                GetMember(results, "Blue", "Foo").GetList<ReferenceComment>("Params")[1].Name.ShouldBe("a");
+                GetMember(results, "Blue", "Foo").GetList<ReferenceComment>("Params")[1].Html
+                    .ShouldBe("AAA");
             }
 
             [Test]
@@ -1558,7 +1517,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Green summary.", GetResult(results, "Blue")["Summary"]);
+                GetResult(results, "Blue")["Summary"].ShouldBe("Green summary.");
             }
 
             [Test]
@@ -1591,7 +1550,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Red summary.", GetResult(results, "Blue")["Summary"]);
+                GetResult(results, "Blue")["Summary"].ShouldBe("Red summary.");
             }
 
             [Test]
@@ -1625,7 +1584,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Green summary.", GetResult(results, "Blue")["Summary"]);
+                GetResult(results, "Blue")["Summary"].ShouldBe("Green summary.");
             }
 
             [Test]
@@ -1658,7 +1617,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Interface summary.", GetMember(results, "Blue", "Foo")["Summary"]);
+                GetMember(results, "Blue", "Foo")["Summary"].ShouldBe("Interface summary.");
             }
 
             [Test]
@@ -1694,7 +1653,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Interface summary.", GetMember(results, "Blue", "Foo")["Summary"]);
+                GetMember(results, "Blue", "Foo")["Summary"].ShouldBe("Interface summary.");
             }
 
             [Test]
@@ -1731,7 +1690,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Base summary.", GetMember(results, "Blue", "Foo")["Summary"]);
+                GetMember(results, "Blue", "Foo")["Summary"].ShouldBe("Base summary.");
             }
 
             [Test]
@@ -1771,7 +1730,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Interface summary.", GetMember(results, "Blue", "Foo")["Summary"]);
+                GetMember(results, "Blue", "Foo")["Summary"].ShouldBe("Interface summary.");
             }
 
             [Test]
@@ -1799,7 +1758,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("\n    &lt;foo&gt;bar&lt;/foo&gt;\n    ", GetResult(results, "Green")["Summary"]);
+                GetResult(results, "Green")["Summary"].ShouldBe("\n    &lt;foo&gt;bar&lt;/foo&gt;\n    ");
             }
 
             [Test]
@@ -1829,7 +1788,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("\n    <pre><code>&lt;foo&gt;bar&lt;/foo&gt;</code></pre>\n    ", GetResult(results, "Green")["Example"]);
+                GetResult(results, "Green")["Example"].ShouldBe("\n    <pre><code>&lt;foo&gt;bar&lt;/foo&gt;</code></pre>\n    ");
             }
         }
     }

@@ -38,6 +38,7 @@ namespace Statiq.CodeAnalysis.Analysis
         private readonly bool _docsForImplicitSymbols;
         private readonly bool _assemblySymbols;
         private readonly bool _implicitInheritDoc;
+        private readonly bool _includeEmptyNamespaces;
         private readonly MethodInfo _getAccessibleMembersInThisAndBaseTypes;
         private readonly Type _documentationCommentCompiler;
         private readonly MethodInfo _documentationCommentCompilerDefaultVisit;
@@ -57,7 +58,8 @@ namespace Statiq.CodeAnalysis.Analysis
             ConcurrentDictionary<string, string> cssClasses,
             bool docsForImplicitSymbols,
             bool assemblySymbols,
-            bool implicitInheritDoc)
+            bool implicitInheritDoc,
+            bool includeEmptyNamespaces)
         {
             _compilation = compilation;
             _context = context;
@@ -67,6 +69,7 @@ namespace Statiq.CodeAnalysis.Analysis
             _docsForImplicitSymbols = docsForImplicitSymbols;
             _assemblySymbols = assemblySymbols;
             _implicitInheritDoc = implicitInheritDoc;
+            _includeEmptyNamespaces = includeEmptyNamespaces;
 
             // Get any reflected methods we need
             Assembly workspacesAssembly = typeof(Workspace).Assembly;
@@ -126,6 +129,28 @@ namespace Statiq.CodeAnalysis.Analysis
 
         public override void VisitNamespace(INamespaceSymbol symbol)
         {
+            // Exclude this namespace if it doesn't contain any nested symbols
+            if (!_includeEmptyNamespaces && !HasNestedMembers(symbol))
+            {
+                return;
+            }
+
+            bool HasNestedMembers(INamespaceSymbol nestedNamespace)
+            {
+                if (nestedNamespace.GetTypeMembers().Length > 0)
+                {
+                    return true;
+                }
+                foreach (INamespaceSymbol childNestedNamespace in nestedNamespace.GetNamespaceMembers())
+                {
+                    if (HasNestedMembers(childNestedNamespace))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             // Add to the namespace symbol cache
             string displayName = symbol.GetDisplayName();
             ConcurrentHashSet<INamespaceSymbol> symbols = _namespaceDisplayNameToSymbols.GetOrAdd(displayName, _ => new ConcurrentHashSet<INamespaceSymbol>());

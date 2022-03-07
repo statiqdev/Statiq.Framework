@@ -103,6 +103,7 @@ namespace Statiq.CodeAnalysis
         private bool _assemblySymbols = false;
         private Config<bool> _implicitInheritDoc = false;
         private Config<string> _compilationAssemblyName = Config.FromContext(_ => Path.GetRandomFileName());
+        private Config<bool> _includeEmptyNamespaces = false;
 
         /// <summary>
         /// This will assume <c>inheritdoc</c> if a symbol has no other code comments.
@@ -395,6 +396,21 @@ namespace Statiq.CodeAnalysis
             return this;
         }
 
+        /// <summary>
+        /// Controls whether symbol documents for empty namespaces (those that contain
+        /// only other namespaces but no other symbols recursively) are output. By default
+        /// only namespaces that contain other nested symbols are output.
+        /// </summary>
+        /// <param name="includeEmptyNamespaces">
+        /// <c>true</c> to output empty namespaces, <c>false</c> to omit them.
+        /// </param>
+        /// <returns>The current module instance.</returns>
+        public AnalyzeCSharp IncludeEmptyNamespaces(Config<bool> includeEmptyNamespaces = null)
+        {
+            _includeEmptyNamespaces = (includeEmptyNamespaces ?? true).EnsureNonDocument(nameof(includeEmptyNamespaces));
+            return this;
+        }
+
         private static NormalizedPath GetDefaultDestination(ISymbol symbol, in NormalizedPath prefix, IExecutionContext context)
         {
             INamespaceSymbol containingNamespace = symbol.ContainingNamespace;
@@ -465,7 +481,8 @@ namespace Statiq.CodeAnalysis
                 _cssClasses,
                 await _docsForImplicitSymbols.GetValueAsync(null, context),
                 _assemblySymbols,
-                await _implicitInheritDoc.GetValueAsync(null, context));
+                await _implicitInheritDoc.GetValueAsync(null, context),
+                await _includeEmptyNamespaces.GetValueAsync(null, context));
             Parallel.ForEach(symbols, s => visitor.Visit(s));
             return visitor.Finish();
         }

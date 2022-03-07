@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using Statiq.CodeAnalysis.Analysis;
 using Statiq.Testing;
+using Shouldly;
 
 namespace Statiq.CodeAnalysis.Tests
 {
@@ -23,7 +24,7 @@ namespace Statiq.CodeAnalysis.Tests
                 string result = builder.ToString();
 
                 // Then
-                Assert.AreEqual("abcdefghi", result);
+                result.ShouldBe("abcdefghi");
             }
 
             [Test]
@@ -39,7 +40,7 @@ namespace Statiq.CodeAnalysis.Tests
                 string result = builder.ToString();
 
                 // Then
-                Assert.AreEqual("abcdefghi", result);
+                result.ShouldBe("abcdefghi");
             }
 
             [Test]
@@ -55,7 +56,7 @@ namespace Statiq.CodeAnalysis.Tests
                 string result = builder.ToString();
 
                 // Then
-                Assert.AreEqual("abcdef" + Environment.NewLine + "ghi", result);
+                result.ShouldBe("abcdef" + Environment.NewLine + "ghi");
             }
 
             [Test]
@@ -71,7 +72,7 @@ namespace Statiq.CodeAnalysis.Tests
                 string result = builder.ToString();
 
                 // Then
-                Assert.AreEqual("abc" + Environment.NewLine + "defghi", result);
+                result.ShouldBe("abc" + Environment.NewLine + "defghi");
             }
 
             [Test]
@@ -87,7 +88,7 @@ namespace Statiq.CodeAnalysis.Tests
                 string result = builder.ToString();
 
                 // Then
-                Assert.AreEqual("abc" + Environment.NewLine + "1234defghi", result);
+                result.ShouldBe("abc" + Environment.NewLine + "1234defghi");
             }
 
             [Test]
@@ -103,7 +104,7 @@ namespace Statiq.CodeAnalysis.Tests
                 string result = builder.ToString();
 
                 // Then
-                Assert.AreEqual("abc" + Environment.NewLine + "1234defxyz" + Environment.NewLine + "1234ghi", result);
+                result.ShouldBe("abc" + Environment.NewLine + "1234defxyz" + Environment.NewLine + "1234ghi");
             }
 
             [Test]
@@ -119,7 +120,7 @@ namespace Statiq.CodeAnalysis.Tests
                 string result = builder.ToString();
 
                 // Then
-                Assert.AreEqual("abc" + Environment.NewLine + "1234def" + Environment.NewLine + "1234ghi", result);
+                result.ShouldBe("abc" + Environment.NewLine + "1234def" + Environment.NewLine + "1234ghi");
             }
 
             [Test]
@@ -135,7 +136,7 @@ namespace Statiq.CodeAnalysis.Tests
                 string result = builder.ToString();
 
                 // Then
-                Assert.AreEqual("abcdef" + Environment.NewLine + "1234ghi", result);
+                result.ShouldBe("abcdef" + Environment.NewLine + "1234ghi");
             }
 
             [Test]
@@ -152,7 +153,7 @@ namespace Statiq.CodeAnalysis.Tests
                 string result = builder.ToString();
 
                 // Then
-                Assert.AreEqual("abcdef" + Environment.NewLine + "1234ghi" + Environment.NewLine + "1234xyz", result);
+                result.ShouldBe("abcdef" + Environment.NewLine + "1234ghi" + Environment.NewLine + "1234xyz");
             }
 
             [Test]
@@ -173,7 +174,7 @@ namespace Statiq.CodeAnalysis.Tests
                 string result = builder.ToString();
 
                 // Then
-                Assert.AreEqual("abc" + Environment.NewLine + "def" + Environment.NewLine + "1234ghi" + Environment.NewLine + "5jklm" + Environment.NewLine + "5n", result);
+                result.ShouldBe("abc" + Environment.NewLine + "def" + Environment.NewLine + "1234ghi" + Environment.NewLine + "5jklm" + Environment.NewLine + "5n");
             }
 
             [Test]
@@ -189,7 +190,7 @@ namespace Statiq.CodeAnalysis.Tests
                 string result = builder.ToString();
 
                 // Then
-                Assert.AreEqual("abcdef" + Environment.NewLine + "g", result);
+                result.ShouldBe("abcdef" + Environment.NewLine + "g");
             }
 
             [Test]
@@ -207,7 +208,7 @@ namespace Statiq.CodeAnalysis.Tests
                 string result = builder.ToString();
 
                 // Then
-                Assert.AreEqual("abc" + Environment.NewLine + "defg" + Environment.NewLine + "1234hij", result);
+                result.ShouldBe("abc" + Environment.NewLine + "defg" + Environment.NewLine + "1234hij");
             }
 
             [Test]
@@ -226,7 +227,7 @@ namespace Statiq.CodeAnalysis.Tests
                 string result = builder.ToString();
 
                 // Then
-                Assert.AreEqual("abc" + Environment.NewLine + "1234def" + Environment.NewLine + "1234" + Environment.NewLine + "1234ghi", result);
+                result.ShouldBe("abc" + Environment.NewLine + "1234def" + Environment.NewLine + "1234" + Environment.NewLine + "1234ghi");
             }
         }
     }

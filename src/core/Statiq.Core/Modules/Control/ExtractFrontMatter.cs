@@ -86,11 +86,7 @@ namespace Statiq.Core
         public ExtractFrontMatter(Config<IEnumerable<Regex>> regexes, params IModule[] modules)
             : base(modules)
         {
-            if (regexes.RequiresDocument)
-            {
-                throw new ArgumentException("Front matter regexes cannot be dependent on a document", nameof(regexes));
-            }
-            _regexes = regexes;
+            _regexes = regexes.EnsureNonDocument(nameof(regexes));
         }
 
         /// <summary>

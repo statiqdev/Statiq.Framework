@@ -49,7 +49,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Blue", "Green", "Red", "Yellow", "Orange" }, results.Select(x => x["Name"]));
+                results.Select(x => x["Name"]).ShouldBe(new[] { string.Empty, "Foo", "Blue", "Green", "Red", "Yellow", "Orange" }, true);
             }
 
             [Test]
@@ -79,9 +79,11 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(
-                    new[] { "Ext" },
-                    results.Single(x => x["Name"].Equals("Blue")).Get<IEnumerable<IDocument>>("ExtensionMethods").Select(x => x["Name"]));
+                results
+                    .Single(x => x["Name"].Equals("Blue"))
+                    .Get<IEnumerable<IDocument>>("ExtensionMethods")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "Ext" });
             }
 
             [Test]
@@ -115,9 +117,11 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(
-                    new[] { "Ext" },
-                    results.Single(x => x["Name"].Equals("Blue")).Get<IEnumerable<IDocument>>("ExtensionMethods").Select(x => x["Name"]));
+                results
+                    .Single(x => x["Name"].Equals("Blue"))
+                    .Get<IEnumerable<IDocument>>("ExtensionMethods")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "Ext" });
             }
 
             [Test]
@@ -151,9 +155,11 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(
-                    new[] { "Blue", "Red", "Yellow" },
-                    results.Single(x => x["Name"].Equals("Green")).Get<IEnumerable<IDocument>>("MemberTypes").Select(x => x["Name"]));
+                results
+                    .Single(x => x["Name"].Equals("Green"))
+                    .Get<IEnumerable<IDocument>>("MemberTypes")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "Blue", "Red", "Yellow" }, true);
             }
 
             [Test]
@@ -190,7 +196,9 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Green", "Green.Blue", "Red", "Yellow", "Bar" }, results.Select(x => x["FullName"]));
+                results
+                    .Select(x => x["FullName"])
+                    .ShouldBe(new[] { string.Empty, "Foo", "Green", "Green.Blue", "Red", "Yellow", "Bar" }, true);
             }
 
             [Test]
@@ -227,7 +235,9 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { "global", "Foo", "Green", "Green.Blue", "Red", "Yellow", "Foo.Bar" }, results.Select(x => x["DisplayName"]));
+                results
+                    .Select(x => x["DisplayName"])
+                    .ShouldBe(new[] { "global", "Foo", "Green", "Green.Blue", "Red", "Yellow", "Foo.Bar" }, true);
             }
 
             [Test]
@@ -264,7 +274,9 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Foo.Green", "Foo.Green.Blue", "Foo.Red", "Foo.Bar.Yellow", "Foo.Bar" }, results.Select(x => x["QualifiedName"]));
+                results
+                    .Select(x => x["QualifiedName"])
+                    .ShouldBe(new[] { string.Empty, "Foo", "Foo.Green", "Foo.Green.Blue", "Foo.Red", "Foo.Bar.Yellow", "Foo.Bar" }, true);
             }
 
             [Test]
@@ -301,10 +313,10 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Foo", results.Single(x => x["Name"].Equals("Green")).Get<IDocument>("ContainingNamespace")["Name"]);
-                Assert.AreEqual("Foo", results.Single(x => x["Name"].Equals("Blue")).Get<IDocument>("ContainingNamespace")["Name"]);
-                Assert.AreEqual("Foo", results.Single(x => x["Name"].Equals("Red")).Get<IDocument>("ContainingNamespace")["Name"]);
-                Assert.AreEqual("Bar", results.Single(x => x["Name"].Equals("Yellow")).Get<IDocument>("ContainingNamespace")["Name"]);
+                results.Single(x => x["Name"].Equals("Green")).Get<IDocument>("ContainingNamespace")["Name"].ShouldBe("Foo");
+                results.Single(x => x["Name"].Equals("Blue")).Get<IDocument>("ContainingNamespace")["Name"].ShouldBe("Foo");
+                results.Single(x => x["Name"].Equals("Red")).Get<IDocument>("ContainingNamespace")["Name"].ShouldBe("Foo");
+                results.Single(x => x["Name"].Equals("Yellow")).Get<IDocument>("ContainingNamespace")["Name"].ShouldBe("Bar");
             }
 
             [Test]
@@ -341,10 +353,10 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.IsNull(results.Single(x => x["Name"].Equals("Green")).Get<IDocument>("ContainingType"));
-                Assert.AreEqual("Green", results.Single(x => x["Name"].Equals("Blue")).Get<IDocument>("ContainingType")["Name"]);
-                Assert.IsNull(results.Single(x => x["Name"].Equals("Red")).Get<IDocument>("ContainingType"));
-                Assert.IsNull(results.Single(x => x["Name"].Equals("Yellow")).Get<IDocument>("ContainingType"));
+                results.Single(x => x["Name"].Equals("Green")).Get<IDocument>("ContainingType").ShouldBeNull();
+                results.Single(x => x["Name"].Equals("Blue")).Get<IDocument>("ContainingType")["Name"].ShouldBe("Green");
+                results.Single(x => x["Name"].Equals("Red")).Get<IDocument>("ContainingType").ShouldBeNull();
+                results.Single(x => x["Name"].Equals("Yellow")).Get<IDocument>("ContainingType").ShouldBeNull();
             }
 
             [Test]
@@ -381,10 +393,10 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("NamedType", results.Single(x => x["Name"].Equals("Green"))["Kind"]);
-                Assert.AreEqual("NamedType", results.Single(x => x["Name"].Equals("Blue"))["Kind"]);
-                Assert.AreEqual("NamedType", results.Single(x => x["Name"].Equals("Red"))["Kind"]);
-                Assert.AreEqual("NamedType", results.Single(x => x["Name"].Equals("Yellow"))["Kind"]);
+                results.Single(x => x["Name"].Equals("Green"))["Kind"].ShouldBe("NamedType");
+                results.Single(x => x["Name"].Equals("Blue"))["Kind"].ShouldBe("NamedType");
+                results.Single(x => x["Name"].Equals("Red"))["Kind"].ShouldBe("NamedType");
+                results.Single(x => x["Name"].Equals("Yellow"))["Kind"].ShouldBe("NamedType");
             }
 
             [Test]
@@ -421,10 +433,10 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Class", results.Single(x => x["Name"].Equals("Green"))["SpecificKind"]);
-                Assert.AreEqual("Class", results.Single(x => x["Name"].Equals("Blue"))["SpecificKind"]);
-                Assert.AreEqual("Structure", results.Single(x => x["Name"].Equals("Red"))["SpecificKind"]);
-                Assert.AreEqual("Enum", results.Single(x => x["Name"].Equals("Yellow"))["SpecificKind"]);
+                results.Single(x => x["Name"].Equals("Green"))["SpecificKind"].ShouldBe("Class");
+                results.Single(x => x["Name"].Equals("Blue"))["SpecificKind"].ShouldBe("Class");
+                results.Single(x => x["Name"].Equals("Red"))["SpecificKind"].ShouldBe("Structure");
+                results.Single(x => x["Name"].Equals("Yellow"))["SpecificKind"].ShouldBe("Enum");
             }
 
             [Test]
@@ -467,12 +479,12 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<IDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Object", results.Single(x => x["Name"].Equals("Red")).GetDocumentList("BaseTypes").First()["Name"]);
-                Assert.AreEqual("Red", results.Single(x => x["Name"].Equals("Green")).GetDocumentList("BaseTypes").First()["Name"]);
-                Assert.AreEqual("ValueType", results.Single(x => x["Name"].Equals("Blue")).GetDocumentList("BaseTypes").First()["Name"]);
-                CollectionAssert.IsEmpty(results.Single(x => x["Name"].Equals("Yellow")).GetDocumentList("BaseTypes"));
-                CollectionAssert.IsEmpty(results.Single(x => x["Name"].Equals("Purple")).GetDocumentList("BaseTypes"));
-                Assert.AreEqual("Enum", results.Single(x => x["Name"].Equals("Orange")).GetDocumentList("BaseTypes").First()["Name"]);
+                results.Single(x => x["Name"].Equals("Red")).GetDocumentList("BaseTypes").First()["Name"].ShouldBe("Object");
+                results.Single(x => x["Name"].Equals("Green")).GetDocumentList("BaseTypes").First()["Name"].ShouldBe("Red");
+                results.Single(x => x["Name"].Equals("Blue")).GetDocumentList("BaseTypes").First()["Name"].ShouldBe("ValueType");
+                results.Single(x => x["Name"].Equals("Yellow")).GetDocumentList("BaseTypes").ShouldBeEmpty();
+                results.Single(x => x["Name"].Equals("Purple")).GetDocumentList("BaseTypes").ShouldBeEmpty();
+                results.Single(x => x["Name"].Equals("Orange")).GetDocumentList("BaseTypes").First()["Name"].ShouldBe("Enum");
             }
 
             [Test]
@@ -508,9 +520,10 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(
-                    new[] { "Green", "Red", "_yellow", "Changed", "ToString", "Equals", "Equals", "ReferenceEquals", "GetHashCode", "GetType", "Finalize", "MemberwiseClone" },
-                    GetResult(results, "Blue").Get<IReadOnlyList<IDocument>>("Members").Select(x => x["Name"]));
+                GetResult(results, "Blue")
+                    .Get<IReadOnlyList<IDocument>>("Members")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "Green", "Red", "_yellow", "Changed", "ToString", "Equals", "Equals", "ReferenceEquals", "GetHashCode", "GetType", "Finalize", "MemberwiseClone" }, true);
             }
 
             [Test]
@@ -550,7 +563,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual(2, GetResult(results, "Blue").Get<IReadOnlyList<IDocument>>("Constructors").Count);
+                GetResult(results, "Blue").Get<IReadOnlyList<IDocument>>("Constructors").Count.ShouldBe(2);
             }
 
             [Test]
@@ -588,9 +601,10 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(
-                    new[] { "Foo/Green/index.html", "Foo.Bar/Blue/index.html", "global/Yellow/index.html", "Foo/Red/index.html" },
-                    results.Where(x => x["Kind"].Equals("NamedType")).Select(x => x.Destination.FullPath));
+                results
+                    .Where(x => x["Kind"].Equals("NamedType"))
+                    .Select(x => x.Destination.FullPath)
+                    .ShouldBe(new[] { "Foo/Green/index.html", "Foo.Bar/Blue/index.html", "global/Yellow/index.html", "Foo/Red/index.html" }, true);
             }
 
             [Test]
@@ -613,7 +627,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Object", GetResult(results, "Red").GetDocumentList("BaseTypes").First()["Name"]);
+                GetResult(results, "Red").GetDocumentList("BaseTypes").First()["Name"].ShouldBe("Object");
             }
 
             [Test]
@@ -640,8 +654,11 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { string.Empty, "Foo", "Red", "IBlue" }, results.Select(x => x["Name"]));
-                CollectionAssert.AreEquivalent(new[] { "IBlue", "IFoo" }, GetResult(results, "Red").Get<IEnumerable<IDocument>>("AllInterfaces").Select(x => x["Name"]));
+                results.Select(x => x["Name"]).ShouldBe(new[] { string.Empty, "Foo", "Red", "IBlue" }, true);
+                GetResult(results, "Red")
+                    .Get<IEnumerable<IDocument>>("AllInterfaces")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "IBlue", "IFoo" }, true);
             }
 
             [Test]
@@ -680,11 +697,17 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { "Blue" }, GetResult(results, "Red").Get<IEnumerable<IDocument>>("DerivedTypes").Select(x => x["Name"]));
-                CollectionAssert.AreEquivalent(new[] { "Green", "Yellow" }, GetResult(results, "Blue").Get<IEnumerable<IDocument>>("DerivedTypes").Select(x => x["Name"]));
-                CollectionAssert.IsEmpty(GetResult(results, "Green").Get<IEnumerable<IDocument>>("DerivedTypes"));
-                CollectionAssert.IsEmpty(GetResult(results, "Yellow").Get<IEnumerable<IDocument>>("DerivedTypes"));
-                CollectionAssert.IsEmpty(GetResult(results, "IBlue").Get<IEnumerable<IDocument>>("DerivedTypes"));
+                GetResult(results, "Red")
+                    .Get<IEnumerable<IDocument>>("DerivedTypes")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "Blue" });
+                GetResult(results, "Blue")
+                    .Get<IEnumerable<IDocument>>("DerivedTypes")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "Green", "Yellow" }, true);
+                GetResult(results, "Green").Get<IEnumerable<IDocument>>("DerivedTypes").ShouldBeEmpty();
+                GetResult(results, "Yellow").Get<IEnumerable<IDocument>>("DerivedTypes").ShouldBeEmpty();
+                GetResult(results, "IBlue").Get<IEnumerable<IDocument>>("DerivedTypes").ShouldBeEmpty();
             }
 
             [Test]
@@ -711,8 +734,14 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEqual(new[] { "T" }, GetResult(results, "Red").Get<IEnumerable<IDocument>>("TypeParameters").Select(x => x["Name"]));
-                CollectionAssert.AreEqual(new[] { "TKey", "TValue" }, GetResult(results, "IBlue").Get<IEnumerable<IDocument>>("TypeParameters").Select(x => x["Name"]));
+                GetResult(results, "Red")
+                    .Get<IEnumerable<IDocument>>("TypeParameters")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "T" }, true);
+                GetResult(results, "IBlue")
+                    .Get<IEnumerable<IDocument>>("TypeParameters")
+                    .Select(x => x["Name"])
+                    .ShouldBe(new[] { "TKey", "TValue" }, true);
             }
 
             [Test]
@@ -735,7 +764,11 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                Assert.AreEqual("Red", GetResult(results, "Red").Get<IEnumerable<IDocument>>("TypeParameters").First().Get<IDocument>("DeclaringType")["Name"]);
+                GetResult(results, "Red")
+                    .Get<IEnumerable<IDocument>>("TypeParameters")
+                    .First()
+                    .Get<IDocument>("DeclaringType")["Name"]
+                    .ShouldBe("Red");
             }
 
             [Test]
@@ -773,7 +806,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { "Blue", "Green", "Red" }, results.Select(x => x["Name"]));
+                results.Select(x => x["Name"]).ShouldBe(new[] { "Blue", "Green", "Red" }, true);
             }
 
             [Test]
@@ -803,7 +836,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { "Blue", "Red" }, results.Select(x => x["Name"]));
+                results.Select(x => x["Name"]).ShouldBe(new[] { "Blue", "Red" }, true);
             }
 
             [Test]
@@ -833,7 +866,7 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                CollectionAssert.AreEquivalent(new[] { "Blue" }, results.Select(x => x["Name"]));
+                results.Select(x => x["Name"]).ShouldBe(new[] { "Blue" }, true);
             }
 
             [Test]
@@ -866,7 +899,9 @@ namespace Statiq.CodeAnalysis.Tests
                 IReadOnlyList<TestDocument> results = await ExecuteAsync(document, context, module);
 
                 // Then
-                results.Select(x => x.GetString(CodeAnalysisKeys.SymbolId)).ShouldBe(new[] { string.Empty, "Foo", "Blue", "Green", "Green.Red", "Blue.Red" }, true);
+                results
+                    .Select(x => x.GetString(CodeAnalysisKeys.SymbolId))
+                    .ShouldBe(new[] { string.Empty, "Foo", "Blue", "Green", "Green.Red", "Blue.Red" }, true);
             }
         }
     }
