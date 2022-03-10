@@ -124,6 +124,12 @@ namespace Statiq.CodeAnalysis
         public const string IsOverride = nameof(IsOverride);
 
         /// <summary>
+        /// Indicates if the symbol is a tuple.
+        /// </summary>
+        /// <type cref="bool" />
+        public const string IsTupleType = nameof(IsTupleType);
+
+        /// <summary>
         /// A unique ID that identifies the symbol for documentation purposes.
         /// </summary>
         /// <type cref="string" />
@@ -217,6 +223,13 @@ namespace Statiq.CodeAnalysis
         /// </summary>
         /// <type cref="IReadOnlyList{IDocument}" />
         public const string TypeArguments = nameof(TypeArguments);
+
+        /// <summary>
+        /// This is available for tuple type symbols and contains a collection of the documents that represent tuple elements. The collection
+        /// is empty if the type is not a tuple.
+        /// </summary>
+        /// <type cref="IReadOnlyList{IDocument}" />
+        public const string TupleElements = nameof(TupleElements);
 
         /// <summary>
         /// This is available for type, method, field, event, and property symbols and contains the declared accessibility of the symbol.

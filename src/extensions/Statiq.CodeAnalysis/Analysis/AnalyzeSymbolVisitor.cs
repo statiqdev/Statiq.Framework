@@ -200,7 +200,9 @@ namespace Statiq.CodeAnalysis.Analysis
                     { CodeAnalysisKeys.TypeParameters, DocumentsFor(symbol.TypeParameters) },
                     { CodeAnalysisKeys.TypeArguments, DocumentsFor(symbol.TypeArguments) },
                     { CodeAnalysisKeys.Accessibility, _ => symbol.DeclaredAccessibility.ToString() },
-                    { CodeAnalysisKeys.Attributes, GetAttributeDocuments(symbol) }
+                    { CodeAnalysisKeys.Attributes, GetAttributeDocuments(symbol) },
+                    { CodeAnalysisKeys.IsTupleType, _ => symbol.IsTupleType },
+                    { CodeAnalysisKeys.TupleElements, DocumentsFor(symbol.TupleElements) }
                 };
                 if (!_finished)
                 {
@@ -328,6 +330,18 @@ namespace Statiq.CodeAnalysis.Analysis
         private bool ShouldIncludeSymbol<TSymbol>(TSymbol symbol)
             where TSymbol : ISymbol
         {
+            // Exclude the global auto-generated F# namespace (need to use .ToString() instead of .Name because it can have dots which act as nested namespaces)
+            if (symbol.ToString().Contains("StartupCode$") || (symbol.ContainingNamespace?.ToString().Contains("StartupCode$") ?? false))
+            {
+                return false;
+            }
+
+            // Always include symbols if we're already finished since they're being created for lookups at that point
+            if (_finished)
+            {
+                return true;
+            }
+
             // Exclude implicit symbols
             // but always include the global namespace (might be excluded in the predicate though)
             if (symbol.IsImplicitlyDeclared
@@ -336,13 +350,7 @@ namespace Statiq.CodeAnalysis.Analysis
                 return false;
             }
 
-            // Exclude the global auto-generated F# namespace (need to use .ToString() instead of .Name because it can have dots which act as nested namespaces)
-            if (symbol.ToString().Contains("StartupCode$") || (symbol.ContainingNamespace?.ToString().Contains("StartupCode$") ?? false))
-            {
-                return false;
-            }
-
-            return _finished || (_symbolPredicate is null || _symbolPredicate(symbol, _compilation));
+            return _symbolPredicate is null || _symbolPredicate(symbol, _compilation);
         }
 
         // This was helpful: http://stackoverflow.com/a/30445814/807064

@@ -1,3 +1,7 @@
+# 1.0.0-beta.60
+
+- Added support for surfacing tuple information in the `AnalyzeCSharp` module.
+
 # 1.0.0-beta.59
 
 - Added support for regular expressions to the `ExtractFrontMatter` module (#231).
