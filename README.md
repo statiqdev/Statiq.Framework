@@ -16,4 +16,6 @@ Statiq Framework is a flexible and extensible static content generation framewor
 
 Statiq Framework is licensed under the MIT License and is open source software.
 
+Note that projects which build on Statiq Framework such as [Statiq Web](https://github.com/statiqdev/Statiq.Web) and [Statiq Docs](https://github.com/statiqdev/Statiq.Docs) have different licenses.
+
 Please see the [licensing FAQs](LICENSE-FAQ.md) for more information.

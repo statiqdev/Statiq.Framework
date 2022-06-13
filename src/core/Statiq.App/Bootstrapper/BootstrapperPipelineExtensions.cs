@@ -8,15 +8,31 @@ namespace Statiq.App
     public static class BootstrapperPipelineExtensions
     {
         /// <summary>
-        /// Adds a pipeline of type <typeparamref name="TPipeline"/>.
+        /// Registers a pipeline of type <typeparamref name="TPipeline"/>.
         /// </summary>
+        /// <remarks>
+        /// Note that this method registers the pipeline with the dependency injection container
+        /// which the engine uses to populate the initial set of pipelines on instantiation. Therefore
+        /// any pipelines added through this method will take effect before anything that happens in
+        /// <c>ConfigureEngine()</c>, even if the call to this method is after the call to that one.
+        /// To add pipelines after <c>ConfigureEngine</c> is called you will need to manipulate the
+        /// <see cref="IEngine.Pipelines"/> collection directly.
+        /// </remarks>
         public static Bootstrapper AddPipeline<TPipeline>(this Bootstrapper bootstrapper)
             where TPipeline : IPipeline =>
             bootstrapper.ConfigureServices(x => x.AddSingleton(typeof(IPipeline), typeof(TPipeline)));
 
         /// <summary>
-        /// Adds a pipeline of type <typeparamref name="TPipeline"/> with the specified name.
+        /// Registers a pipeline of type <typeparamref name="TPipeline"/> with the specified name.
         /// </summary>
+        /// <remarks>
+        /// Note that this method registers the pipeline with the dependency injection container
+        /// which the engine uses to populate the initial set of pipelines on instantiation. Therefore
+        /// any pipelines added through this method will take effect before anything that happens in
+        /// <c>ConfigureEngine()</c>, even if the call to this method is after the call to that one.
+        /// To add pipelines after <c>ConfigureEngine</c> is called you will need to manipulate the
+        /// <see cref="IEngine.Pipelines"/> collection directly.
+        /// </remarks>
         public static Bootstrapper AddPipeline<TPipeline>(this Bootstrapper bootstrapper, string name)
             where TPipeline : class, IPipeline
         {
@@ -31,8 +47,16 @@ namespace Statiq.App
         }
 
         /// <summary>
-        /// Adds all pipelines defined in <typeparamref name="TParent"/>.
+        /// Registers all pipelines defined in <typeparamref name="TParent"/>.
         /// </summary>
+        /// <remarks>
+        /// Note that this method registers the pipeline with the dependency injection container
+        /// which the engine uses to populate the initial set of pipelines on instantiation. Therefore
+        /// any pipelines added through this method will take effect before anything that happens in
+        /// <c>ConfigureEngine()</c>, even if the call to this method is after the call to that one.
+        /// To add pipelines after <c>ConfigureEngine</c> is called you will need to manipulate the
+        /// <see cref="IEngine.Pipelines"/> collection directly.
+        /// </remarks>
         public static Bootstrapper AddPipelines<TParent>(this Bootstrapper bootstrapper) =>
             bootstrapper.AddPipelines(typeof(TParent));
 
