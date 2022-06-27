@@ -14,22 +14,22 @@ namespace Statiq.Html
         [Obsolete("Use Keys.Excerpt instead")]
         public const string Excerpt = nameof(Keys.Excerpt);
 
-        [Obsolete("Use Keys.Excerpt instead")]
-        public const string OuterHtml = nameof(Keys.Excerpt);
+        [Obsolete("Use Keys.OuterHtml instead")]
+        public const string OuterHtml = nameof(Keys.OuterHtml);
 
-        [Obsolete("Use Keys.Excerpt instead")]
-        public const string InnerHtml = nameof(Keys.Excerpt);
+        [Obsolete("Use Keys.InnerHtml instead")]
+        public const string InnerHtml = nameof(Keys.InnerHtml);
 
-        [Obsolete("Use Keys.Excerpt instead")]
-        public const string TextContent = nameof(Keys.Excerpt);
+        [Obsolete("Use Keys.TextContent instead")]
+        public const string TextContent = nameof(Keys.TextContent);
 
-        [Obsolete("Use Keys.Excerpt instead")]
-        public const string Headings = nameof(Keys.Excerpt);
+        [Obsolete("Use Keys.Headings instead")]
+        public const string Headings = nameof(Keys.Headings);
 
-        [Obsolete("Use Keys.Excerpt instead")]
-        public const string HeadingId = nameof(Keys.Excerpt);
+        [Obsolete("Use Keys.HeadingId instead")]
+        public const string HeadingId = nameof(Keys.HeadingId);
 
-        [Obsolete("Use Keys.Excerpt instead")]
-        public const string Level = nameof(Keys.Excerpt);
+        [Obsolete("Use Keys.Level instead")]
+        public const string Level = nameof(Keys.Level);
     }
 }
