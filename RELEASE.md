@@ -1,3 +1,8 @@
+# 1.0.0-beta.61
+
+- Updated the referenced version of ImageSharp in the Statiq.Images library (#242, thanks @olevett).
+- Fixed some `HtmlKeys` copy-paste errors (#240, thanks @pascalberger).
+
 # 1.0.0-beta.60
 
 - Added support for surfacing tuple information in the `AnalyzeCSharp` module.
