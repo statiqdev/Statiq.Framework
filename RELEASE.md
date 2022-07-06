@@ -1,3 +1,8 @@
+# 1.0.0-beta.62
+
+- Changed `Statiq.App.props` to `Statiq.App.targets` to resolve some import ordering bugs.
+- Added a `Keys.IgnoreExternalDestinations` setting to ignore when document destinations are not relative to the output path since some use cases may require writing documents elsewhere.
+
 # 1.0.0-beta.61
 
 - Updated the referenced version of ImageSharp in the Statiq.Images library (#242, thanks @olevett).

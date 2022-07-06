@@ -11,4 +11,10 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup Condition="'$(Language)' == 'C#' AND ('$(ImplicitUsings)' == 'true' or '$(ImplicitUsings)' == 'enable')">
+    <Using Include="Statiq" />
+    <Using Include="Statiq.Common" />
+    <Using Include="Statiq.Core" />
+    <Using Include="Statiq.App" />
+  </ItemGroup>
 </Project>
