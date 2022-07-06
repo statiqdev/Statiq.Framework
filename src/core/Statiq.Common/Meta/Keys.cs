@@ -128,6 +128,13 @@ namespace Statiq.Common
         /// <type cref="string" />
         public const string FailureLogLevel = nameof(FailureLogLevel);
 
+        /// <summary>
+        /// Usually an error will be generated if the destination of a document falls outside the output folder.
+        /// Setting this to <c>true</c> will ignore such errors and should be used when files need to be written
+        /// to arbitrary locations on the file system.
+        /// </summary>
+        public const string IgnoreExternalDestinations = nameof(IgnoreExternalDestinations);
+
         // Document
 
         /// <summary>

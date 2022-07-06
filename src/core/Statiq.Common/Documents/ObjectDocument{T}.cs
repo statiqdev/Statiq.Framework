@@ -120,7 +120,7 @@ namespace Statiq.Common
             {
                 throw new ArgumentException($"Document sources must be absolute ({source})", nameof(source));
             }
-            if (!destination.IsNull && !destination.IsRelative)
+            if (!IExecutionState.Current.Settings.Get<bool>(Statiq.Common.Keys.IgnoreExternalDestinations) && !destination.IsNull && !destination.IsRelative)
             {
                 throw new ArgumentException($"Document destinations must be relative to the output path ({destination})", nameof(destination));
             }
