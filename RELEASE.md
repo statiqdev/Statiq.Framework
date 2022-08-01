@@ -1,3 +1,7 @@
+# 1.0.0-beta.63
+
+- Fixed generation of document source paths for symbols in `AnalyzeCSharp` to use the symbol ID and generate shorter names so very long symbols don't create paths that are too long (#244).
+
 # 1.0.0-beta.62
 
 - Changed `Statiq.App.props` to `Statiq.App.targets` to resolve some import ordering bugs.

@@ -11,6 +11,7 @@ using ConcurrentCollections;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.CodeAnalysis.Analysis
@@ -20,6 +21,12 @@ namespace Statiq.CodeAnalysis.Analysis
     internal class AnalyzeSymbolVisitor : SymbolVisitor
     {
         private static readonly object XmlDocLock = new object();
+
+        private static readonly SymbolDisplayFormat _documentSourceFormat = new SymbolDisplayFormat(
+            memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
+            parameterOptions: SymbolDisplayParameterOptions.None,
+            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+            genericsOptions: SymbolDisplayGenericsOptions.None);
 
         private readonly ConcurrentCache<string, IDocument> _namespaceDisplayNameToDocument =
             new ConcurrentCache<string, IDocument>(false);
@@ -476,9 +483,16 @@ namespace Statiq.CodeAnalysis.Analysis
 
             // Create the document and add it to caches
             // Use a special ".symbol" extension for the source so we don't conflict with other known file types when consuming
+            // We also need to use a special symbol display format to make sure the document sources are short enough,
+            // then hash and combine the full display string to get a unique name
             return _symbolToDocument.GetOrAdd(
                 symbol,
-                (key, args) => args._context.CreateDocument(new NormalizedPath(key.ToDisplayString() + ".symbol", PathKind.Absolute), args.destination, args.items),
+                (key, args) => args._context.CreateDocument(
+                    new NormalizedPath(
+                        $"{key.ToDisplayString(_documentSourceFormat)}_{key.GetId()}.symbol",
+                        PathKind.Absolute),
+                    args.destination,
+                    args.items),
                 (destination, items, _context));
         }
 
