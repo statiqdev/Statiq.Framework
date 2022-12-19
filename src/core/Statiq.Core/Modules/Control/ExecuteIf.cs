@@ -239,7 +239,7 @@ namespace Statiq.Core
                         }
                     }
                 }
-                else
+                else if (!hasExecuted)
                 {
                     if (await condition.Predicate.GetValueAsync(null, context))
                     {

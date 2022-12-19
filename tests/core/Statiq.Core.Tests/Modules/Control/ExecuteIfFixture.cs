@@ -253,6 +253,126 @@ namespace Statiq.Core.Tests.Modules.Control
             }
 
             [Test]
+            public async Task TrueIfWithFollowingElseIfWithContextResultsInCorrectCounts()
+            {
+                // Given
+                CountModule a = new CountModule("A")
+                {
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
+                };
+                CountModule b = new CountModule("B")
+                {
+                    AdditionalOutputs = 2
+                };
+                CountModule c = new CountModule("C")
+                {
+                    AdditionalOutputs = 3
+                };
+
+                // When
+                await ExecuteAsync(
+                    a,
+                    new ExecuteIf(Config.FromContext(_ => true), b)
+                        .ElseIf(Config.FromContext(_ => true), c));
+
+                // Then
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(1);
+                c.ExecuteCount.ShouldBe(0);
+            }
+
+            [Test]
+            public async Task FalseIfWithFollowingElseIfWithContextResultsInCorrectCounts()
+            {
+                // Given
+                CountModule a = new CountModule("A")
+                {
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
+                };
+                CountModule b = new CountModule("B")
+                {
+                    AdditionalOutputs = 2
+                };
+                CountModule c = new CountModule("C")
+                {
+                    AdditionalOutputs = 3
+                };
+
+                // When
+                await ExecuteAsync(
+                    a,
+                    new ExecuteIf(Config.FromContext(_ => false), b)
+                        .ElseIf(Config.FromContext(_ => true), c));
+
+                // Then
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(0);
+                c.ExecuteCount.ShouldBe(1);
+            }
+
+            [Test]
+            public async Task TrueIfWithFollowingElseWithContextResultsInCorrectCounts()
+            {
+                // Given
+                CountModule a = new CountModule("A")
+                {
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
+                };
+                CountModule b = new CountModule("B")
+                {
+                    AdditionalOutputs = 2
+                };
+                CountModule c = new CountModule("C")
+                {
+                    AdditionalOutputs = 3
+                };
+
+                // When
+                await ExecuteAsync(
+                    a,
+                    new ExecuteIf(Config.FromContext(_ => true), b)
+                        .Else(c));
+
+                // Then
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(1);
+                c.ExecuteCount.ShouldBe(0);
+            }
+
+            [Test]
+            public async Task FalseIfWithFollowingElseWithContextResultsInCorrectCounts()
+            {
+                // Given
+                CountModule a = new CountModule("A")
+                {
+                    AdditionalOutputs = 2,
+                    EnsureInputDocument = true
+                };
+                CountModule b = new CountModule("B")
+                {
+                    AdditionalOutputs = 2
+                };
+                CountModule c = new CountModule("C")
+                {
+                    AdditionalOutputs = 3
+                };
+
+                // When
+                await ExecuteAsync(
+                    a,
+                    new ExecuteIf(Config.FromContext(_ => false), b)
+                        .Else(c));
+
+                // Then
+                a.ExecuteCount.ShouldBe(1);
+                b.ExecuteCount.ShouldBe(0);
+                c.ExecuteCount.ShouldBe(1);
+            }
+
+            [Test]
             public async Task UnmatchedDocumentsAreAddedToResults()
             {
                 // Given
