@@ -32,6 +32,8 @@ namespace Statiq.Common
 
         public Guid ExecutionId => ExecutionState.ExecutionId;
 
+        public DateTime ExecutionDateTime => ExecutionState.ExecutionDateTime;
+
         public CancellationToken CancellationToken => ExecutionState.CancellationToken;
 
         public IApplicationState ApplicationState => ExecutionState.ApplicationState;

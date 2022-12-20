@@ -66,6 +66,9 @@ namespace Statiq.Core
         public Guid ExecutionId => _contextData.Engine.ExecutionId;
 
         /// <inheritdoc/>
+        public DateTime ExecutionDateTime => _contextData.Engine.ExecutionDateTime;
+
+        /// <inheritdoc/>
         public INamespacesCollection Namespaces => _contextData.Engine.Namespaces;
 
         /// <inheritdoc/>

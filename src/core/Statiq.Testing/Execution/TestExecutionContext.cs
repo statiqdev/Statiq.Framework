@@ -64,6 +64,9 @@ namespace Statiq.Testing
         /// <inheritdoc/>
         public Guid ExecutionId => Engine.ExecutionId;
 
+        /// <inheritdoc />
+        public DateTime ExecutionDateTime => Engine.ExecutionDateTime;
+
         /// <inheritdoc/>
         IExecutionState IExecutionContext.ExecutionState => Engine;
 

@@ -9,7 +9,7 @@ namespace Statiq.Common
     public static class DateTimeCultureExtensions
     {
         /// <summary>
-        /// Attempts to parse and input date using the input date culture setting.
+        /// Attempts to parse an input date using the input date culture setting.
         /// </summary>
         /// <param name="context">The execution context.</param>
         /// <param name="s">The string to parse.</param>

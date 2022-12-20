@@ -53,6 +53,11 @@ namespace Statiq.Common
         CancellationToken CancellationToken { get; }
 
         /// <summary>
+        /// The date/time that the current execution started.
+        /// </summary>
+        DateTime ExecutionDateTime { get; }
+
+        /// <summary>
         /// Gets the state of the application when it was run.
         /// </summary>
         IApplicationState ApplicationState { get; }

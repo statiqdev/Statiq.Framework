@@ -43,6 +43,9 @@ namespace Statiq.Testing
         public Guid ExecutionId { get; set; } = Guid.Empty;
 
         /// <inheritdoc />
+        public DateTime ExecutionDateTime { get; set; } = DateTime.Now;
+
+        /// <inheritdoc />
         public CancellationToken CancellationToken { get; set; }
 
         /// <inheritdoc />

@@ -409,11 +409,11 @@ namespace Statiq.Feeds
                 Title = _feedTitle ?? context.Settings.GetString(FeedKeys.Title),
                 Description = _feedDescription ?? context.Settings.GetString(FeedKeys.Description),
                 Author = _feedAuthor ?? context.Settings.GetString(FeedKeys.Author),
-                Published = _feedPublished ?? DateTime.UtcNow,
-                Updated = _feedUpdated ?? DateTime.UtcNow,
+                Published = _feedPublished ?? context.GetCurrentDateTime().ToUniversalTime(),
+                Updated = _feedUpdated ?? context.GetCurrentDateTime().ToUniversalTime(),
                 Link = _feedLink ?? TypeHelper.Convert<Uri>(context.GetLink()),
                 ImageLink = _feedImageLink ?? TypeHelper.Convert<Uri>(context.GetLink(context.Settings, FeedKeys.Image, true)),
-                Copyright = _feedCopyright ?? context.Settings.GetString(FeedKeys.Copyright) ?? DateTime.UtcNow.Year.ToString()
+                Copyright = _feedCopyright ?? context.Settings.GetString(FeedKeys.Copyright) ?? context.GetCurrentDateTime().ToUniversalTime().Year.ToString()
             };
 
             // Copy the feed metadata to document metadata for the eventual outputs

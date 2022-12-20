@@ -223,6 +223,9 @@ namespace Statiq.Core
         public Guid ExecutionId { get; private set; } = Guid.Empty;
 
         /// <inheritdoc />
+        public DateTime ExecutionDateTime { get; private set; } = DateTime.Now;
+
+        /// <inheritdoc />
         public CancellationToken CancellationToken { get; private set; }
 
         /// <inheritdoc />
@@ -381,6 +384,7 @@ namespace Statiq.Core
 
             // Initialize some stuff
             ExecutionId = Guid.NewGuid();
+            ExecutionDateTime = DateTime.Now;
             CancellationToken = cancellationToken;
 
             try
@@ -417,6 +421,8 @@ namespace Statiq.Core
                 Logger.LogInformation($"Executing {ExecutingPipelines.Count} pipelines ({string.Join(", ", ExecutingPipelines.Keys.OrderBy(x => x))})");
                 Logger.LogDebug($"Execution ID: {ExecutionId}");
                 Logger.LogDebug($"Clean mode: {FileCleaner.CleanMode}");
+                Logger.LogInformation($"Absolute Execution Date/Time: {ExecutionDateTime.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)}");
+                Logger.LogInformation($"Configured Current Date/Time: {this.GetCurrentDateTime().ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)}");
 
                 // Do a check for the same input/output path
                 if (FileSystem.InputPaths.Any(x => x.Equals(FileSystem.OutputPath)))

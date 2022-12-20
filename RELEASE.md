@@ -1,3 +1,8 @@
+# 1.0.0-beta.64
+
+- Fixed `ElseIf` when `Predicate.RequiresDocument` is false in `ExecuteIf` module (#255, #256, thanks @nils-a).
+- Adds the ability to configure a specific date/time as "current". All code and themes should now use `IExecutionState.GetCurrentDateTime()` instead of `DateTime.Now`, etc.
+
 # 1.0.0-beta.63
 
 - Fixed generation of document source paths for symbols in `AnalyzeCSharp` to use the symbol ID and generate shorter names so very long symbols don't create paths that are too long (#244).

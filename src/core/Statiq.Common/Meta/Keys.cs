@@ -97,6 +97,12 @@ namespace Statiq.Common
         public const string CleanMode = nameof(CleanMode);
 
         /// <summary>
+        /// Allows you to set an alternate date/time that the engine will use as the current date/time.
+        /// </summary>
+        /// <type cref="DateTime" />
+        public const string CurrentDateTime = nameof(CurrentDateTime);
+
+        /// <summary>
         /// Indicates the culture to use for reading and interpreting dates as input.
         /// </summary>
         /// <type cref="string" />
