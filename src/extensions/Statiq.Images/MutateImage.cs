@@ -113,6 +113,18 @@ namespace Statiq.Images
         }
 
         /// <summary>
+        /// Outputs the image as WebP. This will override the default
+        /// behavior of outputting the image as the same format.
+        /// </summary>
+        /// <returns>The current module instance.</returns>
+        public MutateImage OutputAsWebp()
+        {
+            _operations.Peek().OutputActions.Add(
+                new OutputAction((i, s) => i.SaveAsWebp(s), x => x.ChangeExtension(".webp")));
+            return this;
+        }
+
+        /// <summary>
         /// Allows you to specify an alternate output format for the image.
         /// For example, you might use this if you want to full specify the encoder and it's properties.
         /// This will override the default behavior of outputting the image as the same format.
