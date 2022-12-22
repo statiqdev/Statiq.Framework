@@ -94,7 +94,6 @@ namespace Statiq.App
                 foreach (ConsoleContent content in ConsoleContentBuffer)
                 {
                     Console.ForegroundColor = content.Foreground;
-                    Console.BackgroundColor = content.Background;
                     Console.Write(content.Message.ToString());
                 }
                 Console.WriteLine();

@@ -53,10 +53,10 @@ namespace Statiq.App
                 if (lastAngle > 0)
                 {
                     int firstAngle = FormattedMessage.IndexOf('»');
-                    consoleContentBuffer.Add(new ConsoleContent(ConsoleColor.Blue, ConsoleColor.Black, FormattedMessage.AsMemory(0, firstAngle + 1)));
+                    consoleContentBuffer.Add(new ConsoleContent(ConsoleColor.Blue, FormattedMessage.AsMemory(0, firstAngle + 1)));
                     if (firstAngle < lastAngle)
                     {
-                        consoleContentBuffer.Add(new ConsoleContent(ConsoleColor.Cyan, ConsoleColor.Black, FormattedMessage.AsMemory(firstAngle + 1, lastAngle - (firstAngle + 1) + 1)));
+                        consoleContentBuffer.Add(new ConsoleContent(ConsoleColor.Cyan, FormattedMessage.AsMemory(firstAngle + 1, lastAngle - (firstAngle + 1) + 1)));
                     }
                 }
                 else
@@ -68,7 +68,7 @@ namespace Statiq.App
                 int normalStart = lastAngle + 1;
                 if (CategoryName?.StartsWith(NamespacePrefix) == false)
                 {
-                    consoleContentBuffer.Add(new ConsoleContent(ConsoleColor.DarkGray, ConsoleColor.Black, $"[{CategoryName}] ".AsMemory()));
+                    consoleContentBuffer.Add(new ConsoleContent(ConsoleColor.DarkGray, $"[{CategoryName}] ".AsMemory()));
                     consoleContentBuffer.Add(new ConsoleContent(FormattedMessage.AsMemory(normalStart, FormattedMessage.Length - normalStart)));
                 }
                 else
@@ -123,7 +123,7 @@ namespace Statiq.App
                 // Add the category
                 if (CategoryName?.StartsWith(NamespacePrefix) == false)
                 {
-                    consoleContentBuffer.Add(new ConsoleContent(ConsoleColor.DarkGray, ConsoleColor.Black, $"[{CategoryName}] ".AsMemory()));
+                    consoleContentBuffer.Add(new ConsoleContent(ConsoleColor.DarkGray, $"[{CategoryName}] ".AsMemory()));
                 }
 
                 // Then add the message
@@ -154,12 +154,12 @@ namespace Statiq.App
         private ConsoleContent GetLogLevelConsoleContent(LogLevel logLevel, in ReadOnlyMemory<char> message) =>
             logLevel switch
             {
-                LogLevel.Critical => new ConsoleContent(ConsoleColor.DarkRed, ConsoleColor.Black, message),
-                LogLevel.Error => new ConsoleContent(ConsoleColor.Red, ConsoleColor.Black, message),
-                LogLevel.Warning => new ConsoleContent(ConsoleColor.Yellow, ConsoleColor.Black, message),
-                LogLevel.Information => new ConsoleContent(ConsoleColor.DarkGreen, ConsoleColor.Black, message),
-                LogLevel.Debug => new ConsoleContent(ConsoleColor.DarkGray, ConsoleColor.Black, message),
-                LogLevel.Trace => new ConsoleContent(ConsoleColor.DarkGray, ConsoleColor.Black, message),
+                LogLevel.Critical => new ConsoleContent(ConsoleColor.DarkRed, message),
+                LogLevel.Error => new ConsoleContent(ConsoleColor.Red, message),
+                LogLevel.Warning => new ConsoleContent(ConsoleColor.Yellow, message),
+                LogLevel.Information => new ConsoleContent(ConsoleColor.DarkGreen, message),
+                LogLevel.Debug => new ConsoleContent(ConsoleColor.DarkGray, message),
+                LogLevel.Trace => new ConsoleContent(ConsoleColor.DarkGray, message),
                 _ => new ConsoleContent(message),
             };
     }
