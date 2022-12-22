@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -419,10 +420,11 @@ namespace Statiq.Core
                 // Log
                 Logger.LogInformation("========== Execution ==========");
                 Logger.LogInformation($"Executing {ExecutingPipelines.Count} pipelines ({string.Join(", ", ExecutingPipelines.Keys.OrderBy(x => x))})");
-                Logger.LogDebug($"Execution ID: {ExecutionId}");
-                Logger.LogDebug($"Clean mode: {FileCleaner.CleanMode}");
                 Logger.LogInformation($"Absolute Execution Date/Time: {ExecutionDateTime.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)}");
                 Logger.LogInformation($"Configured Current Date/Time: {this.GetCurrentDateTime().ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)}");
+                Logger.LogInformation($"Minimum Configured Log Level: {Services.GetRequiredService<IOptions<LoggerFilterOptions>>().Value.MinLevel.ToString()}");
+                Logger.LogDebug($"Execution ID: {ExecutionId}");
+                Logger.LogDebug($"Clean mode: {FileCleaner.CleanMode}");
 
                 // Do a check for the same input/output path
                 if (FileSystem.InputPaths.Any(x => x.Equals(FileSystem.OutputPath)))

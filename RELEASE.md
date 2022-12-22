@@ -3,6 +3,7 @@
 - Fixed `ElseIf` when `Predicate.RequiresDocument` is false in `ExecuteIf` module (#255, #256, thanks @nils-a).
 - Adds the ability to configure a specific date/time as "current". All code and themes should now use `IExecutionState.GetCurrentDateTime()` instead of `DateTime.Now`, etc.
 - Removes console background color for better compatibility with different console themes (#257).
+- Outputs the configured log level on execution.
 
 # 1.0.0-beta.63
 
