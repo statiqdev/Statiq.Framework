@@ -422,7 +422,7 @@ namespace Statiq.Core
                 Logger.LogInformation($"Executing {ExecutingPipelines.Count} pipelines ({string.Join(", ", ExecutingPipelines.Keys.OrderBy(x => x))})");
                 Logger.LogInformation($"Absolute Execution Date/Time: {ExecutionDateTime.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)}");
                 Logger.LogInformation($"Configured Current Date/Time: {this.GetCurrentDateTime().ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)}");
-                Logger.LogInformation($"Minimum Configured Log Level: {Services.GetRequiredService<IOptions<LoggerFilterOptions>>().Value.MinLevel.ToString()}");
+                Logger.LogInformation($"Minimum Configured Log Level: {Services.GetService<IOptions<LoggerFilterOptions>>()?.Value.MinLevel.ToString() ?? "Not Configured"}");
                 Logger.LogDebug($"Execution ID: {ExecutionId}");
                 Logger.LogDebug($"Clean mode: {FileCleaner.CleanMode}");
 
