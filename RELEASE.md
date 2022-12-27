@@ -1,3 +1,7 @@
+# 1.0.0-beta.65
+
+- Added a `GenerateRedirects.AlwaysCreateAdditionalOutput()` method to allow creating additional redirect files even if no redirects are specified (I.e. if redirects are also being generated from another source).
+
 # 1.0.0-beta.64
 
 - Fixed `ElseIf` when `Predicate.RequiresDocument` is false in `ExecuteIf` module (#255, #256, thanks @nils-a).

@@ -443,6 +443,11 @@ namespace Statiq.Common
         public string ToDisplayString() => IsNull ? string.Empty : FullPath;
 
         /// <summary>
+        /// A display string that can be used for tracing that displays a custom message if the path is null.
+        /// </summary>
+        public string ToDisplayString(string nullText) => IsNull ? nullText : FullPath;
+
+        /// <summary>
         /// Returns a <see cref="string" /> that represents this path.
         /// </summary>
         /// <returns>

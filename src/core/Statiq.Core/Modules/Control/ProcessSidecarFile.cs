@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -69,6 +70,7 @@ namespace Statiq.Core
                 IFile sidecarFile = context.FileSystem.GetInputFile(sidecarPath);
                 if (sidecarFile.Exists)
                 {
+                    context.LogDebug($"Processing sidecar file {sidecarPath} for {input.Source.ToDisplayString("unknown")}");
                     IContentProvider sidecarContent = sidecarFile.GetContentProvider();
                     foreach (IDocument result in await context.ExecuteModulesAsync(Children, input.Clone(sidecarContent).Yield()))
                     {

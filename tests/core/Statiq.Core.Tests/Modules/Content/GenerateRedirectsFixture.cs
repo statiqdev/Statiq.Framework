@@ -179,7 +179,8 @@ namespace Statiq.Core.Tests.Modules.Contents
                 {
                     { Keys.RedirectFrom, new List<NormalizedPath> { new NormalizedPath("bar/baz.html") } }
                 });
-            GenerateRedirects redirect = new GenerateRedirects().WithAdditionalOutput(new NormalizedPath("a/b"), x => string.Join("|", x.Select(y => $"{y.Key} {y.Value}")));
+            GenerateRedirects redirect = new GenerateRedirects()
+                .WithAdditionalOutput(new NormalizedPath("a/b"), x => string.Join("|", x.Select(y => $"{y.Key} {y.Value}")));
 
             // When
             IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
@@ -214,6 +215,40 @@ namespace Statiq.Core.Tests.Modules.Contents
 
             // Then
             results.Select(x => x.Destination.FullPath).ShouldBe(new[] { "a/b" });
+        }
+
+        [Test]
+        public async Task ShouldNotGenerateAdditionalOutputIfNoRedirects()
+        {
+            // Given
+            TestDocument redirected1 = new TestDocument(new NormalizedPath("foo2.html"));
+            TestDocument redirected2 = new TestDocument(new NormalizedPath("fizz.html"));
+            GenerateRedirects redirect = new GenerateRedirects()
+                .WithAdditionalOutput(new NormalizedPath("a/b"), x => "foobar");
+
+            // When
+            IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
+
+            // Then
+            results.Select(x => x.Destination.FullPath).ShouldBeEmpty();
+        }
+
+        [Test]
+        public async Task ShouldGenerateAdditionalOutputIfNoRedirects()
+        {
+            // Given
+            TestDocument redirected1 = new TestDocument(new NormalizedPath("foo2.html"));
+            TestDocument redirected2 = new TestDocument(new NormalizedPath("fizz.html"));
+            GenerateRedirects redirect = new GenerateRedirects()
+                .WithAdditionalOutput(new NormalizedPath("a/b"), x => "foobar")
+                .AlwaysCreateAdditionalOutput();
+
+            // When
+            IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { redirected1, redirected2 }, redirect);
+
+            // Then
+            results.Select(x => x.Destination.FullPath).ShouldBe(new[] { "a/b" });
+            results.Single(x => x.Destination.FullPath == "a/b").Content.ShouldBe("foobar");
         }
 
         [Test]

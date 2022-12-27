@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -141,7 +142,19 @@ namespace Statiq.Core
             return null;
         }
 
-        protected override Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, NormalizedPath value) =>
-            Task.FromResult(value.IsNull ? input.Yield() : input.Clone(value).Yield());
+        protected override Task<IEnumerable<IDocument>> ExecuteConfigAsync(
+            IDocument input,
+            IExecutionContext context,
+            NormalizedPath value)
+        {
+            if (value.IsNull)
+            {
+                return Task.FromResult(input.Yield());
+            }
+
+            context.LogDebug(
+                $"Setting destination of {input.Source.ToDisplayString("null")} to {value.ToDisplayString("null")}");
+            return Task.FromResult(input.Clone(value).Yield());
+        }
     }
 }

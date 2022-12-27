@@ -37,6 +37,7 @@ namespace Statiq.Core
         private Config<IReadOnlyList<NormalizedPath>> _paths = Config.FromDocument<IReadOnlyList<NormalizedPath>>(Keys.RedirectFrom);
         private bool _metaRefreshPages = true;
         private bool _includeHost = false;
+        private bool _alwaysCreateAdditionalOutput = false;
 
         /// <summary>
         /// Controls where the redirected paths come from. By default, values from the metadata
@@ -92,6 +93,17 @@ namespace Statiq.Core
             return this;
         }
 
+        /// <summary>
+        /// Always creates any additional output documents even if there are no redirected paths.
+        /// </summary>
+        /// <param name="alwaysCreateAdditionalOutput"><c>true</c> to always create additional output documents.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateRedirects AlwaysCreateAdditionalOutput(bool alwaysCreateAdditionalOutput = true)
+        {
+            _alwaysCreateAdditionalOutput = alwaysCreateAdditionalOutput;
+            return this;
+        }
+
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
@@ -109,7 +121,7 @@ namespace Statiq.Core
             }
 
             // Generate other output documents if requested
-            if (redirects.Count > 0)
+            if (redirects.Count > 0 || _alwaysCreateAdditionalOutput)
             {
                 foreach (KeyValuePair<NormalizedPath, Func<IDictionary<NormalizedPath, string>, string>> additionalOutput in _additionalOutputs)
                 {
