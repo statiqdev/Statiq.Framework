@@ -1,6 +1,7 @@
 # 1.0.0-beta.65
 
 - Added a `GenerateRedirects.AlwaysCreateAdditionalOutput()` method to allow creating additional redirect files even if no redirects are specified (I.e. if redirects are also being generated from another source).
+- Added additional overloads to `GenerateRedirects.WithAdditionalOutput()` that can accept the execution context in the delegate and/or return a `Task`.
 
 # 1.0.0-beta.64
 

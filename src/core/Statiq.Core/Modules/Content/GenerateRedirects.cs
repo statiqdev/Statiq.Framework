@@ -31,8 +31,8 @@ namespace Statiq.Core
     /// <category name="Content" />
     public class GenerateRedirects : Module
     {
-        private readonly Dictionary<NormalizedPath, Func<IDictionary<NormalizedPath, string>, string>> _additionalOutputs =
-            new Dictionary<NormalizedPath, Func<IDictionary<NormalizedPath, string>, string>>();
+        private readonly Dictionary<NormalizedPath, Func<IDictionary<NormalizedPath, string>, IExecutionContext, Task<string>>> _additionalOutputs =
+            new Dictionary<NormalizedPath, Func<IDictionary<NormalizedPath, string>, IExecutionContext, Task<string>>>();
 
         private Config<IReadOnlyList<NormalizedPath>> _paths = Config.FromDocument<IReadOnlyList<NormalizedPath>>(Keys.RedirectFrom);
         private bool _metaRefreshPages = true;
@@ -81,7 +81,48 @@ namespace Statiq.Core
         /// <param name="content">A delegate that takes a dictionary with keys equal to each redirected file
         /// and values equal to the destination URL. The delegate should return the content of the output file.</param>
         /// <returns>The current module instance.</returns>
-        public GenerateRedirects WithAdditionalOutput(in NormalizedPath path, Func<IDictionary<NormalizedPath, string>, string> content)
+        public GenerateRedirects WithAdditionalOutput(
+            in NormalizedPath path,
+            Func<IDictionary<NormalizedPath, string>, string> content) =>
+            WithAdditionalOutput(path, (r, _) => Task.FromResult(content(r)));
+
+        /// <summary>
+        /// Adds additional output files that you specify by supplying a delegate that takes a dictionary
+        /// of redirected paths to destination URLs.
+        /// </summary>
+        /// <param name="path">The path of the output file (must be relative).</param>
+        /// <param name="content">A delegate that takes a dictionary with keys equal to each redirected file
+        /// and values equal to the destination URL. The delegate should return the content of the output file.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateRedirects WithAdditionalOutput(
+            in NormalizedPath path,
+            Func<IDictionary<NormalizedPath, string>, Task<string>> content) =>
+            WithAdditionalOutput(path, async (r, _) => await content(r));
+
+        /// <summary>
+        /// Adds additional output files that you specify by supplying a delegate that takes a dictionary
+        /// of redirected paths to destination URLs.
+        /// </summary>
+        /// <param name="path">The path of the output file (must be relative).</param>
+        /// <param name="content">A delegate that takes a dictionary with keys equal to each redirected file
+        /// and values equal to the destination URL. The delegate should return the content of the output file.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateRedirects WithAdditionalOutput(
+            in NormalizedPath path,
+            Func<IDictionary<NormalizedPath, string>, IExecutionContext, string> content) =>
+            WithAdditionalOutput(path, (r, c) => Task.FromResult(content(r, c)));
+
+        /// <summary>
+        /// Adds additional output files that you specify by supplying a delegate that takes a dictionary
+        /// of redirected paths to destination URLs.
+        /// </summary>
+        /// <param name="path">The path of the output file (must be relative).</param>
+        /// <param name="content">A delegate that takes a dictionary with keys equal to each redirected file
+        /// and values equal to the destination URL. The delegate should return the content of the output file.</param>
+        /// <returns>The current module instance.</returns>
+        public GenerateRedirects WithAdditionalOutput(
+            in NormalizedPath path,
+            Func<IDictionary<NormalizedPath, string>, IExecutionContext, Task<string>> content)
         {
             path.ThrowIfNull(nameof(path));
             content.ThrowIfNull(nameof(content));
@@ -123,9 +164,9 @@ namespace Statiq.Core
             // Generate other output documents if requested
             if (redirects.Count > 0 || _alwaysCreateAdditionalOutput)
             {
-                foreach (KeyValuePair<NormalizedPath, Func<IDictionary<NormalizedPath, string>, string>> additionalOutput in _additionalOutputs)
+                foreach (KeyValuePair<NormalizedPath, Func<IDictionary<NormalizedPath, string>, IExecutionContext, Task<string>>> additionalOutput in _additionalOutputs)
                 {
-                    string content = additionalOutput.Value(redirects);
+                    string content = await additionalOutput.Value(redirects, context);
                     if (!string.IsNullOrEmpty(content))
                     {
                         outputs.Add(
