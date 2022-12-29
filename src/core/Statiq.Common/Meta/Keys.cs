@@ -99,6 +99,14 @@ namespace Statiq.Common
         /// <summary>
         /// Allows you to set an alternate date/time that the engine will use as the current date/time.
         /// </summary>
+        /// <remarks>
+        /// Note that this can result in unexpected behavior when using write times or other variable
+        /// date/time values for documents (as Statiq Web does). For example, if you set this value
+        /// to a date in the past, any time you edit a file, the write time for that file will be set
+        /// to the current time and it will no longer be considered before your set
+        /// <see cref="CurrentDateTime"/> value. When using this setting, you should also set explicit
+        /// dates for all content where applicable (such as "Published" in Statiq Web).
+        /// </remarks>
         /// <type cref="DateTime" />
         public const string CurrentDateTime = nameof(CurrentDateTime);
 
