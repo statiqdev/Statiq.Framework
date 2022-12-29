@@ -29,6 +29,8 @@ namespace Statiq.Testing
 
         public bool Deployment { get; set; }
 
+        public bool PostProcessHasDependencies { get; set; }
+
         public ExecutionPolicy ExecutionPolicy { get; set; }
 
         public TestPipeline(params IModule[] processModules)

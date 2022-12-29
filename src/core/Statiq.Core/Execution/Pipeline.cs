@@ -59,6 +59,9 @@ namespace Statiq.Core
         public bool Deployment { get; set; }
 
         /// <inheritdoc/>
+        public bool PostProcessHasDependencies { get; set; }
+
+        /// <inheritdoc/>
         public ExecutionPolicy ExecutionPolicy { get; set; }
 
         /// <inheritdoc/>

@@ -85,10 +85,10 @@ namespace Statiq.Core
             // Only add from same deployment value pipelines (if a deployment pipeline, non-deployment phases were added above)
             if (_currentPhase.Phase == Phase.Process)
             {
-                HashSet<string> transitivePipelineDependencies = GatherProcessPhasePipelineDependencies(_currentPhase);
+                HashSet<string> transitiveProcessDependencies = GatherPipelineDependencies(_currentPhase, Phase.Process);
                 outputs.AddRange(_phaseResults
                     .Where(x => _pipelines[x.Key].Deployment == _currentPhase.Pipeline.Deployment)
-                    .Where(x => transitivePipelineDependencies.Contains(x.Key))
+                    .Where(x => transitiveProcessDependencies.Contains(x.Key))
                     .Select(x => KeyValuePair.Create(x.Key, GetOutputs(x.Value, Phase.Process))));
             }
 
@@ -99,6 +99,17 @@ namespace Statiq.Core
                 outputs.AddRange(_phaseResults
                     .Where(x => _pipelines[x.Key].Deployment == _currentPhase.Pipeline.Deployment)
                     .Select(x => KeyValuePair.Create(x.Key, GetOutputs(x.Value, Phase.Process))));
+
+                // Also add other post-process phases if the post-process dependencies flag is set
+                // Need to AddOrReplace existing outputs since we've already added some for process phases
+                if (_currentPhase.Pipeline.PostProcessHasDependencies)
+                {
+                    HashSet<string> transitivePostProcessDependencies = GatherPipelineDependencies(_currentPhase, Phase.PostProcess);
+                    outputs.AddOrReplaceRange(_phaseResults
+                        .Where(x => _pipelines[x.Key].Deployment == _currentPhase.Pipeline.Deployment)
+                        .Where(x => transitivePostProcessDependencies.Contains(x.Key))
+                        .Select(x => KeyValuePair.Create(x.Key, GetOutputs(x.Value, Phase.PostProcess))));
+                }
             }
 
             // If we're in the output phase non-deployment outputs were added above
@@ -119,16 +130,16 @@ namespace Statiq.Core
             return p == -1 ? DocumentList<IDocument>.Empty : phaseResults[p].Outputs.ToDocumentList();
         }
 
-        private HashSet<string> GatherProcessPhasePipelineDependencies(PipelinePhase phase, HashSet<string> transientDependencies = null)
+        private HashSet<string> GatherPipelineDependencies(
+            PipelinePhase currentPhase,
+            Phase dependentPhase,
+            HashSet<string> transientDependencies = null)
         {
-            if (transientDependencies is null)
-            {
-                transientDependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            }
-            foreach (PipelinePhase dependency in phase.Dependencies.Where(x => x.Phase == Phase.Process))
+            transientDependencies ??= new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (PipelinePhase dependency in currentPhase.Dependencies.Where(x => x.Phase == dependentPhase))
             {
                 transientDependencies.Add(dependency.PipelineName);
-                GatherProcessPhasePipelineDependencies(dependency, transientDependencies);
+                GatherPipelineDependencies(dependency, dependentPhase, transientDependencies);
             }
             return transientDependencies;
         }
@@ -184,7 +195,7 @@ namespace Statiq.Core
                 {
                     throw new InvalidOperationException($"Cannot access documents from currently executing pipeline {pipelineName} while in the {nameof(Phase.Process)} phase");
                 }
-                if (!GatherProcessPhasePipelineDependencies(_currentPhase).Contains(pipelineName))
+                if (!GatherPipelineDependencies(_currentPhase, Phase.Process).Contains(pipelineName))
                 {
                     throw new InvalidOperationException($"Cannot access documents from pipeline {pipelineName} without a dependency while in the {nameof(Phase.Process)} phase");
                 }

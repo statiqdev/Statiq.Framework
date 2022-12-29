@@ -1059,7 +1059,7 @@ namespace Statiq.Common
         public static bool ReplaceInvalidPathChars(in Span<char> path, char newChar = '-') =>
             path.Replace(Path.GetInvalidPathChars(), newChar);
 
-        public const string OptimizeFileNameReservedChars = "_~:/\\?#[]@!$&'()*+;=};,";
+        public const string OptimizeFileNameReservedChars = "_~:/\\?#[]@!$&'()*+={};,";
 
         public static string OptimizeFileName(
             string fileName,

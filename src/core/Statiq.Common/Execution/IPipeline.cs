@@ -45,6 +45,9 @@ namespace Statiq.Common
         new bool Deployment { get; set; }
 
         /// <inheritdoc/>
+        new bool PostProcessHasDependencies { get; set; }
+
+        /// <inheritdoc/>
         new ExecutionPolicy ExecutionPolicy { get; set; }
     }
 }

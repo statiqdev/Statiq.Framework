@@ -723,12 +723,14 @@ namespace Statiq.Core
             // Make a pass through non-isolated post-process phases to set dependencies to all non-isolated process phases
             foreach (PipelinePhases pipelinePhases in phasesByPipeline.Values.Where(x => !x.Pipeline.Isolated))
             {
-                // We only need to add phases from other pipelines with same deployment setting since deployment pipeline input
-                // phases are dependent on non-deloyment pipeline output phases below (I.e. deployment pipelines won't execute *any*
-                // phases until all non-deployment pipelines are completely done)
+                // We only need to add process phases from other pipelines with same deployment setting
                 pipelinePhases.PostProcess.Dependencies =
                     pipelinePhases.PostProcess.Dependencies
-                        .Concat(phasesByPipeline.Values.Where(x => x != pipelinePhases && !x.Pipeline.Isolated && pipelinePhases.Pipeline.Deployment == x.Pipeline.Deployment).Select(x => x.Process))
+                        .Concat(phasesByPipeline.Values
+                            .Where(x => x != pipelinePhases // ...it's not the same pipeline
+                                && !x.Pipeline.Isolated // ...and it's not isolated
+                                && pipelinePhases.Pipeline.Deployment == x.Pipeline.Deployment) // ...and it's the same deployment setting
+                            .Select(x => x.Process))
                         .ToArray();
             }
 
@@ -783,6 +785,7 @@ namespace Statiq.Core
                 {
                     // Visit dependencies if this isn't an isolated pipeline
                     List<PipelinePhase> processDependencies = new List<PipelinePhase>();
+                    List<PipelinePhase> postProcessDependencies = new List<PipelinePhase>();
                     foreach (string dependencyName in pipeline.GetAllDependencies(pipelines))
                     {
                         if (!pipelines.TryGetValue(dependencyName, out IPipeline dependency))
@@ -800,7 +803,15 @@ namespace Statiq.Core
                             throw new PipelineException($"Non-deployment pipeline {name} cannot have a dependency on deployment pipeline {dependencyName}");
                         }
 
-                        processDependencies.Add(Visit(dependencyName, dependency).Process);
+                        // Add process phase dependencies to the process phase of all dependencies
+                        // and add post-process phase dependencies to the post-process phase of all dependencies if
+                        // the post-process dependency flag is set
+                        PipelinePhases dependencyPhases = Visit(dependencyName, dependency);
+                        processDependencies.Add(dependencyPhases.Process);
+                        if (pipeline.PostProcessHasDependencies)
+                        {
+                            postProcessDependencies.Add(dependencyPhases.PostProcess);
+                        }
                     }
 
                     // Add the phases (by this time all dependencies should have been added)
@@ -808,12 +819,14 @@ namespace Statiq.Core
 
                     pipelinePhases.Input = new PipelinePhase(pipeline, name, Phase.Input, pipeline.InputModules, logger);
 
-                    // Makes sure the process phase is also dependent on it's input phase
+                    // Makes sure the process phase is also dependent on it's own pipeline's input phase
                     processDependencies.Insert(0, pipelinePhases.Input);
                     pipelinePhases.Process = new PipelinePhase(pipeline, name, Phase.Process, pipeline.ProcessModules, logger, processDependencies.ToArray());
 
-                    // Post-process dependencies will be added after all pipelines have been processed
-                    pipelinePhases.PostProcess = new PipelinePhase(pipeline, name, Phase.PostProcess, pipeline.PostProcessModules, logger, pipelinePhases.Process);
+                    // Post-process dependencies to all process phases will be added after all pipelines have been processed
+                    // Make sure the post-process phase is also dependent on it's own pipeline's process phase
+                    postProcessDependencies.Insert(0, pipelinePhases.Process);
+                    pipelinePhases.PostProcess = new PipelinePhase(pipeline, name, Phase.PostProcess, pipeline.PostProcessModules, logger, postProcessDependencies.ToArray());
 
                     // The output phase is dependent on it's post-process phase
                     pipelinePhases.Output = new PipelinePhase(pipeline, name, Phase.Output, pipeline.OutputModules, logger, pipelinePhases.PostProcess);

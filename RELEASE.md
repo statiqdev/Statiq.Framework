@@ -1,5 +1,6 @@
 # 1.0.0-beta.65
 
+- Added a new pipeline `PostProcessHasDependencies` property that indicates the post-process phase of a pipeline should depend on the post-process phase(s) of the pipeline dependencies. This is helpful in certain situations where you need a pipeline to run after other post-process phases from dependencies.
 - Added a `GenerateRedirects.AlwaysCreateAdditionalOutput()` method to allow creating additional redirect files even if no redirects are specified (I.e. if redirects are also being generated from another source).
 - Added additional overloads to `GenerateRedirects.WithAdditionalOutput()` that can accept the execution context in the delegate and/or return a `Task`.
 

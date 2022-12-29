@@ -43,6 +43,12 @@ namespace Statiq.Common
             set => Pipeline.Deployment = value;
         }
 
+        public bool PostProcessHasDependencies
+        {
+            get => Pipeline.PostProcessHasDependencies;
+            set => Pipeline.PostProcessHasDependencies = value;
+        }
+
         public ExecutionPolicy ExecutionPolicy
         {
             get => Pipeline.ExecutionPolicy;

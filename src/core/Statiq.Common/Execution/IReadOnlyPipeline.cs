@@ -32,6 +32,25 @@ namespace Statiq.Common
         bool Deployment { get; }
 
         /// <summary>
+        /// Indicates that the post-process phase of this pipeline should have
+        /// dependencies on the post-process phase(s) of it's dependencies.
+        /// </summary>
+        /// <remarks>
+        /// Normally all post-process phases are executed concurrently after
+        /// all process phases have completed. This also means that a post-process
+        /// phase can access documents from the process phase of any pipeline (other
+        /// than those with <see cref="Isolated"/> set to <c>true</c>) but not
+        /// from the post-process phase in other pipelines. Sometimes it can be
+        /// helpful for the post-process phase of a pipeline to itself have a
+        /// dependency on the post-process phase of it's pipeline dependencies.
+        /// Setting this to <c>true</c> will cause the post-process phase of this
+        /// pipeline to wait to execute until all post-process phases of it's
+        /// dependencies have completed, and will allow it to access documents
+        /// from those post-process phases.
+        /// </remarks>
+        bool PostProcessHasDependencies { get; }
+
+        /// <summary>
         /// Indicates when the pipeline is executed.
         /// </summary>
         ExecutionPolicy ExecutionPolicy { get; }

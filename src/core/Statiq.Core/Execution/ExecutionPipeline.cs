@@ -73,6 +73,9 @@ namespace Statiq.Core
         public virtual bool Deployment { get; set; }
 
         /// <inheritdoc/>
+        public virtual bool PostProcessHasDependencies { get; set; }
+
+        /// <inheritdoc/>
         public virtual ExecutionPolicy ExecutionPolicy { get; set; }
 
         protected sealed override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context) =>
