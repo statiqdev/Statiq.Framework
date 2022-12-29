@@ -203,6 +203,12 @@ namespace Statiq.App
             return this;
         }
 
+        public PipelineBuilder AsPostProcessHasDependencies(bool postProcessHasDependencies = true)
+        {
+            _actions.Add(x => x.AsPostProcessHasDependencies(postProcessHasDependencies));
+            return this;
+        }
+
         public PipelineBuilder WithExecutionPolicy(ExecutionPolicy policy)
         {
             _actions.Add(x => x.WithExecutionPolicy(policy));

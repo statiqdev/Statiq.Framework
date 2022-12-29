@@ -104,6 +104,13 @@ namespace Statiq.Common
             return pipeline;
         }
 
+        public static TPipeline AsPostProcessHasDependencies<TPipeline>(this TPipeline pipeline, bool postProcessHasDependencies = true)
+            where TPipeline : IPipeline
+        {
+            pipeline.PostProcessHasDependencies = postProcessHasDependencies;
+            return pipeline;
+        }
+
         public static TPipeline WithExecutionPolicy<TPipeline>(this TPipeline pipeline, ExecutionPolicy policy)
             where TPipeline : IPipeline
         {
