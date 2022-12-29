@@ -405,6 +405,84 @@ namespace Statiq.Core.Tests.Execution
                     .Select(x => (x.PipelineName, x.Phase))
                     .ShouldBeEmpty();
             }
+
+            [Test]
+            public void ShouldAddProcessDependenciesToPostProcess()
+            {
+                // Given
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                pipelines.Add("Bar", new TestPipeline
+                {
+                    Dependencies = new HashSet<string>(new[] { "Foo" })
+                });
+                pipelines.Add("Foo", new TestPipeline());
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
+
+                // When
+                PipelinePhase[] phases = Engine.GetPipelinePhases(pipelines, logger);
+
+                // Then
+                phases.Select(x => (x.PipelineName, x.Phase)).ShouldBe(new (string, Phase)[]
+                {
+                    ("Foo", Phase.Input),
+                    ("Foo", Phase.Process),
+                    ("Bar", Phase.Input),
+                    ("Bar", Phase.Process),
+                    ("Foo", Phase.PostProcess),
+                    ("Foo", Phase.Output),
+                    ("Bar", Phase.PostProcess),
+                    ("Bar", Phase.Output),
+                });
+                phases.Single(x => x.PipelineName == "Bar" && x.Phase == Phase.PostProcess).Dependencies
+                    .Select(x => (x.PipelineName, x.Phase))
+                    .ShouldBe(
+                        new (string, Phase)[]
+                        {
+                            ("Bar", Phase.Process),
+                            ("Foo", Phase.Process)
+                        },
+                        true);
+            }
+
+            [Test]
+            public void ShouldAddPostProcessDependencyToPostProcess()
+            {
+                // Given
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                pipelines.Add("Bar", new TestPipeline
+                {
+                    PostProcessHasDependencies = true,
+                    Dependencies = new HashSet<string>(new[] { "Foo" })
+                });
+                pipelines.Add("Foo", new TestPipeline());
+                ILogger logger = new TestLoggerProvider().CreateLogger(null);
+
+                // When
+                PipelinePhase[] phases = Engine.GetPipelinePhases(pipelines, logger);
+
+                // Then
+                phases.Select(x => (x.PipelineName, x.Phase)).ShouldBe(new (string, Phase)[]
+                {
+                    ("Foo", Phase.Input),
+                    ("Foo", Phase.Process),
+                    ("Bar", Phase.Input),
+                    ("Bar", Phase.Process),
+                    ("Foo", Phase.PostProcess),
+                    ("Foo", Phase.Output),
+                    ("Bar", Phase.PostProcess),
+                    ("Bar", Phase.Output),
+                });
+                phases.Single(x => x.PipelineName == "Bar" && x.Phase == Phase.PostProcess).Dependencies
+                    .Select(x => (x.PipelineName, x.Phase))
+                    .ShouldBe(
+                        new (string, Phase)[]
+                        {
+                            ("Bar", Phase.Process),
+                            ("Foo", Phase.Process),
+                            ("Foo", Phase.PostProcess)
+                        },
+                        true);
+            }
         }
 
         public class GetServiceTests : EngineFixture

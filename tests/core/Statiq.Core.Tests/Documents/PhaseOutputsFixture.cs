@@ -185,6 +185,59 @@ namespace Statiq.Core.Tests.Documents
                 // Then
                 result.ShouldBe(new[] { b1, b2 }, true);
             }
+
+            [Test]
+            public void PostProcessPhaseDoesNotGetDocumentsFromTransientDependencies()
+            {
+                // Given
+                TestDocument a1 = new TestDocument((NormalizedPath)"a1", "a1");
+                TestDocument b1 = new TestDocument((NormalizedPath)"b1", "b1");
+                TestDocument b2 = new TestDocument((NormalizedPath)"b2", "b2");
+                TestDocument c1 = new TestDocument((NormalizedPath)"c1", "c1");
+                ConcurrentDictionary<string, PhaseResult[]> phaseResults =
+                    new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                PipelinePhase phaseA =
+                    GetPipelineAndPhase("A", Phase.PostProcess, pipelines, phaseResults, new[] { a1 }, Phase.PostProcess);
+                PipelinePhase phaseB =
+                    GetPipelineAndPhase("B", Phase.PostProcess, pipelines, phaseResults, new[] { b1, b2 }, Phase.PostProcess, phaseA);
+                PipelinePhase phaseC =
+                    GetPipelineAndPhase("C", Phase.PostProcess, pipelines, phaseResults, new[] { c1 }, Phase.PostProcess, phaseB);
+                PhaseOutputs documentCollection = new PhaseOutputs(phaseResults, phaseC, pipelines);
+
+                // When
+                IDocument[] result = documentCollection.ToArray();
+
+                // Then
+                result.Select(x => x.Source).ShouldBeEmpty();
+            }
+
+            [Test]
+            public void PostProcessHasDependenciesPhaseGetsDocumentsFromTransientDependencies()
+            {
+                // Given
+                TestDocument a1 = new TestDocument((NormalizedPath)"a1", "a1");
+                TestDocument b1 = new TestDocument((NormalizedPath)"b1", "b1");
+                TestDocument b2 = new TestDocument((NormalizedPath)"b2", "b2");
+                TestDocument c1 = new TestDocument((NormalizedPath)"c1", "c1");
+                ConcurrentDictionary<string, PhaseResult[]> phaseResults =
+                    new ConcurrentDictionary<string, PhaseResult[]>(StringComparer.OrdinalIgnoreCase);
+                IPipelineCollection pipelines = new TestPipelineCollection();
+                PipelinePhase phaseA =
+                    GetPipelineAndPhase("A", Phase.PostProcess, pipelines, phaseResults, new[] { a1 }, Phase.PostProcess);
+                PipelinePhase phaseB =
+                    GetPipelineAndPhase("B", Phase.PostProcess, pipelines, phaseResults, new[] { b1, b2 }, Phase.PostProcess, phaseA);
+                PipelinePhase phaseC =
+                    GetPipelineAndPhase("C", Phase.PostProcess, pipelines, phaseResults, new[] { c1 }, Phase.PostProcess, phaseB);
+                phaseC.Pipeline.PostProcessHasDependencies = true;
+                PhaseOutputs documentCollection = new PhaseOutputs(phaseResults, phaseC, pipelines);
+
+                // When
+                IDocument[] result = documentCollection.ToArray();
+
+                // Then
+                result.Select(x => x.Source).ShouldBe(new NormalizedPath[] { "/input/a1", "/input/b1", "/input/b2" }, true);
+            }
         }
 
         public class ExceptPipelineTests : PhaseOutputsFixture
