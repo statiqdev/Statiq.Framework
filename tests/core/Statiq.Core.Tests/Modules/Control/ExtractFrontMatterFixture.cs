@@ -122,6 +122,127 @@ Content2");
             }
 
             [Test]
+            public async Task DelimiterWithNewLineTreatsAsFrontMatter()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"FM1
+FM2
+---
+")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
+                {
+                    frontMatterContent = await x.GetContentStringAsync();
+                    return new[] { x };
+                })));
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"FM1
+FM2
+");
+                (await documents.First().GetContentStringAsync()).ShouldBeEmpty();
+            }
+
+            [Test]
+            public async Task DelimiterOnLastLineTreatsAsFrontMatter()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"FM1
+FM2
+---")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
+                {
+                    frontMatterContent = await x.GetContentStringAsync();
+                    return new[] { x };
+                })));
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBe(
+                    @"FM1
+FM2
+");
+                (await documents.First().GetContentStringAsync()).ShouldBeEmpty();
+            }
+
+            [Test]
+            public async Task DelimiterFollowedByJunkIsNotFrontMatter()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"FM1
+FM2
+---foo")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
+                {
+                    frontMatterContent = await x.GetContentStringAsync();
+                    return new[] { x };
+                })));
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBeNull();
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"FM1
+FM2
+---foo");
+            }
+
+            [Test]
+            public async Task DelimiterPrecededByJunkIsNotFrontMatter()
+            {
+                // Given
+                TestExecutionContext context = new TestExecutionContext();
+                TestDocument[] inputs =
+                {
+                    new TestDocument(@"FM1
+FM2
+foo---")
+                };
+                string frontMatterContent = null;
+                ExtractFrontMatter frontMatter = new ExtractFrontMatter(new ExecuteConfig(Config.FromDocument(async x =>
+                {
+                    frontMatterContent = await x.GetContentStringAsync();
+                    return new[] { x };
+                })));
+
+                // When
+                IEnumerable<IDocument> documents = await ExecuteAsync(inputs, context, frontMatter);
+
+                // Then
+                documents.Count().ShouldBe(1);
+                frontMatterContent.ShouldBeNull();
+                (await documents.First().GetContentStringAsync()).ShouldBe(
+                    @"FM1
+FM2
+foo---");
+            }
+
+            [Test]
             public async Task DashStringDoesNotSplitAtNonmatchingDashes()
             {
                 // Given

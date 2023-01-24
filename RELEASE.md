@@ -1,3 +1,7 @@
+# 1.0.0-beta.66
+
+- Fixed a bug in `ExtractFrontMatter` to ensure front matter is extracted when the delimiter is on the last line of the file. 
+
 # 1.0.0-beta.65
 
 - Added a new pipeline `PostProcessHasDependencies` property that indicates the post-process phase of a pipeline should depend on the post-process phase(s) of the pipeline dependencies. This is helpful in certain situations where you need a pipeline to run after other post-process phases from dependencies.

@@ -348,7 +348,7 @@ namespace Statiq.Core
             {
                 regexBuilder.Append("+");
             }
-            regexBuilder.Append(@"[^\S\n]*$\r?\n)");
+            regexBuilder.Append(@"[^\S\n]*$(\r?\n)?)");
 
             return regexBuilder.ToString();
         }
