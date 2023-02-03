@@ -1,3 +1,7 @@
+# 1.0.0-beta.67
+
+- Fixed a bug that still resulted in file cleaning even when `CleanMode.None` is set (I.e. `--noclean`).
+
 # 1.0.0-beta.66
 
 - Fixed a bug in `ExtractFrontMatter` to ensure front matter is extracted when the delimiter is on the last line of the file. 

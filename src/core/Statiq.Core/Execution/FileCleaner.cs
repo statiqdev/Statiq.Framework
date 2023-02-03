@@ -52,13 +52,16 @@ namespace Statiq.Core
             }
 
             // Clean if we need to
-            if (CleanMode == CleanMode.Full || _firstExecution)
+            if (CleanMode != CleanMode.None)
             {
-                CleanDirectory(_fileSystem.GetOutputDirectory(), "output");
-            }
-            else if (CleanMode == CleanMode.Self)
-            {
-                CleanSelf();
+                if (CleanMode == CleanMode.Full || _firstExecution)
+                {
+                    CleanDirectory(_fileSystem.GetOutputDirectory(), "output");
+                }
+                else if (CleanMode == CleanMode.Self)
+                {
+                    CleanSelf();
+                }
             }
 
             _firstExecution = false;
