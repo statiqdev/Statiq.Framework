@@ -113,6 +113,24 @@ namespace Statiq.Razor.Tests
                     writer.ToString().ShouldBe(@"<a href=""/a/b/c?abc=123#xyz"">Foo</a>");
                 }
             }
+
+            [Test]
+            public void LinkFromMarkdown()
+            {
+                // Given
+                TestDocument document = new TestDocument(new NormalizedPath("a/b/c"));
+                IHtmlHelper htmlHelper = new TestHtmlHelper();
+
+                // When
+                IHtmlContent result = htmlHelper.DocumentLink(document, "abc=123&amp;xyz=456", "Foo");
+
+                // Then
+                using (StringWriter writer = new StringWriter())
+                {
+                    result.WriteTo(writer, HtmlEncoder.Default);
+                    writer.ToString().ShouldBe(@"<a href=""/a/b/c?abc=123&amp;xyz=456"">Foo</a>");
+                }
+            }
         }
 
         public class CachedPartialTests : IHtmlHelperExtensionsFixture
