@@ -201,6 +201,46 @@ the family Rosaceae.</dd>
             }
 
             [Test]
+            public async Task ShouldEscapeAtWhenOverriddenByMetadata()
+            {
+                // Given
+                const string input = "Looking @Good, @Man!";
+                const string output = @"<p>Looking &#64;Good, &#64;Man!</p>
+";
+                TestDocument document = new TestDocument(input)
+                {
+                    { MarkdownKeys.EscapeAtInMarkdown, true }
+                };
+                RenderMarkdown markdown = new RenderMarkdown().EscapeAt(false);
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
+            public async Task ShouldNotEscapeAtWhenOverriddenByMetadata()
+            {
+                // Given
+                const string input = "Looking @Good, @Man!";
+                const string output = @"<p>Looking @Good, @Man!</p>
+";
+                TestDocument document = new TestDocument(input)
+                {
+                    { MarkdownKeys.EscapeAtInMarkdown, false }
+                };
+                RenderMarkdown markdown = new RenderMarkdown().EscapeAt();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            [Test]
             public async Task ShouldNotEscapeAtWhenEscapedBySlash()
             {
                 // Given

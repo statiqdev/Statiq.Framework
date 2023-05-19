@@ -1,7 +1,8 @@
 # 1.0.0-beta.67
 
 - Fixed a bug that still resulted in file cleaning even when `CleanMode.None` is set (I.e. `--noclean`).
-- `RenderMarkdown` no longer escapes `@` characters inside `mailto` links (#254). 
+- `RenderMarkdown` no longer escapes `@` characters inside `mailto` links (#254).
+- Added a `EscapeAtInMarkdown` setting that can control `@` escaping in Markdown files by the `RenderMarkdown` module on a file-by-file basis (#254).
 
 # 1.0.0-beta.66
 
