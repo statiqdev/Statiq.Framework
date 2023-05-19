@@ -1,6 +1,7 @@
 # 1.0.0-beta.67
 
 - Fixed a bug that still resulted in file cleaning even when `CleanMode.None` is set (I.e. `--noclean`).
+- `RenderMarkdown` no longer escapes `@` characters inside `mailto` links (#254). 
 
 # 1.0.0-beta.66
 

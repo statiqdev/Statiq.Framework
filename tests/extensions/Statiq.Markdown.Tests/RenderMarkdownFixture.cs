@@ -144,7 +144,7 @@ the family Rosaceae.</p>
             }
 
             [Test]
-            public async Task DoesRenderDefintionListWithSpecificConfiguration()
+            public async Task DoesRenderDefinitionListWithSpecificConfiguration()
             {
                 // Given
                 const string input = @"Apple
@@ -405,6 +405,24 @@ Looking @Good, \@Man!
 ```";
                 const string output = @"<pre><code>Looking &#64;Good, @Man!
 </code></pre>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
+
+            // Very special exception since mailto seems to be one place where escaping is universally bad
+            [Test]
+            public async Task ShouldNotEscapeAtInMailToLink()
+            {
+                // Given
+                const string input = "<div>Looking <a href=\"mailto:foo@bar.com\">Good</a>, @Man!</div>";
+                const string output = @"<div>Looking <a href=""mailto:foo@bar.com"">Good</a>, &#64;Man!</div>
 ";
                 TestDocument document = new TestDocument(input);
                 RenderMarkdown markdown = new RenderMarkdown();
