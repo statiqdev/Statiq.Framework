@@ -92,10 +92,16 @@ namespace Statiq.App
             }
             catch (Exception ex)
             {
+                // If this was a cancellation, check if it was due to a timeout or an actual cancellation
                 if (ex is OperationCanceledException)
                 {
-                    // No log message for cancellation
-                    return ExitCode.OperationCanceled;
+                    // Was this a "true" cancellation of the engine?
+                    if (Engine.CancellationToken.IsCancellationRequested)
+                    {
+                        _logger.LogInformation("Exited due to engine cancellation request");
+                        return ExitCode.OperationCanceled;
+                    }
+                    _logger.LogCritical("Operation/task timeout occurred or internal cancellation was triggered, inner exception(s) follow (if available)");
                 }
 
                 // Log exceptions not already logged (including those thrown by the engine directly)

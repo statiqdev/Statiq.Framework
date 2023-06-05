@@ -1,6 +1,7 @@
 # 1.0.0-beta.68
 
 - Improved the `HttpClient.SendWithRetryAsync()` extension to log retries at the information level since they may indicate other problems, and to retry during internal `HttpClient` timeouts.
+- Improved exception logging to the console by making sure internal cancellations and timeout exceptions are logged (previously they were silent, which could create the impression nothing went wrong).
 
 # 1.0.0-beta.67
 
