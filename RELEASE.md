@@ -1,3 +1,7 @@
+# 1.0.0-beta.68
+
+- Improved the `HttpClient.SendWithRetryAsync()` extension to log retries at the information level since they may indicate other problems, and to retry during internal `HttpClient` timeouts.
+
 # 1.0.0-beta.67
 
 - Fixed a bug that still resulted in file cleaning even when `CleanMode.None` is set (I.e. `--noclean`).
