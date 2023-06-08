@@ -1,3 +1,7 @@
+# 1.0.0-beta.69
+
+- Added a configurator for the `IEngineManager` and a corresponding bootstrapper `ConfigureEngineManager()` extension method to allow customizing the engine manager used in most commands just prior to it executing the engine (useful for last-minute pipeline customization and some other niche use cases).
+
 # 1.0.0-beta.68
 
 - Improved the `HttpClient.SendWithRetryAsync()` extension to log retries at the information level since they may indicate other problems, and to retry during internal `HttpClient` timeouts.

@@ -26,6 +26,8 @@ namespace Statiq.App
             IServiceCollection serviceCollection,
             Bootstrapper bootstrapper)
         {
+            Bootstrapper = bootstrapper;
+
             // Get the standard input stream
             string input = null;
             if (commandSettings?.StdIn == true)
@@ -78,6 +80,8 @@ namespace Statiq.App
             _logger.LogInformation($"Cache path:{Environment.NewLine}       {Engine.FileSystem.CachePath}");
         }
 
+        public IBootstrapper Bootstrapper { get; set; }
+
         public Engine Engine { get; }
 
         public string[] Pipelines { get; set; }
@@ -86,6 +90,11 @@ namespace Statiq.App
 
         public async Task<ExitCode> ExecuteAsync(CancellationTokenSource cancellationTokenSource)
         {
+            // Provide a chance to configure the engine manager, which is mainly useful for tweaking
+            // the pipelines and/or engine right before executing
+            Bootstrapper.Configurators.Configure<IEngineManager>(this);
+
+            // Execute the engine and log all errors (including cancellation requests)
             try
             {
                 await Engine.ExecuteAsync(Pipelines, NormalPipelines, cancellationTokenSource?.Token ?? CancellationToken.None);
