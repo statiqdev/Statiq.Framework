@@ -874,6 +874,30 @@ End";
                 // Then
                 result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
             }
+
+            // Older versions of Markdig had a problem related to this pattern, see
+            // https://github.com/statiqdev/Statiq.Framework/issues/267
+            [Test]
+            public async Task ShouldCorrectlyRenderAltTextWithFollowingText()
+            {
+                // Given
+                const string input = @"![alt text][fastcar2]
+
+[fastcar2]: img/car.jfif ""VROOM""
+
+any arbitrary text";
+                const string output = @"<p><img src=""img/car.jfif"" alt=""alt text"" title=""VROOM"" /></p>
+<p>any arbitrary text</p>
+";
+                TestDocument document = new TestDocument(input);
+                RenderMarkdown markdown = new RenderMarkdown();
+
+                // When
+                TestDocument result = await ExecuteAsync(document, markdown).SingleAsync();
+
+                // Then
+                result.Content.ShouldBe(output, StringCompareShould.IgnoreLineEndings);
+            }
         }
     }
 }

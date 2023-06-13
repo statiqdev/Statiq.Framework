@@ -1,3 +1,7 @@
+# 1.0.0-beta.70
+
+- Updated Markdig to 0.31.0 to fix an upstream bug when using alt text on images (https://github.com/statiqdev/Statiq.Framework/issues/267).
+
 # 1.0.0-beta.69
 
 - Added a configurator for the `IEngineManager` and a corresponding bootstrapper `ConfigureEngineManager()` extension method to allow customizing the engine manager used in most commands just prior to it executing the engine (useful for last-minute pipeline customization and some other niche use cases).
