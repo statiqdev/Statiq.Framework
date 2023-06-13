@@ -1,6 +1,11 @@
 # 1.0.0-beta.70
 
-- Updated Markdig to 0.31.0 to fix an upstream bug when using alt text on images (https://github.com/statiqdev/Statiq.Framework/issues/267).
+- Updated Markdig to 0.31.0 to fix an upstream bug when using alt text on images (#267).
+- Updated Spectre.Console (#247, thanks @devlead).
+- Updated JavaScriptEngineSwitcher (#246, thanks @devlead).
+- Updated Microsoft.Data.SqlClient (#248, thanks @devlead).
+- Updated System.Linq.Async (#249, thanks @devlead).
+- Updated YamlDotNet (#263, thanks @NikoMix).
 
 # 1.0.0-beta.69
 
