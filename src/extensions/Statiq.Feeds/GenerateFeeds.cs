@@ -8,6 +8,7 @@ using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using AngleSharp.Html;
+using Microsoft.Extensions.Logging;
 using Statiq.Common;
 using Statiq.Feeds.Syndication;
 using IDocument = Statiq.Common.IDocument;
@@ -433,6 +434,13 @@ namespace Statiq.Feeds
                 { FeedKeys.Image, feed.ImageLink },
                 { FeedKeys.Copyright, feed.Copyright }
             };
+
+            // Display a warning if no host is specified
+            if (!feed.Link.IsAbsoluteUri)
+            {
+                context.LogWarning("Feed is missing absolute link and will not validate according to the W3C criteria, "
+                    + "consider specifying a feed link directly or by using the Host setting");
+            }
 
             // Sort the items and take the maximum items
             List<(IDocument, DateTime?)> items = new List<(IDocument, DateTime?)>();

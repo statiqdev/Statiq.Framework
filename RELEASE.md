@@ -8,6 +8,7 @@
 - Updated YamlDotNet (#263, thanks @NikoMix).
 - Updated NetEscapades.Configuration.Yaml in reaction to update to YamlDotNet.
 - Ensures that the `GenerateFeeds` module always sets a feed title, even if one isn't provided.
+- Added a warning to `GenerateFeeds` if a feed link isn't set, either through the `Host` setting or otherwise.
 
 # 1.0.0-beta.69
 
