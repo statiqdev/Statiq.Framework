@@ -6,6 +6,7 @@
 - Updated Microsoft.Data.SqlClient (#248, thanks @devlead).
 - Updated System.Linq.Async (#249, thanks @devlead).
 - Updated YamlDotNet (#263, thanks @NikoMix).
+- Updated NetEscapades.Configuration.Yaml in reaction to update to YamlDotNet.
 
 # 1.0.0-beta.69
 
