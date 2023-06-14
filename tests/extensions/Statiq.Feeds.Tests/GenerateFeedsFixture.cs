@@ -62,6 +62,105 @@ namespace Statiq.Feeds.Tests
             }
 
             [Test]
+            public async Task ShouldSetFeedTitleFromMetadata()
+            {
+                // Given
+                TestDocument a = new TestDocument(new NormalizedPath("a.txt"))
+                {
+                    { FeedKeys.Title, "A" },
+                    { FeedKeys.Published, new DateTime(2010, 1, 1) }
+                };
+                TestDocument b = new TestDocument(new NormalizedPath("b.txt"))
+                {
+                    { FeedKeys.Title, "B" },
+                    { FeedKeys.Published, new DateTime(2010, 2, 1) }
+                };
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings[FeedKeys.Title] = "My Feed";
+                GenerateFeeds module = new GenerateFeeds();
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, context, module);
+
+                // Then
+                TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
+                result.Content.ShouldContain("<title>My Feed</title>");
+            }
+
+            [Test]
+            public async Task ShouldSetDefaultFeedTitleIfNoMetadata()
+            {
+                // Given
+                TestDocument a = new TestDocument(new NormalizedPath("a.txt"))
+                {
+                    { FeedKeys.Title, "A" },
+                    { FeedKeys.Published, new DateTime(2010, 1, 1) }
+                };
+                TestDocument b = new TestDocument(new NormalizedPath("b.txt"))
+                {
+                    { FeedKeys.Title, "B" },
+                    { FeedKeys.Published, new DateTime(2010, 2, 1) }
+                };
+                GenerateFeeds module = new GenerateFeeds();
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
+
+                // Then
+                TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
+                result.Content.ShouldContain("<title>Feed</title>");
+            }
+
+            [Test]
+            public async Task ShouldSetFeedTitleFromFluentMethod()
+            {
+                // Given
+                TestDocument a = new TestDocument(new NormalizedPath("a.txt"))
+                {
+                    { FeedKeys.Title, "A" },
+                    { FeedKeys.Published, new DateTime(2010, 1, 1) }
+                };
+                TestDocument b = new TestDocument(new NormalizedPath("b.txt"))
+                {
+                    { FeedKeys.Title, "B" },
+                    { FeedKeys.Published, new DateTime(2010, 2, 1) }
+                };
+                GenerateFeeds module = new GenerateFeeds().WithFeedTitle("Best Feed");
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
+
+                // Then
+                TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
+                result.Content.ShouldContain("<title>Best Feed</title>");
+            }
+
+            [TestCase(null)]
+            [TestCase("")]
+            public async Task ShouldSetDefaultFeedTitleIfNullOrEmptyFluentTitle(string feedTitle)
+            {
+                // Given
+                TestDocument a = new TestDocument(new NormalizedPath("a.txt"))
+                {
+                    { FeedKeys.Title, "A" },
+                    { FeedKeys.Published, new DateTime(2010, 1, 1) }
+                };
+                TestDocument b = new TestDocument(new NormalizedPath("b.txt"))
+                {
+                    { FeedKeys.Title, "B" },
+                    { FeedKeys.Published, new DateTime(2010, 2, 1) }
+                };
+                GenerateFeeds module = new GenerateFeeds().WithFeedTitle(feedTitle);
+
+                // When
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
+
+                // Then
+                TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
+                result.Content.ShouldContain("<title>Feed</title>");
+            }
+
+            [Test]
             public async Task PreservesInputOrder()
             {
                 // Given

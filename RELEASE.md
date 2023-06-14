@@ -7,6 +7,7 @@
 - Updated System.Linq.Async (#249, thanks @devlead).
 - Updated YamlDotNet (#263, thanks @NikoMix).
 - Updated NetEscapades.Configuration.Yaml in reaction to update to YamlDotNet.
+- Ensures that the `GenerateFeeds` module always sets a feed title, even if one isn't provided.
 
 # 1.0.0-beta.69
 

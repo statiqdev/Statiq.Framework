@@ -416,6 +416,12 @@ namespace Statiq.Feeds
                 Copyright = _feedCopyright ?? context.Settings.GetString(FeedKeys.Copyright) ?? context.GetCurrentDateTime().ToUniversalTime().Year.ToString()
             };
 
+            // Make sure the title is set to something
+            if (feed.Title.IsNullOrEmpty())
+            {
+                feed.Title = "Feed";
+            }
+
             // Copy the feed metadata to document metadata for the eventual outputs
             MetadataItems metadata = new MetadataItems
             {
