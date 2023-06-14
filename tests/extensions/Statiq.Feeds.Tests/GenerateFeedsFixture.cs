@@ -19,7 +19,7 @@ namespace Statiq.Feeds.Tests
             {
                 // Given
                 TestExecutionContext context = new TestExecutionContext();
-                context.Settings[Keys.Host] = "buzz.com";
+                context.Settings[Keys.Host] = "statiq.dev";
                 TestDocument document = new TestDocument(
                     new NormalizedPath("/input/fizz/buzz"),
                     new NormalizedPath("fizz/buzz"),
@@ -41,6 +41,8 @@ namespace Statiq.Feeds.Tests
             public async Task OrdersByPublish()
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.Host] = "statiq.dev";
                 TestDocument a = new TestDocument(new NormalizedPath("a.txt"))
                 {
                     { FeedKeys.Title, "A" },
@@ -54,7 +56,7 @@ namespace Statiq.Feeds.Tests
                 GenerateFeeds module = new GenerateFeeds();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, context, module);
 
                 // Then
                 TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
@@ -65,6 +67,9 @@ namespace Statiq.Feeds.Tests
             public async Task ShouldSetFeedTitleFromMetadata()
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings[FeedKeys.Title] = "My Feed";
+                context.Settings[Keys.Host] = "statiq.dev";
                 TestDocument a = new TestDocument(new NormalizedPath("a.txt"))
                 {
                     { FeedKeys.Title, "A" },
@@ -75,8 +80,6 @@ namespace Statiq.Feeds.Tests
                     { FeedKeys.Title, "B" },
                     { FeedKeys.Published, new DateTime(2010, 2, 1) }
                 };
-                TestExecutionContext context = new TestExecutionContext();
-                context.Settings[FeedKeys.Title] = "My Feed";
                 GenerateFeeds module = new GenerateFeeds();
 
                 // When
@@ -91,6 +94,8 @@ namespace Statiq.Feeds.Tests
             public async Task ShouldSetDefaultFeedTitleIfNoMetadata()
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.Host] = "statiq.dev";
                 TestDocument a = new TestDocument(new NormalizedPath("a.txt"))
                 {
                     { FeedKeys.Title, "A" },
@@ -104,7 +109,7 @@ namespace Statiq.Feeds.Tests
                 GenerateFeeds module = new GenerateFeeds();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, context, module);
 
                 // Then
                 TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
@@ -115,6 +120,8 @@ namespace Statiq.Feeds.Tests
             public async Task ShouldSetFeedTitleFromFluentMethod()
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.Host] = "statiq.dev";
                 TestDocument a = new TestDocument(new NormalizedPath("a.txt"))
                 {
                     { FeedKeys.Title, "A" },
@@ -128,7 +135,7 @@ namespace Statiq.Feeds.Tests
                 GenerateFeeds module = new GenerateFeeds().WithFeedTitle("Best Feed");
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, context, module);
 
                 // Then
                 TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
@@ -140,6 +147,8 @@ namespace Statiq.Feeds.Tests
             public async Task ShouldSetDefaultFeedTitleIfNullOrEmptyFluentTitle(string feedTitle)
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.Host] = "statiq.dev";
                 TestDocument a = new TestDocument(new NormalizedPath("a.txt"))
                 {
                     { FeedKeys.Title, "A" },
@@ -153,7 +162,7 @@ namespace Statiq.Feeds.Tests
                 GenerateFeeds module = new GenerateFeeds().WithFeedTitle(feedTitle);
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, context, module);
 
                 // Then
                 TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
@@ -164,6 +173,8 @@ namespace Statiq.Feeds.Tests
             public async Task PreservesInputOrder()
             {
                 // Given
+                TestExecutionContext context = new TestExecutionContext();
+                context.Settings[Keys.Host] = "statiq.dev";
                 TestDocument a = new TestDocument(new NormalizedPath("a.txt"))
                 {
                     { FeedKeys.Title, "A" },
@@ -177,7 +188,7 @@ namespace Statiq.Feeds.Tests
                 GenerateFeeds module = new GenerateFeeds().PreserveOrdering();
 
                 // When
-                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, module);
+                IReadOnlyList<TestDocument> results = await ExecuteAsync(new[] { a, b }, context, module);
 
                 // Then
                 TestDocument result = results.Single(x => x.Destination.FullPath == "feed.rss");
