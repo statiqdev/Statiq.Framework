@@ -1,3 +1,8 @@
+# 1.0.0-beta.71
+
+- Updated JavaScriptEngineSwitcher.Core and JavaScriptEngineSwitcher.Jint.
+- Updated `highlight.js` used in `Statiq.Highlight` (#269).
+
 # 1.0.0-beta.70
 
 - Updated Markdig to 0.31.0 to fix an upstream bug when using alt text on images (#267).
