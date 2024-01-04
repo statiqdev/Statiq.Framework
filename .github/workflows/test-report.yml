@@ -1,7 +1,7 @@
-name: 'Test Report'
+name: "Test Report"
 on:
   workflow_run:
-    workflows: [ 'Build' ]
+    workflows: ["Build"]
     types:
       - completed
 jobs:
@@ -16,6 +16,6 @@ jobs:
         uses: dorny/test-reporter@v1.7.0
         with:
           artifact: test-results-${{ matrix.os }}
-          name: 'Test Results (${{ matrix.os }})'
-          path: '**/*.trx'
+          name: "Test Results (${{ matrix.os }})"
+          path: "**/*.trx"
           reporter: dotnet-trx
