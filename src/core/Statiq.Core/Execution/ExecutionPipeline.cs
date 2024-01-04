@@ -79,7 +79,7 @@ namespace Statiq.Core
         public virtual ExecutionPolicy ExecutionPolicy { get; set; }
 
         protected sealed override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context) =>
-            context.Phase switch
+            (context ?? throw new ArgumentNullException(nameof(context))).Phase switch
             {
                 Phase.Input => ExecuteInputPhaseAsync(context),
                 Phase.Process => ExecuteProcessPhaseAsync(context),

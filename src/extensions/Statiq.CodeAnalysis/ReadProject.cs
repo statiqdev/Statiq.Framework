@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Buildalyzer;
@@ -43,6 +44,9 @@ namespace Statiq.CodeAnalysis
         /// <inheritdoc />
         protected override IEnumerable<Project> GetProjects(IExecutionContext context, IFile file)
         {
+            ArgumentNullException.ThrowIfNull(context);
+            ArgumentNullException.ThrowIfNull(file);
+
             StringWriter log = new StringWriter();
             AnalyzerManager manager = new AnalyzerManager(new AnalyzerManagerOptions
             {
