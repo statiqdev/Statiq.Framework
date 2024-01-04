@@ -116,6 +116,8 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<Common.IDocument>> ExecuteInputAsync(Common.IDocument input, IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(input);
+
             if (string.IsNullOrWhiteSpace(_metadataKey) || (_keepExisting && input.ContainsKey(_metadataKey)))
             {
                 return input.Yield();

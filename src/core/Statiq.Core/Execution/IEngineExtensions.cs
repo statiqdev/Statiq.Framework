@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
+using Polly;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -10,6 +11,9 @@ namespace Statiq.Core
     {
         public static void LogAndCheckVersion(this IEngine engine, Assembly assembly, string name, string minimumVersionKey)
         {
+            ArgumentNullException.ThrowIfNull(assembly);
+            ArgumentNullException.ThrowIfNull(engine);
+
             if (!(Attribute.GetCustomAttribute(assembly, typeof(AssemblyInformationalVersionAttribute)) is AssemblyInformationalVersionAttribute versionAttribute))
             {
                 throw new Exception($"Could not determine the {name} version from {assembly.FullName}");

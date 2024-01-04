@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Polly;
 
 namespace Statiq.Core
 {
@@ -15,6 +16,8 @@ namespace Statiq.Core
 
         public void OnCompleted(Action continuation)
         {
+            ArgumentNullException.ThrowIfNull(continuation);
+
             SynchronizationContext previousContext = SynchronizationContext.Current;
             try
             {

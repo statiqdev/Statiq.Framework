@@ -55,7 +55,9 @@ namespace Statiq.Core
         }
 
         /// <inheritdoc />
+#pragma warning disable CA1725 // Parameter names should match base declaration
         protected override IDictionary<string, object> GetDictionary(DataRow row) =>
-            row.Table.Columns.Cast<DataColumn>().ToDictionary(col => col.ColumnName, col => row[col]);
+            (row ?? throw new ArgumentNullException(nameof(row))).Table.Columns.Cast<DataColumn>().ToDictionary(col => col.ColumnName, col => row[col]);
+#pragma warning restore CA1725 // Parameter names should match base declaration
     }
 }

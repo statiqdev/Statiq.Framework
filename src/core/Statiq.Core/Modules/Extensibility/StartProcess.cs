@@ -302,6 +302,8 @@ namespace Statiq.Core
 
         protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, IMetadata values)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             // Only execute once if requested
             if (_onlyOnce && _executed)
             {

@@ -90,6 +90,8 @@ namespace Statiq.Core
             // Get XML from the input documents?
             if (_data is null)
             {
+                ArgumentNullException.ThrowIfNull(context);
+
                 return context.Inputs.AsParallel().SelectMany(input =>
                 {
                     XmlDocument inputDoc = new XmlDocument();

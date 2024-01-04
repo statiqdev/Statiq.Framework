@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Polly;
 
 namespace Statiq.Core
 {
@@ -19,6 +20,8 @@ namespace Statiq.Core
         /// <returns>Each quoted argument as delimited in the original string by spaces.</returns>
         public static IEnumerable<string> Split(string arguments)
         {
+            ArgumentNullException.ThrowIfNull(arguments);
+
             bool inQuotes = false;
 
             return arguments

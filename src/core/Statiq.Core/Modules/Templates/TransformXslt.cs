@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -45,6 +46,8 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             XslCompiledTransform xslt = new XslCompiledTransform();
 
             if (_xsltPath is object)

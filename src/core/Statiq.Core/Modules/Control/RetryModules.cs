@@ -46,14 +46,18 @@ namespace Statiq.Core
             return this;
         }
 
-        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context) =>
-            await Policy
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            return await Policy
                 .Handle<Exception>(ex =>
                 {
                     if (ex is LoggedException loggedException)
                     {
                         ex = loggedException.InnerException;
                     }
+
                     return !_handledExceptionTypes.Contains(ex.GetType());
                 })
                 .WaitAndRetryAsync(
@@ -68,10 +72,12 @@ namespace Statiq.Core
                                 context.Log(_failureMessageLogLevel, failureMessage);
                             }
                         }
+
                         return _sleepDurationProvider(attempt);
                     })
                 .ExecuteAsync(
                     async _ => await context.ExecuteModulesAsync(Children, context.Inputs),
                     context.CancellationToken);
+        }
     }
 }

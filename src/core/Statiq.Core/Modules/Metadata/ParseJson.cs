@@ -44,6 +44,8 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             MetadataDictionary metadata;
             using (Stream contentStream = input.GetContentStream())
             {

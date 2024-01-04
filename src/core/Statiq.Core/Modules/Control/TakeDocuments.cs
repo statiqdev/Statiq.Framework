@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
@@ -22,6 +23,6 @@ namespace Statiq.Core
             _x = x;
         }
 
-        protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context) => context.Inputs.Take(_x);
+        protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context) => (context ?? throw new ArgumentNullException(nameof(context))).Inputs.Take(_x);
     }
 }

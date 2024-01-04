@@ -149,6 +149,8 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             IOrderedEnumerable<IDocument> orderdList = null;
             foreach (Order order in _orders.Reverse())
             {

@@ -165,6 +165,8 @@ namespace Statiq.Core
         // Execute at the context level so we can compile the RegEx pattern(s) once.
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             List<Regex> regexes = new List<Regex>();
 
             // Get the explicit delimiter regex

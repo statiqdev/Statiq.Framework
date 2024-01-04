@@ -8,7 +8,9 @@ namespace Statiq.Core
     /// Throws an exception.
     /// </summary>
     /// <category name="Control" />
+#pragma warning disable CA1711 // Identifiers should not have incorrect suffix
     public class ThrowException : SyncConfigModule<Exception>
+#pragma warning restore CA1711 // Identifiers should not have incorrect suffix
     {
         /// <summary>
         /// Throws the specified exception.
@@ -34,6 +36,9 @@ namespace Statiq.Core
             {
                 throw value;
             }
+
+            ArgumentNullException.ThrowIfNull(context);
+
             return input is null ? context.Inputs : input.Yield();
         }
     }

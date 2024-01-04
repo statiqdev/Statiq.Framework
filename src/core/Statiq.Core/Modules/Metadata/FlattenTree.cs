@@ -84,6 +84,6 @@ namespace Statiq.Core
         }
 
         protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context) =>
-            context.Inputs.Flatten(_treePlaceholderKey, _childrenKey);
+            (context ?? throw new ArgumentNullException(nameof(context))).Inputs.Flatten(_treePlaceholderKey, _childrenKey);
     }
 }

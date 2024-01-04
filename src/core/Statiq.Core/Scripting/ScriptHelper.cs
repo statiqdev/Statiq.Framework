@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Polly;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -151,6 +152,8 @@ namespace Statiq.Core
 
         public static void LogAndEnsureCompilationSuccess(EmitResult result, ILogger logger, string name = null)
         {
+            ArgumentNullException.ThrowIfNull(result);
+
             // Log warnings
             List<string> warningMessages = result.Diagnostics
                 .Where(x => x.Severity == DiagnosticSeverity.Warning)

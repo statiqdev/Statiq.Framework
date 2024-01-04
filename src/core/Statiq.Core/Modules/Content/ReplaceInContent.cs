@@ -76,6 +76,8 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, string value)
         {
+            ArgumentNullException.ThrowIfNull(input);
+
             if (value is null)
             {
                 value = string.Empty;

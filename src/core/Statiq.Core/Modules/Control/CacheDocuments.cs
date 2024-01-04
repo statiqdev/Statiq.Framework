@@ -134,6 +134,8 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             // If we're disabling the cache, clear any existing entries and just execute children
             if (context.Settings.GetBool(Keys.DisableCache))
             {

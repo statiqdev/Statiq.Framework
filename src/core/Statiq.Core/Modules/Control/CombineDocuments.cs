@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
@@ -21,6 +22,8 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             IDocument result = null;
             foreach (IDocument input in context.Inputs)
             {

@@ -347,6 +347,8 @@ namespace Statiq.Core
             IExecutionContext context,
             TClient client)
         {
+            ArgumentNullException.ThrowIfNull(request);
+
             try
             {
                 return await request(input, context, client);

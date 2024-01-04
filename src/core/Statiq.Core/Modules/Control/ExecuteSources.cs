@@ -60,7 +60,9 @@ namespace Statiq.Core
         /// Adds a module to execute. This method is mainly to support collection initialization.
         /// </summary>
         /// <param name="module">The module to add.</param>
+#pragma warning disable CA1725 // Parameter names should match base declaration
         public void Add(IModule module) => _modules.Add(module);
+#pragma warning restore CA1725 // Parameter names should match base declaration
 
         public ExecuteSources WithModules(params IModule[] modules)
         {
@@ -87,6 +89,8 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IEnumerable<string> value)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             List<IDocument> results = new List<IDocument>();
             HashSet<IDocument> matched = new HashSet<IDocument>(context.Inputs.FilterSources(value));
             if (matched.Count > 0)

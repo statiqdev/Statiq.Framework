@@ -97,6 +97,8 @@ namespace Statiq.Core
         {
             if (value is object)
             {
+                ArgumentNullException.ThrowIfNull(context);
+
                 // Use a semaphore to limit the write operations so we don't try to do a bunch of writes at once
                 SemaphoreSlim semaphore = new SemaphoreSlim(20, 20);
 

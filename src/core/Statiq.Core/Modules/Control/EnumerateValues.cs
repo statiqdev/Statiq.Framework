@@ -79,6 +79,8 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IEnumerable<object> value)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             // Return the input document(s) for empty values
             if (value is null)
             {

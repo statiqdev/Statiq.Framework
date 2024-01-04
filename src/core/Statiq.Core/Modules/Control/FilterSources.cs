@@ -57,6 +57,6 @@ namespace Statiq.Core
             IDocument input,
             IExecutionContext context,
             IEnumerable<string> value) =>
-            context.Inputs.FilterSources(value);
+            (context ?? throw new ArgumentNullException(nameof(context))).Inputs.FilterSources(value);
     }
 }

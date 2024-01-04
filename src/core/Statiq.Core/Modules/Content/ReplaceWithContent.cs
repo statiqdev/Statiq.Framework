@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Statiq.Common;
@@ -49,6 +50,8 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, string value)
         {
+            ArgumentNullException.ThrowIfNull(input);
+
             if (value is null)
             {
                 value = string.Empty;
