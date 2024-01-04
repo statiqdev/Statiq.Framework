@@ -46,7 +46,9 @@ namespace Statiq.Common
         /// <c>true</c> if the candidate string is a script string that should be cached,
         /// <c>false</c> if the candidate string is a script string that should not be cached,
         /// and null otherwise.</returns>
+#pragma warning disable CA1021
         public static bool? TryGetScriptString(string str, out string script)
+#pragma warning restore CA1021
         {
             if (TryGetScriptString(str, true, out script))
             {

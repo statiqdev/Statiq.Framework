@@ -1086,7 +1086,9 @@ namespace Statiq.Common
         /// <param name="mediaType">The media type.</param>
         /// <param name="defaultIfNotFound">Will return a "text/x-[extension]" default media type if a mapping is not found.</param>
         /// <returns><c>true</c> if the media type could be determined, <c>false</c> otherwise.</returns>
+#pragma warning disable CA1021 // Avoid out parameters
         public static bool TryGet(string path, out string mediaType, bool defaultIfNotFound = true)
+#pragma warning restore CA1021 // Avoid out parameters
         {
             if (string.IsNullOrWhiteSpace(path))
             {

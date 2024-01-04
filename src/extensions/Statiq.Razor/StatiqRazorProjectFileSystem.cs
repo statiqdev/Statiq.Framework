@@ -28,7 +28,9 @@ namespace Statiq.Razor
         }
 
         [Obsolete("Use GetItem(string path, string fileKind) instead.")]
+#pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
         public override RazorProjectItem GetItem(string path)
+#pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
         {
             return GetItem(path, fileKind: null);
         }
