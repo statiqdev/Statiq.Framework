@@ -13,7 +13,7 @@ jobs:
         os: [windows-latest, ubuntu-latest, macos-latest]
     steps:
       - name: Process Test Results
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v1.7.0
         with:
           artifact: test-results-${{ matrix.os }}
           name: 'Test Results (${{ matrix.os }})'

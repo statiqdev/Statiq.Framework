@@ -19,11 +19,11 @@ jobs:
       NUGET_CERT_REVOCATION_MODE: offline
     steps:
       - name: Get Source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
             3.1.x
