@@ -1,3 +1,7 @@
+# 1.0.0-beta.72
+
+- Added an improved warning message and early exit out of recursive settings expansion. 
+
 # 1.0.0-beta.71
 
 - Modified the behavior of computed metadata values to cache the value for a given document when using the `=>` prefix. The previous behavior that evaluates a computed value every time it's accessed can still be used by prefixing with `->` instead. In theory this change shouldn't result in any differences in behavior since documents are immutable in the first place (so caching wouldn't be any different from re-evaluating), but if you have computed metadata values that consider state outside the document (such as something like `DateTime.Now`), you'll need to switch those to use the `->` prefix instead.
