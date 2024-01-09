@@ -1,5 +1,7 @@
 # 1.0.0-beta.72
 
+- Added a `DocumentSourceComparer` class that implements `IEqualityComparer<IDocument>` and can be used to compare documents by source path.
+- Added a `IEnumerable<IDocument>.ContainsBySource()` extension method to check if a collection of documents contains a document with a given source path.
 - Added an improved warning message and early exit out of recursive settings expansion. 
 - Added a `MediaTypes.IsMediaType()` method to help determine if a given path matches specified media type(s).
 
