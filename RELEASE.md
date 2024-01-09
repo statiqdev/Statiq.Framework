@@ -1,6 +1,7 @@
 # 1.0.0-beta.72
 
 - Added an improved warning message and early exit out of recursive settings expansion. 
+- Added a `MediaTypes.IsMediaType()` method to help determine if a given path matches specified media type(s).
 
 # 1.0.0-beta.71
 
