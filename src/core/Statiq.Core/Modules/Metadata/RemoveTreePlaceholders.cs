@@ -32,6 +32,6 @@ namespace Statiq.Core
         }
 
         protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context) =>
-            context.Inputs.RemoveTreePlaceholders(_treePlaceholderKey);
+            (context ?? throw new ArgumentNullException(nameof(context))).Inputs.RemoveTreePlaceholders(_treePlaceholderKey);
     }
 }

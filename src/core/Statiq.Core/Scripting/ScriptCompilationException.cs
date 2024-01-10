@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Polly;
 
 namespace Statiq.Core
 {
@@ -9,6 +10,8 @@ namespace Statiq.Core
 
         public ScriptCompilationException(List<string> errorMessages)
         {
+            ArgumentNullException.ThrowIfNull(errorMessages);
+
             ErrorMessages = errorMessages.AsReadOnly();
         }
     }

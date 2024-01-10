@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Polly;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -159,6 +161,8 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public EscapeHtml WithStandard(params char[] standard)
         {
+            ArgumentNullException.ThrowIfNull(standard);
+
             foreach (char c in standard)
             {
                 _standardCharacters.Add(c);
@@ -185,6 +189,8 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public EscapeHtml WithEscapedChar(params char[] toEscape)
         {
+            ArgumentNullException.ThrowIfNull(toEscape);
+
             foreach (char c in toEscape)
             {
                 _currentlyEscapedCharacters.Add(
@@ -201,6 +207,8 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(input);
+
             string oldContent = await input.GetContentStringAsync();
             StringWriter outputString = new StringWriter();
             bool escaped = false;

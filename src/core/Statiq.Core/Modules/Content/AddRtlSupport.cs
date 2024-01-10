@@ -173,7 +173,9 @@ namespace Statiq.Core
                    c == 0x00FB3E;
         }
 
+#pragma warning disable CA1505 // Avoid unmaintainable code
         private static bool IsLeftToRight(int c)
+#pragma warning restore CA1505 // Avoid unmaintainable code
         {
             // Generated from Table D.2 of RFC3454
             // http://www.ietf.org/rfc/rfc3454.txt

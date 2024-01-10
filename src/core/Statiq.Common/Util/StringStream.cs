@@ -46,7 +46,9 @@ namespace Statiq.Common
             }
         }
 
+#pragma warning disable CA1720 // Identifier contains type name
         public string String { get; }
+#pragma warning restore CA1720 // Identifier contains type name
 
         public override bool CanRead => true;
 

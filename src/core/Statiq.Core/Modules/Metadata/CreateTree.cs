@@ -171,6 +171,8 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             // Create a dictionary of tree nodes
             TreeNodeEqualityComparer treeNodeEqualityComparer = new TreeNodeEqualityComparer();
             Dictionary<string[], TreeNode> nodesDictionary = await context.Inputs

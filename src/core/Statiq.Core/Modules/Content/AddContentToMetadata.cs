@@ -48,6 +48,8 @@ namespace Statiq.Core
             IExecutionContext context,
             ImmutableArray<IDocument> childOutputs)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             if (childOutputs.Length == 0)
             {
                 return context.Inputs;

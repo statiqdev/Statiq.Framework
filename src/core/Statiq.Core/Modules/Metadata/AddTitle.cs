@@ -66,6 +66,8 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(input);
+
             // Check if there's already a title set
             if (_keepExisting && input.ContainsKey(_key))
             {

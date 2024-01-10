@@ -54,6 +54,8 @@ namespace Statiq.Core
 
         protected override Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(input);
+
             if (input.TryGetValue(_fromKey, out object existingValue))
             {
                 if (_format is object)

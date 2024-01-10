@@ -1,8 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ConcurrentCollections;
+using Polly;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -40,6 +42,8 @@ namespace Statiq.Core
 
         public virtual void AddRange(IEnumerable<string> namespaces)
         {
+            ArgumentNullException.ThrowIfNull(namespaces);
+
             // Iterate manually so we can throw for null or white space
             foreach (string ns in namespaces)
             {

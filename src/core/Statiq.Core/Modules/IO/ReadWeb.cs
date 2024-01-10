@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Polly;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -53,6 +54,8 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public ReadWeb WithUris(params string[] uris)
         {
+            ArgumentNullException.ThrowIfNull(uris);
+
             foreach (string uri in uris)
             {
                 _requests.Add(new WebRequest(uri));

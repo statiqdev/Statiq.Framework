@@ -86,6 +86,8 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             // Partition the pages and get a total before skip/take
             IDocument[][] pages =
                 Partition(context.Inputs, _pageSize)

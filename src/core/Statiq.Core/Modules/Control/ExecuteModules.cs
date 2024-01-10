@@ -26,6 +26,6 @@ namespace Statiq.Core
         protected override IEnumerable<IDocument> ExecuteChildren(
             IExecutionContext context,
             ImmutableArray<IDocument> childOutputs) =>
-            context.Inputs;
+            (context ?? throw new ArgumentNullException(nameof(context))).Inputs;
     }
 }

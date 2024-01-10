@@ -53,6 +53,8 @@ namespace Statiq.Core
         /// <returns>A single document in a list.</returns>
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             if (context.Inputs.Length < 1)
             {
                 return context.CreateDocument().Yield();

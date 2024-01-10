@@ -455,6 +455,8 @@ namespace Statiq.CodeAnalysis
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             // Create the compilation (have to supply an XmlReferenceResolver to handle include XML doc comments)
             MetadataReference mscorlib = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
             CSharpCompilation compilation = CSharpCompilation

@@ -59,6 +59,6 @@ namespace Statiq.Core
             ImmutableArray<IDocument> childOutputs) =>
             _reverse
                 ? childOutputs.SelectMany(childOutput => context.Inputs.Select(input => childOutput.Clone(input.ContentProvider)))
-                : context.Inputs.SelectMany(input => childOutputs.Select(result => input.Clone(result.ContentProvider)));
+                : (context ?? throw new ArgumentNullException(nameof(context))).Inputs.SelectMany(input => childOutputs.Select(result => input.Clone(result.ContentProvider)));
     }
 }

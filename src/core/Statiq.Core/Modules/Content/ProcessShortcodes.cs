@@ -50,6 +50,9 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(input);
+            ArgumentNullException.ThrowIfNull(context);
+
             IContentProvider contentProvider = await ProcessShortcodesAsync(input, input.ContentProvider, context);
             return contentProvider is null ? input.Yield() : input.Clone(contentProvider).Yield();
         }

@@ -45,6 +45,8 @@ namespace Statiq.Core
         /// <inheritdoc />
         public override async Task<ShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             // See if this is a web include
             string included = args.SingleValue();
             if (included.StartsWith(Uri.UriSchemeHttp + "://") || included.StartsWith(Uri.UriSchemeHttps + "://"))
@@ -69,6 +71,8 @@ namespace Statiq.Core
             NormalizedPath includedPath = new NormalizedPath(included);
             if (_sourcePath.IsNull)
             {
+                ArgumentNullException.ThrowIfNull(document);
+
                 // Cache the source path for this shortcode instance since it'll be the same for all future shortcodes
                 _sourcePath = document.GetPath("IncludeShortcodeSource", document.Source);
             }

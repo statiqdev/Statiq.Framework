@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Polly;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -15,6 +16,8 @@ namespace Statiq.Core
     {
         public static IEnumerable<string> GetCallSignatures(Type type, string callThrough, bool extensions = true)
         {
+            ArgumentNullException.ThrowIfNull(type);
+
             Type[] types = type.IsInterface
                 ? type.GetInterfaces().Concat(new[] { type }).ToArray()
                 : new[] { type };
@@ -46,18 +49,20 @@ namespace Statiq.Core
 
         // Always returns public methods
         public static IEnumerable<MethodInfo> GetCallableMethods(Type type) =>
-            type.GetMethods()
+            (type ?? throw new ArgumentNullException(nameof(type))).GetMethods()
                 .Where(m => !m.IsSpecialName && !m.DeclaringType.Equals(typeof(object)) && !m.IsStatic)
                 .Distinct();
 
         // Always returns public properties
         public static IEnumerable<PropertyInfo> GetCallableProperties(Type type) =>
-            type.GetProperties()
+            (type ?? throw new ArgumentNullException(nameof(type))).GetProperties()
                 .Where(p => !p.IsSpecialName && !p.DeclaringType.Equals(typeof(object)) && !p.GetAccessors().Any(a => a.IsStatic))
                 .Distinct();
 
         public static IEnumerable<MethodInfo> GetExtensionMethods(Type type, IEnumerable<Type> candidateTypes = null)
         {
+            ArgumentNullException.ThrowIfNull(type);
+
             foreach (Type candidateType in candidateTypes ?? type.Assembly.GetTypes())
             {
                 if (candidateType.Name.EndsWith("Extensions"))
@@ -84,6 +89,8 @@ namespace Statiq.Core
 
         public static string GetPropertySignature(PropertyInfo propertyInfo, bool callable = false, bool getterAndSetter = false)
         {
+            ArgumentNullException.ThrowIfNull(propertyInfo);
+
             string visibility = GetVisibility(propertyInfo, out string getterVisibility, out string setterVisibility);
             ParameterInfo[] parameters = propertyInfo.GetIndexParameters();
             if (parameters.Length > 0)
@@ -135,6 +142,8 @@ namespace Statiq.Core
         /// </returns>
         public static string GetMethodSignature(MethodInfo method, bool callable = false, bool convertExtensionsToInstance = false)
         {
+            ArgumentNullException.ThrowIfNull(method);
+
             // Special case to use interface syntax for GetEnumerator() methods
             if (method.Name.Equals(nameof(IEnumerable.GetEnumerator))
                 && method.DeclaringType.IsInterface
@@ -263,6 +272,8 @@ namespace Statiq.Core
         /// </returns>
         public static string GetTypeName(Type type)
         {
+            ArgumentNullException.ThrowIfNull(type);
+
             Type nullableType = Nullable.GetUnderlyingType(type);
             if (nullableType is object)
             {

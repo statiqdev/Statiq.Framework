@@ -56,10 +56,14 @@ namespace Statiq.Core
             return this;
         }
 
-        protected override Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, object value) =>
-            Task.FromResult(
+        protected override Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, object value)
+        {
+            ArgumentNullException.ThrowIfNull(input);
+
+            return Task.FromResult(
                 (_onlyIfNonExisting && input.ContainsKey(_key)) || (_ignoreNull && value is null)
                     ? input.Yield()
                     : input.Clone(new MetadataItems { { _key, value } }).Yield());
+        }
     }
 }

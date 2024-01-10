@@ -95,7 +95,7 @@ namespace Statiq.CodeAnalysis
                 // Add .dll to assembly names
                 return symbol.Name + ".dll";
             }
-            if (symbol.Kind == SymbolKind.Namespace)
+            if (symbol?.Kind == SymbolKind.Namespace)
             {
                 // Use "global" for the global namespace display name since it's a reserved keyword and it's used to refer to the global namespace in code
                 return symbol.ContainingNamespace is null ? "global" : GetQualifiedName(symbol);

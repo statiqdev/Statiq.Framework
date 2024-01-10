@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -41,6 +42,8 @@ namespace Statiq.Core
 
         protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, string value)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             context.Log(_logLevel, value);
             return input is null ? context.Inputs : input.Yield();
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Statiq.Common;
 
@@ -17,6 +18,8 @@ namespace Statiq.Core
     {
         public override async Task<ShortcodeResult> ExecuteAsync(KeyValuePair<string, string>[] args, string content, IDocument document, IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             object value = await context.ScriptHelper.EvaluateAsync(content, document);
             return value.ToString();
         }

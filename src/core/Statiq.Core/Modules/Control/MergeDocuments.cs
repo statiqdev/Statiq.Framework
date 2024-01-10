@@ -70,19 +70,31 @@ namespace Statiq.Core
 
         protected override IEnumerable<IDocument> ExecuteChildren(
             IExecutionContext context,
-            ImmutableArray<IDocument> childOutputs) =>
-            _reverse
+            ImmutableArray<IDocument> childOutputs)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            return _reverse
                 ? childOutputs.SelectMany(childOutput =>
                 {
                     IMetadata childOutputWithoutSettings = childOutput.WithoutSettings();
                     return context.Inputs.Select(input =>
-                        childOutput.Clone(_keepExistingMetadata ? input.WithoutSettings().GetRawEnumerable().Where(x => !childOutputWithoutSettings.ContainsKey(x.Key)) : input, input.ContentProvider));
+                        childOutput.Clone(
+                            _keepExistingMetadata
+                                ? input.WithoutSettings().GetRawEnumerable()
+                                    .Where(x => !childOutputWithoutSettings.ContainsKey(x.Key))
+                                : input, input.ContentProvider));
                 })
                 : context.Inputs.SelectMany(input =>
                 {
                     IMetadata inputWithoutSettings = input.WithoutSettings();
                     return childOutputs.Select(result =>
-                        input.Clone(_keepExistingMetadata ? result.WithoutSettings().GetRawEnumerable().Where(x => !inputWithoutSettings.ContainsKey(x.Key)) : result, result.ContentProvider));
+                        input.Clone(
+                            _keepExistingMetadata
+                                ? result.WithoutSettings().GetRawEnumerable()
+                                    .Where(x => !inputWithoutSettings.ContainsKey(x.Key))
+                                : result, result.ContentProvider));
                 });
+        }
     }
 }

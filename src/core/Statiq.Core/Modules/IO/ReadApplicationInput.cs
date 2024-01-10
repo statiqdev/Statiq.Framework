@@ -18,6 +18,8 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override IEnumerable<IDocument> ExecuteContext(IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             // If ApplicationInput is empty, return nothing
             if (string.IsNullOrWhiteSpace(context.ApplicationState.Input))
             {

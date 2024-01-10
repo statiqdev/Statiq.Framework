@@ -65,7 +65,11 @@ namespace Statiq.Core
         public FilterDocuments Or(string key) => Or(Config.FromDocument(doc => doc.ContainsKey(key)));
 
         /// <inheritdoc />
-        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context) =>
-            await context.Inputs.FilterAsync(_predicates, context).ToListAsync(context.CancellationToken);
+        protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            return await context.Inputs.FilterAsync(_predicates, context).ToListAsync(context.CancellationToken);
+        }
     }
 }

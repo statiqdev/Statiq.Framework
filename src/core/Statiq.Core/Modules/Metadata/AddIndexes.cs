@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Statiq.Common;
@@ -13,7 +14,12 @@ namespace Statiq.Core
     public class AddIndexes : Module
     {
         /// <inheritdoc />
-        protected override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context) =>
-            Task.FromResult(context.Inputs.Select((x, i) => x.Clone(new MetadataItems { { Keys.Index, i + 1 } })));
+        protected override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            return Task.FromResult(
+                context.Inputs.Select((x, i) => x.Clone(new MetadataItems { { Keys.Index, i + 1 } })));
+        }
     }
 }

@@ -103,6 +103,8 @@ namespace Statiq.Core
 
         protected override async Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, IEnumerable<string> value)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             IEnumerable<IFile> files = context.FileSystem.GetInputFiles(value);
             files = await files.ParallelWhereAsync(async file => _predicate is null || await _predicate(file));
             return files.AsParallel()

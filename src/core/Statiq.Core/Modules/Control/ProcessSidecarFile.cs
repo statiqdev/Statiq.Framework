@@ -64,6 +64,9 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteInputAsync(IDocument input, IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(input);
+            ArgumentNullException.ThrowIfNull(context);
+
             NormalizedPath sidecarPath = await _sidecarPath.GetValueAsync(input, context);
             if (!sidecarPath.IsNull)
             {

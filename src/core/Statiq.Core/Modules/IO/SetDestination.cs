@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Polly;
 using Statiq.Common;
 
 namespace Statiq.Core
@@ -124,6 +125,8 @@ namespace Statiq.Core
 
         public static NormalizedPath GetCurrentDestinationFromMetadata(IDocument doc)
         {
+            ArgumentNullException.ThrowIfNull(doc);
+
             NormalizedPath path = doc.GetPath(Keys.DestinationPath);
             if (!path.IsNull)
             {
@@ -147,6 +150,8 @@ namespace Statiq.Core
             IExecutionContext context,
             NormalizedPath value)
         {
+            ArgumentNullException.ThrowIfNull(input);
+
             if (value.IsNull)
             {
                 return Task.FromResult(input.Yield());

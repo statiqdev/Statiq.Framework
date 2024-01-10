@@ -77,6 +77,8 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             List<IDocument> results = new List<IDocument>();
             IEnumerable<IDocument> documents = context.Inputs;
             foreach (Tuple<object, IEnumerable<IModule>> c in _cases)

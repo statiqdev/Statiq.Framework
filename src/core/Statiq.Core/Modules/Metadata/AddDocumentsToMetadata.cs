@@ -45,12 +45,16 @@ namespace Statiq.Core
 
         protected override IEnumerable<IDocument> ExecuteChildren(
             IExecutionContext context,
-            ImmutableArray<IDocument> childOutputs) =>
-            childOutputs.Length == 0
+            ImmutableArray<IDocument> childOutputs)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            return childOutputs.Length == 0
                 ? context.Inputs
                 : context.Inputs.Select(input => input.Clone(new MetadataItems
                 {
                     { _key, childOutputs.Length == 1 ? (object)childOutputs[0] : childOutputs }
                 }));
+        }
     }
 }

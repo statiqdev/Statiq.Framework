@@ -91,6 +91,8 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             List<(IDocument Document, IEnumerable<object> Keys)> groups = await context.Inputs
                 .ToAsyncEnumerable()
                 .SelectAwait(async x => (Document: x, Keys: await _key.GetValueAsync(x, context)))

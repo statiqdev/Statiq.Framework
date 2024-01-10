@@ -196,7 +196,9 @@ namespace Statiq.Common
 
         public sealed override int WriteTimeout { get => base.WriteTimeout; set => base.WriteTimeout = value; }
 
+#pragma warning disable CS0672,SYSLIB0010 // Member overrides obsolete member
         public sealed override object InitializeLifetimeService() => base.InitializeLifetimeService();
+#pragma warning restore CS0672,SYSLIB0010 // Member overrides obsolete member
 
         public sealed override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) => base.BeginRead(buffer, offset, count, callback, state);
 

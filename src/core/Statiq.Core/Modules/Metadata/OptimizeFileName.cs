@@ -103,6 +103,8 @@ namespace Statiq.Core
 
         protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, IMetadata values)
         {
+            ArgumentNullException.ThrowIfNull(input);
+
             // Get file name
             NormalizedPath path = values.GetPath(Path);
             if (path.IsNull)

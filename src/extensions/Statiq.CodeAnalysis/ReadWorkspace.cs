@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Buildalyzer;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
@@ -74,6 +73,10 @@ namespace Statiq.CodeAnalysis
 
         protected internal static IAnalyzerResult CompileProject(IExecutionContext context, IProjectAnalyzer analyzer, StringWriter log)
         {
+            ArgumentNullException.ThrowIfNull(context);
+            ArgumentNullException.ThrowIfNull(analyzer);
+            ArgumentNullException.ThrowIfNull(log);
+
             log.GetStringBuilder().Clear();
             context.LogDebug($"Building project {analyzer.ProjectFile.Path}");
             Stopwatch sw = new Stopwatch();
@@ -92,6 +95,8 @@ namespace Statiq.CodeAnalysis
 
         protected override IEnumerable<IDocument> ExecuteConfig(IDocument input, IExecutionContext context, NormalizedPath value)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             if (!value.IsNull)
             {
                 IFile projectFile = context.FileSystem.GetInputFile(value);

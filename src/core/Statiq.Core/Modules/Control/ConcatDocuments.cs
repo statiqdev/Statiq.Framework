@@ -40,6 +40,6 @@ namespace Statiq.Core
         protected override IEnumerable<IDocument> ExecuteChildren(
             IExecutionContext context,
             ImmutableArray<IDocument> childOutputs) =>
-            context.Inputs.Concat(childOutputs);
+            (context ?? throw new ArgumentNullException(nameof(context))).Inputs.Concat(childOutputs);
     }
 }

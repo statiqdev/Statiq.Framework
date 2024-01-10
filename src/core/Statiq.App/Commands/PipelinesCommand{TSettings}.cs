@@ -38,7 +38,9 @@ namespace Statiq.App
             {
                 new ConsoleListener(() =>
                 {
+#pragma warning disable VSTHRD103
                     cancellationTokenSource.Cancel();
+#pragma warning restore VSTHRD103
                     return Task.CompletedTask;
                 });
                 return (int)await engineManager.ExecuteAsync(cancellationTokenSource);

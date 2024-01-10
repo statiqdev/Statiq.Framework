@@ -36,6 +36,8 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override async Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             List<IDocument> results = new List<IDocument>();
             foreach (IEnumerable<IModule> modules in _branches)
             {

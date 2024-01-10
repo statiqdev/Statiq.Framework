@@ -85,6 +85,8 @@ namespace Statiq.Core
         /// <inheritdoc />
         protected override Task<IEnumerable<IDocument>> ExecuteContextAsync(IExecutionContext context)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             Parallel.ForEach(context.Inputs, input =>
             {
                 // Check if the key exists

@@ -118,7 +118,9 @@ namespace Statiq.Feeds.Syndication.Extensions
         }
 
         protected static string ConvertToString(Uri uri) =>
+#pragma warning disable SYSLIB0013
             uri is null ? null : Uri.EscapeUriString(uri.ToString());
+#pragma warning restore SYSLIB0013
 
         protected static Uri ConvertToUri(string value)
         {

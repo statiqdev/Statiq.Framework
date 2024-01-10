@@ -48,6 +48,8 @@ namespace Statiq.Core
 
         protected override Task<IEnumerable<IDocument>> ExecuteConfigAsync(IDocument input, IExecutionContext context, object value)
         {
+            ArgumentNullException.ThrowIfNull(context);
+
             IEnumerable<IDocument> inputs = context.Inputs;
             if (input is object)
             {
