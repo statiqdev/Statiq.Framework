@@ -81,7 +81,9 @@ namespace Statiq.CodeAnalysis.Analysis
             // Get any reflected methods we need
             Assembly workspacesAssembly = typeof(Workspace).Assembly;
             Type reflectedType = workspacesAssembly.GetType("Microsoft.CodeAnalysis.Shared.Extensions.ITypeSymbolExtensions");
-            MethodInfo reflectedMethod = reflectedType.GetMethod("GetAccessibleMembersInThisAndBaseTypes");
+            MethodInfo reflectedMethod = reflectedType.GetRuntimeMethods().Single(m =>
+                m.Name.Equals("GetAccessibleMembersInThisAndBaseTypes") &&
+                m.GetParameters()[1].ParameterType == typeof(ISymbol));
             _getAccessibleMembersInThisAndBaseTypes = reflectedMethod.MakeGenericMethod(typeof(ISymbol));
 
             Assembly csharpAssembly = typeof(CSharpCompilation).Assembly;
