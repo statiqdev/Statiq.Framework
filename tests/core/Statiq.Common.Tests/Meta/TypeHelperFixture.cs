@@ -483,11 +483,13 @@ namespace Statiq.Common.Tests.Meta
                 dateTime.ShouldBeOfType<DateTime>().ShouldBe(new DateTime(2016, 10, 17, 8, 0, 0));
             }
 
+#pragma warning disable CA1711
             public enum ConvertEnum
             {
                 Apple = 3,
                 Orange = 5
             }
+#pragma warning restore CA1711
 
             [Test]
             public void ConvertsStringToEnum()

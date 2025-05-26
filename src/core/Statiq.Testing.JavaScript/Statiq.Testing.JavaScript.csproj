@@ -2,12 +2,18 @@
   <PropertyGroup>
     <Description>Statiq is a configurable static content generation framework. This library provides utility classes to make testing JavaScript components easier.</Description>
     <PackageTags>Statiq Static StaticContent StaticSite Blog BlogEngine</PackageTags>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.21.0" />
-    <PackageReference Include="JavaScriptEngineSwitcher.Jint" Version="3.21.2" />
+    <PackageReference Include="JavaScriptEngineSwitcher.Core" Version="3.24.1" />
+    <PackageReference Include="JavaScriptEngineSwitcher.Jint" Version="3.29.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Statiq.Common\Statiq.Common.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+    <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15" />
+    <PackageReference Update="Roslynator.Analyzers" Version="4.13.1" />
   </ItemGroup>
 </Project>

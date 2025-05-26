@@ -53,6 +53,7 @@ namespace Statiq.Core
         /// <returns>The current module instance.</returns>
         public ReadWeb WithUris(params string[] uris)
         {
+            ArgumentNullException.ThrowIfNull(uris, nameof(uris)); // fix CA1062
             foreach (string uri in uris)
             {
                 _requests.Add(new WebRequest(uri));
