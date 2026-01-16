@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -54,14 +55,37 @@ namespace Statiq.App
 
                 ExitCode exitCode = ExitCode.Normal;
 
-                // Start the console listener
-                ConsoleListener consoleListener = new ConsoleListener(
-                    () =>
+                // Determine if we should run in interactive mode
+                bool interactiveMode = !commandSettings.NoInteractive && IsConsoleAvailable();
+
+                // Start the console listener only if interactive mode is enabled
+                ConsoleListener consoleListener = null;
+                if (interactiveMode)
+                {
+                    consoleListener = new ConsoleListener(
+                        () =>
+                        {
+                            TriggerExit();
+                            return Task.CompletedTask;
+                        },
+                        input => EvaluateScriptAsync(input, commandContext, commandSettings, engineManager));
+                }
+                else
+                {
+                    // In non-interactive mode, set up console cancel key press handler if possible
+                    try
                     {
-                        TriggerExit();
-                        return Task.CompletedTask;
-                    },
-                    input => EvaluateScriptAsync(input, commandContext, commandSettings, engineManager));
+                        Console.CancelKeyPress += (sender, e) =>
+                        {
+                            e.Cancel = true;
+                            TriggerExit();
+                        };
+                    }
+                    catch
+                    {
+                        // Console may not be available, cancellation will rely on the token
+                    }
+                }
 
                 // Execute the engine for the first time
                 exitCode = await engineManager.ExecuteAsync(_cancellationTokenSource);
@@ -71,41 +95,64 @@ namespace Statiq.App
                 {
                     await AfterInitialExecutionAsync(commandContext, commandSettings, engineManager, _cancellationTokenSource);
 
-                    // Log that we're ready and start waiting on input
-                    const string prompt = "Type Ctrl-C or \"Exit()\" to exit and \"Help()\" for global methods and properties";
-                    logger.LogInformation(prompt);
-                    ConsoleLoggerProvider.FlushAndWait();
-                    consoleListener.StartReadingLines();
-
-                    // Wait for activity
-                    while (true)
+                    if (interactiveMode)
                     {
-                        // Blocks the current thread until a signal
-                        // This will also reset the event (since it's an AutoResetEvent) so any triggering will cause a following execution
-                        _triggerExecutionEvent.WaitOne();
-
-                        // Stop listening while we run again
-                        consoleListener.StopReadingLines();
-
-                        // Break here before running if we're exiting
-                        if (_exit)
-                        {
-                            break;
-                        }
-
-                        // Execute
-                        exitCode = await ExecutionTriggeredAsync(commandContext, commandSettings, engineManager, exitCode, _cancellationTokenSource);
-
-                        // Check one more time for exit
-                        if (_exit)
-                        {
-                            break;
-                        }
-
-                        // Log that we're ready and start waiting on input (again)
+                        // Interactive mode: use REPL
+                        const string prompt = "Type Ctrl-C or \"Exit()\" to exit and \"Help()\" for global methods and properties";
                         logger.LogInformation(prompt);
                         ConsoleLoggerProvider.FlushAndWait();
                         consoleListener.StartReadingLines();
+
+                        // Wait for activity
+                        while (true)
+                        {
+                            // Blocks the current thread until a signal
+                            // This will also reset the event (since it's an AutoResetEvent) so any triggering will cause a following execution
+                            _triggerExecutionEvent.WaitOne();
+
+                            // Stop listening while we run again
+                            consoleListener.StopReadingLines();
+
+                            // Break here before running if we're exiting
+                            if (_exit)
+                            {
+                                break;
+                            }
+
+                            // Execute
+                            exitCode = await ExecutionTriggeredAsync(commandContext, commandSettings, engineManager, exitCode, _cancellationTokenSource);
+
+                            // Check one more time for exit
+                            if (_exit)
+                            {
+                                break;
+                            }
+
+                            // Log that we're ready and start waiting on input (again)
+                            logger.LogInformation(prompt);
+                            ConsoleLoggerProvider.FlushAndWait();
+                            consoleListener.StartReadingLines();
+                        }
+                    }
+                    else
+                    {
+                        // Non-interactive mode: wait for cancellation or file changes
+                        logger.LogInformation("Running in non-interactive mode. Press Ctrl+C to exit.");
+                        ConsoleLoggerProvider.FlushAndWait();
+
+                        // Wait for activity (file changes will trigger execution, Ctrl+C will trigger exit)
+                        while (!_exit)
+                        {
+                            _triggerExecutionEvent.WaitOne();
+
+                            if (_exit)
+                            {
+                                break;
+                            }
+
+                            // Execute
+                            exitCode = await ExecutionTriggeredAsync(commandContext, commandSettings, engineManager, exitCode, _cancellationTokenSource);
+                        }
                     }
                 }
 
@@ -114,6 +161,28 @@ namespace Statiq.App
                 await ExitingAsync(commandContext, commandSettings, engineManager);
 
                 return (int)exitCode;
+            }
+        }
+
+        /// <summary>
+        /// Checks if a console is available for interactive input/output.
+        /// </summary>
+        private static bool IsConsoleAvailable()
+        {
+            try
+            {
+                // Try to access console properties that require a valid handle
+                // This will throw if no console is available
+                _ = Console.KeyAvailable;
+                return true;
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
             }
         }
 
