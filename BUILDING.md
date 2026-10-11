@@ -4,7 +4,7 @@ Statiq Framework is a .NET Core library and can be built using standard .NET eco
 
 ## Prerequisites
 
-- [.NET Core SDK](https://dotnet.microsoft.com/download/dotnet-core)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
 
 ## Steps
 
@@ -18,5 +18,5 @@ Statiq Framework is a .NET Core library and can be built using standard .NET eco
 
 ## Steps
 
-- Open `Statiq.Framework.sln`
+- Open `Statiq.Framework.slnx`
 - Build from Visual Studio

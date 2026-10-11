@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Shouldly;
@@ -29,7 +30,7 @@ namespace Statiq.Core.Tests.Modules.Control
                 Assert.That(
                     await results
                         .ToAsyncEnumerable()
-                        .SelectAwait(async x => await x.GetContentStringAsync())
+                        .Select(async (IDocument x, CancellationToken _) => await x.GetContentStringAsync())
                         .ToListAsync(), Is.EqualTo(new[] { "ab" }));
             }
 
